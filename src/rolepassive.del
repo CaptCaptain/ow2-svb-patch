@@ -1,0 +1,59 @@
+globalvar define RolePassivesEnabled = WorkshopSettingToggle("OW2 Experimental Combat Changes", "Enable Role Passives", true, 1);
+playervar define SupportHealingID;
+
+/* ======================================================== */
+
+rule: "Tank Passive: Reduce Ultimate Charge"
+Event.OnDamageDealt
+if (RolePassivesEnabled)
+if ((IsTrueForAny(AllTankHeroes(), HeroOf(Victim()) == ArrayElement()) == true || IsTrueForAny(AllTankHeroes(), HeroBeingDuplicated(Victim()) == ArrayElement())) == true)
+if (UltimateChargePercent(Attacker()) < 100)
+{
+    SetUltimateCharge(Attacker(), UltimateChargePercent(Attacker()) - EventDamage() / 100);
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+}
+
+rule: "Tank Passive: Reduced Knockback"
+Event.OngoingPlayer
+if (RolePassivesEnabled)
+if ((IsTrueForAny(AllTankHeroes(), HeroOf(EventPlayer()) == ArrayElement()) == true || IsTrueForAny(AllTankHeroes(), HeroBeingDuplicated(EventPlayer()) == ArrayElement())) == true)
+{
+    SetKnockbackReceived(EventPlayer(), 50);
+}
+
+rule: "Revert Tank Knockback"
+Event.OngoingPlayer
+if (RolePassivesEnabled)
+if ((IsTrueForAny(AllTankHeroes(), HeroOf(EventPlayer()) == ArrayElement()) == true || IsTrueForAny(AllTankHeroes(), HeroBeingDuplicated(EventPlayer()) == ArrayElement())) == false)
+{
+    SetKnockbackReceived(EventPlayer(), 100);
+}
+
+rule: "Damage Passive"
+Event.OngoingPlayer
+if (RolePassivesEnabled)
+if ((IsTrueForAny(AllDamageHeroes(), HeroOf(EventPlayer()) == ArrayElement()) == true || IsTrueForAny(AllDamageHeroes(), HeroBeingDuplicated(EventPlayer()) == ArrayElement())) == true)
+{
+    SetMoveSpeed(EventPlayer(), 125);
+    WaitUntil(IsTrueForAll(AllDamageHeroes(), HeroOf(EventPlayer()) != ArrayElement()), 99999);
+    SetMoveSpeed(EventPlayer(), 100);
+}
+
+rule: "Support Passive"
+Event.OnDamageTaken
+if (RolePassivesEnabled)
+if ((IsTrueForAny(AllSupportHeroes(), HeroOf(EventPlayer()) == ArrayElement()) == true || IsTrueForAny(AllSupportHeroes(), HeroBeingDuplicated(EventPlayer()) == ArrayElement())) == true)
+{
+    StopHealOverTime(SupportHealingID);
+    Wait(2, WaitBehavior.AbortWhenFalse);
+    StartHealOverTime(EventPlayer(), EventPlayer(), 9999, 10);
+    SupportHealingID = LastHealOverTime();
+}
+
+rule: "Stop Support Passive"
+Event.OngoingPlayer
+if (RolePassivesEnabled)
+if ((IsTrueForAny(AllSupportHeroes(), HeroOf(EventPlayer()) == ArrayElement()) == true || IsTrueForAny(AllSupportHeroes(), HeroBeingDuplicated(EventPlayer()) == ArrayElement())) == false || NormalizedHealth() == 1)
+{
+    StopHealOverTime(SupportHealingID);
+}

@@ -1,0 +1,128 @@
+globalvar define ReinhardtEnabled = WorkshopSettingToggle("OW2 Experimental Combat Changes", "Enable Reinhardt Changes", true, 0);
+playervar define ReinhardtFirestrikeCharges = 2;
+playervar define ReinhardtFirestrikeCooldown;
+playervar define ReinhardtHud = [];
+playervar define ReinhardtHealthPool = [];
+playervar define ReinhardtActive = false;
+
+/* ======================================================== */
+
+void CleanupReinhardt() "Cleanup Reinhardt" {
+    WaitUntil(HeroOf() != Hero.Reinhardt, 9999);
+
+    foreach (define healthPool in ReinhardtHealthPool) {
+        RemoveHealthPoolFromPlayer(healthPool);
+    }
+    foreach (define hud in ReinhardtHud) {
+        DestroyHudText(hud);
+    }
+
+    SetMaxHealth(HealthPercent: 100);
+    SetAbility2Enabled(Enabled: true);
+
+    ReinhardtActive = false;
+}
+
+rule: "Initial Reinhardt"
+Event.OngoingPlayer
+Player.Reinhardt
+if (ReinhardtEnabled)
+{
+    AbortIf(ReinhardtActive == true);
+
+    Wait();
+    
+    # Variable setup
+    ReinhardtActive = true;
+    ReinhardtFirestrikeCharges = 2;
+    ChaseVariableAtRate(ReinhardtFirestrikeCooldown, 0, 1, RateChaseReevaluation.DestinationAndRate);
+    
+    # Character setup
+    SetMaxHealth(EventPlayer(), 50);
+    AddHealthPoolToPlayer(EventPlayer(), HealthType.Health, 150, true, true);
+    ModifyVariable(ReinhardtHealthPool, Operation.AppendToArray, LastCreatedHealthPool());
+    AddHealthPoolToPlayer(EventPlayer(), HealthType.Armor, 125, true, true);
+    ModifyVariable(ReinhardtHealthPool, Operation.AppendToArray, LastCreatedHealthPool());
+
+    # Create hud text
+    CreateHudText(EventPlayer(), null, null, " \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", Location.Left, 0, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    ModifyVariable(ReinhardtHud, Operation.AppendToArray, LastTextID());
+    CreateHudText(EventPlayer(), <"<0> Fire Strike: <1> (<2>)", AbilityIconString(Hero.Reinhardt, Button.Ability2), RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down), RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) == 2 ? IconString(Icon.Checkmark) : RoundToInteger(ReinhardtFirestrikeCooldown, Rounding.Up)>, null, null, Location.Left, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    ModifyVariable(ReinhardtHud, Operation.AppendToArray, LastTextID());
+
+    # Start Rule
+    async! CleanupReinhardt();
+}
+
+rule: "Reinhardt Charge Cancelling"
+Event.OngoingPlayer
+Player.Reinhardt
+if (ReinhardtEnabled)
+if (IsUsingAbility1(EventPlayer()) == true)
+{
+    Wait(1);
+    WaitUntil(!IsButtonHeld(EventPlayer(), Button.Ability1) || !IsUsingAbility1(EventPlayer()), 99999);
+    WaitUntil(!IsUsingAbility1(EventPlayer()) || IsButtonHeld(EventPlayer(), Button.Ability1), 99999);
+    CancelPrimaryAction(EventPlayer());
+}
+
+rule: "Reinhardt Lower Charge Cooldown"
+Event.OngoingPlayer
+Player.Reinhardt
+if (ReinhardtEnabled)
+if (IsUsingAbility1(EventPlayer()) == true)
+{
+    WaitUntil(IsUsingAbility1(EventPlayer()) == false, 9999);
+    SetAbilityCooldown(EventPlayer(), Button.Ability1, 8);
+}
+
+/* ======================================================== */
+
+rule: "Refresh Reinhardt Firestrike"
+Event.OngoingPlayer
+Player.Reinhardt
+if (ReinhardtEnabled)
+if (IsUsingAbility2(EventPlayer()) == true)
+{
+    WaitUntil(IsUsingAbility2(EventPlayer()) == false, 9999);
+    SetAbilityCooldown(EventPlayer(), Button.Ability2, 0);
+}
+
+rule: "Reinhardt Firestrike Recharge"
+Event.OngoingPlayer
+Player.Reinhardt
+if (ReinhardtEnabled)
+if (RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) < 2)
+{
+    ReinhardtFirestrikeCooldown = 6;
+    WaitUntil(ReinhardtFirestrikeCooldown == 0, 9999);
+    ReinhardtFirestrikeCharges += 1;
+    LoopIfConditionIsTrue();
+}
+
+rule: "Reinhardt Firestrike Expends Charge"
+Event.OngoingPlayer
+Player.Reinhardt
+if (ReinhardtEnabled)
+if (IsUsingAbility2(EventPlayer()) == true)
+{
+    ReinhardtFirestrikeCharges -= 1;
+}
+
+rule: "Reinhardt Enable Firestrike when charges are available"
+Event.OngoingPlayer
+Player.Reinhardt
+if (ReinhardtEnabled)
+if (RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) > 0)
+{
+    SetAbility2Enabled(EventPlayer(), true);
+}
+
+rule: "Reinhardt Disable Firestrike when charges are not available"
+Event.OngoingPlayer
+Player.Reinhardt
+if (ReinhardtEnabled)
+if (RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) <= 0)
+{
+    SetAbility2Enabled(EventPlayer(), false);
+}

@@ -1,0 +1,17 @@
+{
+  "Modes": {
+    "All": {
+      "Limit Roles": "2 Of Each Role Per Team"
+    },
+    "Assault": {},
+    "Control": {},
+    "Escort": {},
+    "Hybrid": {}
+  },
+  "Description": "OW2 Experimental Combat Changes",
+  "Workshop": {
+    "Reinhardt Changes": true,
+    "Role Passives": true,
+    "Winston Changes": true
+  }
+}
