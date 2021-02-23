@@ -126,3 +126,45 @@ if (RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) <= 0)
 {
     SetAbility2Enabled(EventPlayer(), false);
 }
+
+/* ======================================================== */
+playervar define facingAngle;
+
+rule: "Reinhardt Detect Facing Angle"
+Event.OngoingPlayer
+Player.Reinhardt
+if (ReinhardtEnabled)
+if (IsUsingAbility1(EventPlayer()) == true)
+{
+    facingAngle = HorizontalFacingAngleOf(EventPlayer());
+    MinWait();
+    # steering right
+    if (AngleDifference(HorizontalFacingAngleOf(EventPlayer()), facingAngle) > 0)
+    {
+        if (IsInAir(EventPlayer()))
+        {
+            StartAccelerating(EventPlayer(), Right(), 100, 4, Relative.ToPlayer, AccelerateRev.DirectionRateAndMaxSpeed);
+        }
+        else
+        {
+            StartAccelerating(EventPlayer(), Right(), 500, 11.5, Relative.ToPlayer, AccelerateRev.DirectionRateAndMaxSpeed);
+        }
+    }
+    else if (AngleDifference(HorizontalFacingAngleOf(EventPlayer()), facingAngle) < 0)
+    {
+        if (IsInAir(EventPlayer()))
+        {
+            StartAccelerating(EventPlayer(), Left(), 100, 4, Relative.ToPlayer, AccelerateRev.DirectionRateAndMaxSpeed);
+        }
+        else
+        {
+            StartAccelerating(EventPlayer(), Left(), 500, 11.5, Relative.ToPlayer, AccelerateRev.DirectionRateAndMaxSpeed);
+        }
+    }
+    else
+    {
+        StopAccelerating(EventPlayer());
+    }
+    LoopIfConditionIsTrue();
+    StopAccelerating();
+}

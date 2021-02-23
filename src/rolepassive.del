@@ -1,5 +1,6 @@
 globalvar define RolePassivesEnabled = WorkshopSettingToggle("OW2 Experimental Combat Changes", "Enable Role Passives", true, 1);
 playervar define SupportHealingID;
+playervar define NextUltCharge = 5;
 
 /* ======================================================== */
 
@@ -8,9 +9,18 @@ Event.OnDamageDealt
 if (RolePassivesEnabled)
 if ((IsTrueForAny(AllTankHeroes(), HeroOf(Victim()) == ArrayElement()) == true || IsTrueForAny(AllTankHeroes(), HeroBeingDuplicated(Victim()) == ArrayElement())) == true)
 if (UltimateChargePercent(Attacker()) < 100)
+if (UltimateChargePercent(Attacker()) > Attacker().NextUltCharge)
 {
-    SetUltimateCharge(Attacker(), UltimateChargePercent(Attacker()) - EventDamage() / 100);
-    Wait(0.25, WaitBehavior.IgnoreCondition);
+    Attacker().NextUltCharge = UltimateChargePercent(Attacker()) + 5;
+    SetUltimateCharge(Attacker(), UltimateChargePercent(Attacker()) - Max(2, EventDamage() / 200));
+}
+
+rule: "Reset Tank Passive"
+Event.OngoingPlayer
+if (RolePassivesEnabled)
+if (UltimateChargePercent() == 0)
+{
+    NextUltCharge = 5;
 }
 
 rule: "Tank Passive: Reduced Knockback"
