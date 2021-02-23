@@ -1,4 +1,9 @@
+import "../../OSTWUtils/OnScreenText.del";
+
+enum hudDisplay {left, right}
+
 globalvar define ReinhardtEnabled = WorkshopSettingToggle("OW2 Experimental Combat Changes", "Enable Reinhardt Changes", true, 0);
+globalvar define ReinhardtHudDisplay = WorkshopSettingCombo("OW2 Experimental Combat Changes", "Reinhardt Hud Display Location", 0, ["Left", "Right"], 0);
 playervar define ReinhardtFirestrikeCharges = 2;
 playervar define ReinhardtFirestrikeCooldown;
 playervar define ReinhardtHud = [];
@@ -15,6 +20,7 @@ void CleanupReinhardt() "Cleanup Reinhardt" {
     }
     foreach (define hud in ReinhardtHud) {
         DestroyHudText(hud);
+        DestroyInWorldText(hud);
     }
 
     SetMaxHealth(HealthPercent: 100);
@@ -44,11 +50,19 @@ if (ReinhardtEnabled)
     AddHealthPoolToPlayer(EventPlayer(), HealthType.Armor, 125, true, true);
     ModifyVariable(ReinhardtHealthPool, Operation.AppendToArray, LastCreatedHealthPool());
 
-    # Create hud text
-    CreateHudText(EventPlayer(), null, null, " \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", Location.Left, 0, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
-    ModifyVariable(ReinhardtHud, Operation.AppendToArray, LastTextID());
-    CreateHudText(EventPlayer(), <"<0> Fire Strike: <1> (<2>)", AbilityIconString(Hero.Reinhardt, Button.Ability2), RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down), RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) == 2 ? IconString(Icon.Checkmark) : RoundToInteger(ReinhardtFirestrikeCooldown, Rounding.Up)>, null, null, Location.Left, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
-    ModifyVariable(ReinhardtHud, Operation.AppendToArray, LastTextID());
+    // Create hud text
+    switch (ReinhardtHudDisplay) {
+        case hudDisplay.left:
+            CreateHudText(EventPlayer(), null, null, " \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", Location.Left, 0, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+            ModifyVariable(ReinhardtHud, Operation.AppendToArray, LastTextID());
+            CreateHudText(EventPlayer(), <"<0> Fire Strike: <1> (<2>)", AbilityIconString(Hero.Reinhardt, Button.Ability2), RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down), RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) == 2 ? IconString(Icon.Checkmark) : RoundToInteger(ReinhardtFirestrikeCooldown, Rounding.Up)>, null, null, Location.Left, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+            ModifyVariable(ReinhardtHud, Operation.AppendToArray, LastTextID());
+            break;
+        case hudDisplay.right:
+            CreateInWorldText(Header:  <"<0> (<1>)", RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down), RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) == 2 ? IconString(Icon.Checkmark) : RoundToInteger(ReinhardtFirestrikeCooldown, Rounding.Up)>, Position: UpdateEveryFrame(OnScreenText.PlayerRender(EventPlayer(), IsUsingAbility1() ? 1.65 : 2.15, IsUsingAbility1() ? -1 : -1.35)), Scale: 2, Clipping: Clipping.DoNotClip, Reevaluation: InworldTextRev.VisibleToPositionAndString, TextColor: Color.White, Spectators: Spectators.DefaultVisibility);
+            ModifyVariable(ReinhardtHud, Operation.AppendToArray, LastTextID());
+            break;
+    }
 
     # Start Rule
     async! CleanupReinhardt();

@@ -1,4 +1,8 @@
 {
+  "Lobby": {
+    "Map Rotation": "After A Game",
+    "Return To Lobby": "Never"
+  },
   "Modes": {
     "All": {
       "Limit Roles": "2 Of Each Role Per Team"
