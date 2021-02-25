@@ -3,7 +3,7 @@ import "../../OSTWUtils/OnScreenText.del";
 enum hudDisplay {left, right}
 
 globalvar define ReinhardtEnabled = WorkshopSettingToggle("OW2 Experimental Combat Changes", "Enable Reinhardt Changes", true, 0);
-globalvar define ReinhardtHudDisplay = WorkshopSettingCombo("OW2 Experimental Combat Changes", "Reinhardt Hud Display Location", 0, ["Left", "Right"], 0);
+globalvar define ReinhardtHudDisplay = WorkshopSettingCombo("OW2 Experimental Combat Changes", "Reinhardt Hud Display Location", 1, ["Left", "Right"], 0);
 playervar define ReinhardtFirestrikeCharges = 2;
 playervar define ReinhardtFirestrikeCooldown;
 playervar define ReinhardtHud = [];
@@ -59,7 +59,7 @@ if (ReinhardtEnabled)
             ModifyVariable(ReinhardtHud, Operation.AppendToArray, LastTextID());
             break;
         case hudDisplay.right:
-            CreateInWorldText(Header:  <"<0> (<1>)", RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down), RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) == 2 ? IconString(Icon.Checkmark) : RoundToInteger(ReinhardtFirestrikeCooldown, Rounding.Up)>, Position: UpdateEveryFrame(OnScreenText.PlayerRender(EventPlayer(), IsUsingAbility1() ? 1.65 : 2.15, IsUsingAbility1() ? -1 : -1.35)), Scale: 2, Clipping: Clipping.DoNotClip, Reevaluation: InworldTextRev.VisibleToPositionAndString, TextColor: Color.White, Spectators: Spectators.DefaultVisibility);
+            CreateHudText(EventPlayer(), null, null, <"<0><1> (<2>)", <" \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n <0>", <"                                                                                                                            <0>", <"                                                                                                                            <0>", "                                                                          ">>>, RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down), RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) == 2 ? IconString(Icon.Checkmark) : RoundToInteger(ReinhardtFirestrikeCooldown, Rounding.Up)>, Location.Left, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
             ModifyVariable(ReinhardtHud, Operation.AppendToArray, LastTextID());
             break;
     }
