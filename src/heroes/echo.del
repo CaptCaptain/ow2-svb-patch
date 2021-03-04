@@ -1,0 +1,7 @@
+rule: 'Echo Not At Full Health Fix'
+Event.OngoingPlayer
+Player.Echo
+{
+    # Because some heroes change their max health, Echo will start at a lower health once she stops duplicating, so we have to heal her back to full health.
+    StartHealOverTime(EventPlayer(), null, 1, 200);
+}

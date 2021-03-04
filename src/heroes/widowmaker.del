@@ -1,0 +1,42 @@
+playervar Number DamageModification;
+
+define TargetPlayer: SortedArray(FilteredArray(PlayersWithinRadius(EyePosition(), 30, OppositeTeamOf(TeamOf()), RadiusLOS.Surfaces), IsInViewAngle(EventPlayer(), ArrayElement(), 30) && IsAlive(ArrayElement())), DistanceBetween(EventPlayer(), ArrayElement())).First;
+
+void CleanupWidowmaker() "Subroutine: Cleanup Widowmaker" {
+    WaitUntil(HeroOf() != Hero.Widowmaker && !IsDuplicating(), 9999);
+
+    StopDamageModification(DamageModification);
+
+    Wait();
+
+    ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Widowmaker);
+}
+
+void InitialWidowmaker() "Subroutine: Initial Widowmaker" {
+    AbortIf(ArrayContains(ActiveHero, Hero.Widowmaker));
+    ModifyVariable(ActiveHero, Operation.AppendToArray, Hero.Widowmaker);
+
+    StartDamageModification(TargetPlayer, EventPlayer(), !IsMeleeing() && IsFiringSecondary() ? Min(Max(25, DistanceBetween(EventPlayer(), TargetPlayer) * 3.33333333333), 100) : 100, DamageModificationRev.ReceiversDamagersAndDamagePercent);
+    DamageModification = LastDamageModificationID();
+
+    async! CleanupWidowmaker();
+}
+
+/* ================================================== */
+
+rule: 'Widowmaker Reverse Fall-Off Damage'
+Event.OngoingPlayer
+Player.Widowmaker
+{
+    InitialWidowmaker();
+}
+
+/* ================================================== */
+
+rule: 'Widowmaker Reverse Fall-Off Damage (Duplication)'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Widowmaker)
+{
+    InitialWidowmaker();
+}

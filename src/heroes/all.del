@@ -1,6 +1,7 @@
-globalvar define RolePassivesEnabled = WorkshopSettingToggle("OW2 Experimental Combat Changes", "Enable Role Passives", true, 3);
+globalvar define RolePassivesEnabled = true;
 playervar define SupportHealingID;
 playervar define NextUltCharge = 5;
+playervar define ActiveHero;
 
 /* ======================================================== */
 
@@ -29,7 +30,8 @@ Event.OngoingPlayer
 if (RolePassivesEnabled)
 if (IsTrueForAny(AllTankHeroes(), HeroOf() == ArrayElement() || HeroBeingDuplicated(EventPlayer()) == ArrayElement()))
 {
-    SetKnockbackReceived(EventPlayer(), 50);
+    AbortIf(HeroOf() == Hero.Reinhardt);
+    SetKnockbackReceived(EventPlayer(), 30);
     WaitUntil(IsTrueForAll(AllTankHeroes(), HeroOf() != ArrayElement() && HeroBeingDuplicated(EventPlayer()) != ArrayElement()), 9999);
     SetKnockbackReceived(EventPlayer(), 100);
 }
@@ -39,7 +41,7 @@ Event.OngoingPlayer
 if (RolePassivesEnabled)
 if (IsTrueForAny(AllDamageHeroes(), HeroOf() == ArrayElement() || HeroBeingDuplicated(EventPlayer()) == ArrayElement()))
 {
-    SetMoveSpeed(EventPlayer(), 125);
+    SetMoveSpeed(EventPlayer(), 115);
     WaitUntil(IsTrueForAll(AllDamageHeroes(), HeroOf() != ArrayElement() && HeroBeingDuplicated(EventPlayer()) != ArrayElement()), 9999);
     SetMoveSpeed(EventPlayer(), 100);
 }
@@ -51,7 +53,7 @@ if (IsTrueForAny(AllSupportHeroes(), HeroOf() == ArrayElement() || HeroBeingDupl
 {
     StopHealOverTime(SupportHealingID);
     Wait(2, WaitBehavior.AbortWhenFalse);
-    StartHealOverTime(EventPlayer(), EventPlayer(), 9999, 10);
+    StartHealOverTime(EventPlayer(), EventPlayer(), 9999, 20);
     SupportHealingID = LastHealOverTime();
 }
 

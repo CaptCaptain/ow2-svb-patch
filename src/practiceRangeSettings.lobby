@@ -2,21 +2,22 @@
   "Lobby": {
     "Map Rotation": "After A Game",
     "Return To Lobby": "Never",
-    "Max Team 1 Players": 5,
-    "Max Team 2 Players": 5
+    "Max Team 1 Players": 5
   },
   "Modes": {
-    "All": {
-      "Limit Roles": "2 Of Each Role Per Team"
-    },
-    "Control": {},
-    "Escort": {},
-    "Hybrid": {}
+    "Practice Range": {}
   },
   "Description": "OW2 SVB Patch",
   "Extensions": {
     "Buff Status Effects": true,
     "Buff and Debuff Sounds": true,
     "Explosion Sounds": true
+  },
+  "Heroes": {
+    "General": {
+      "General": {
+        "Spawn With Ultimate Ready": true
+      }
+    }
   }
 }

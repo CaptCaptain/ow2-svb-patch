@@ -1,30 +1,26 @@
-globalvar define WinstonEnabled = WorkshopSettingToggle("OW2 Experimental Combat Changes", "Enable Winston Changes", true, 2);
 playervar define WinstonHealthPool = [];
-playervar define WinstonActive = false;
 
-void CleanupWinston() "Cleanup Winston" {
-    WaitUntil(HeroOf() != Hero.Winston, 9999);
+void CleanupWinston() "Subroutine: Cleanup Winston" {
+    WaitUntil(HeroOf() != Hero.Winston && !IsDuplicating(), 9999);
 
     foreach (define healthPool in WinstonHealthPool) {
         RemoveHealthPoolFromPlayer(healthPool);
     }
 
+    Wait();
+
     SetMaxHealth(HealthPercent: 100);
 
-    WinstonActive = false;
+    ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Winston);
 }
 
-rule: "Initial Winston"
-Event.OngoingPlayer
-Player.Winston
-if (WinstonEnabled)
-{
-    AbortIf(WinstonActive == true);
+void InitialWinston() "Subroutine: Initial Winston" {
+    AbortIf(ArrayContains(ActiveHero, Hero.Winston));
 
     Wait();
 
     # Variable setup
-    WinstonActive = true;
+    ModifyVariable(ActiveHero, Operation.AppendToArray, Hero.Winston);
 
     # Character setup
     SetMaxHealth(HealthPercent: 92.85714286);
@@ -35,4 +31,19 @@ if (WinstonEnabled)
 
     # Start Rule
     async! CleanupWinston();
+}
+
+rule: "Initial Winston"
+Event.OngoingPlayer
+Player.Winston
+{
+    InitialWinston();
+}
+
+rule: "Initial Winston (Duplication)"
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Winston)
+{
+    InitialWinston();
 }

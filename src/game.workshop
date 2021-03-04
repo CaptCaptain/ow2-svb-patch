@@ -1,4 +1,8 @@
 import "customGameSettings.lobby";
-import "rolepassive.del";
-import "reinhardt.del";
-import "winston.del";
+import "heroes/all.del";
+import "heroes/echo.del";
+import "heroes/reinhardt.del";
+import "heroes/winston.del";
+import "heroes/widowmaker.del";
+import "heroes/orisa.del";
+import "heroes/symmetra.del";

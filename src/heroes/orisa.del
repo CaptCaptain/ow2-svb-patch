@@ -1,0 +1,246 @@
+playervar Number OrisaHud;
+playervar Number PersistantEffects = [];
+playervar Boolean CastingUltimate;
+playervar Boolean Galloping;
+
+void CreatePersistantEffects() "Subroutine: Create Orisa Effects" {
+    CreateEffect(AllPlayers(), Effect.WinstonPrimalRageEffect, <Color>TeamOf(), UpdateEveryFrame(EyePosition()), 1, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(PersistantEffects, Operation.AppendToArray, LastCreatedEntity());
+    CreateEffect(AllPlayers(), Effect.AnaNanoBoostedSound, <Color>TeamOf(), UpdateEveryFrame(EyePosition()), 500, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(PersistantEffects, Operation.AppendToArray, LastCreatedEntity());
+}
+
+void CleanupPersistantEffects() "Subroutine: Cleanup Orisa Effects" {
+    foreach (define effect in PersistantEffects) {
+        # Destroy Effects
+        DestroyEffect(effect);
+    }
+}
+
+void CleanupOrisa() "Subroutine: Cleanup Orisa" {
+    WaitUntil(HeroOf() != Hero.Orisa && !IsDuplicating(), 9999);
+
+    foreach (define hud in OrisaHud) {
+        DestroyHudText(hud);
+    }
+    CleanupPersistantEffects();
+
+    AllowButton(Button: Button.Ability2);
+    AllowButton(Button: Button.Ultimate);
+    SetMoveSpeed(MoveSpeedPercent: 100);
+    SetProjectileGravity(ProjectileGravityPercent: 100);
+    SetProjectileSpeed(ProjectileSpeedPercent: 100);
+    SetPrimaryFireEnabled(Enabled: true);
+    SetSecondaryFireEnabled(Enabled: true);
+    SetAbility2Enabled(Enabled: true);
+    StopForcingThrottle();
+    StopFacing();
+    StopCamera();
+
+    ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Orisa);
+}
+
+void InitialOrisa() "Subroutine: Initial Orisa" {
+    AbortIf(ArrayContains(ActiveHero, Hero.Orisa));
+    Wait();
+
+    ModifyVariable(ActiveHero, Operation.AppendToArray, Hero.Orisa);
+
+    DisallowButton(Button: Button.Ability2);
+
+    Wait();
+
+    CreateHudText(EventPlayer(), null, null, <"<0>(<1>)", <" \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n <0>", <"                                                                                                                            <0>", <"                                                                                                                            <0>", "                                                                             ">>>, "Gallop">, Location.Left, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    ModifyVariable(OrisaHud, Operation.AppendToArray, LastTextID());
+
+    SetProjectileSpeed(ProjectileSpeedPercent: 125);
+
+    async! CleanupOrisa();
+
+    Wait(9999);
+}
+
+void OrisaDecreaseMovementPenalty() "Subroutine: Orisa Decrease Primary Fire Movement Speed Penalty" {
+    SetMoveSpeed(MoveSpeedPercent: 120);
+    WaitUntil(!IsFiringPrimary(), 9999);
+    SetMoveSpeed(MoveSpeedPercent: 100);
+}
+
+void OrisaGallop() "Subroutine: Orisa Gallop" {
+    AbortIf(IsTrueForAny([HasStatus(Status: Status.Asleep), HasStatus(Status: Status.Hacked), HasStatus(Status: Status.KnockedDown), HasStatus(Status: Status.Stunned), HasStatus(Status: Status.Frozen)], ArrayElement() == true));
+
+    # Disable
+    SetPrimaryFireEnabled(Enabled: false);
+    SetSecondaryFireEnabled(Enabled: false);
+    SetAbility2Enabled(Enabled: false);
+    DisallowButton(Button: Button.Ultimate);
+    
+    # Start transition to third person camera
+    StartCamera(EyePosition: EyePosition(), LookAtPosition: EyePosition() + FacingDirectionOf(), BlendSpeed: 30);
+    Wait();
+    StartCamera(EyePosition: RayCastHitPosition(WorldVectorOf(Vector(0, 0, 0), EventPlayer(), LocalVector.RotationAndTranslation), WorldVectorOf(Vector(0, 3, -2), EventPlayer(), LocalVector.RotationAndTranslation)), LookAtPosition: WorldVectorOf(Vector(0, 3, 0), EventPlayer(), LocalVector.RotationAndTranslation), BlendSpeed: 30);
+
+    # Universal Effects
+    async! CreatePersistantEffects();
+    PlayEffect(AllPlayers(), PlayEffect.OrisaHaltImplosionSound, <Color>TeamOf(), EyePosition(), 500);
+
+    # Casting
+    SetMoveSpeed(MoveSpeedPercent: 0);
+    StartFacing(EventPlayer(), Vector(0, 0, 1), 500, Relative.ToPlayer, FacingRev.DirectionAndTurnRate);
+    WaitUntil(IsTrueForAny([HasStatus(Status: Status.Asleep), HasStatus(Status: Status.Hacked), HasStatus(Status: Status.KnockedDown), HasStatus(Status: Status.Stunned), HasStatus(Status: Status.Frozen)], ArrayElement() == true), 0.6);
+
+    # Gallop    
+    ForceThrottle(MinForward: 1, MaxForward: 1);
+    SetMoveSpeed(MoveSpeedPercent: 500);
+    DisableMovementCollisionWithPlayers();
+    Galloping = true;
+
+    Player ExcludedPlayers = [];
+    Number TimeRemaining = 0;
+    
+    ChaseVariableAtRate(TimeRemaining, 9999, 1, RateChaseReevaluation.DestinationAndRate);
+    while (TimeRemaining < 0.25)
+    {
+        if (IsTrueForAny([!IsInLineOfSight(EyePosition(), EyePosition() + WorldVectorOf(Forward() * 2, EventPlayer(), LocalVector.Rotation)), HasStatus(Status: Status.Asleep), HasStatus(Status: Status.Hacked), HasStatus(Status: Status.KnockedDown), HasStatus(Status: Status.Stunned), HasStatus(Status: Status.Frozen)], ArrayElement() == true)) {
+            # Stop Gallop
+            break;
+        } else {
+            Player TargetPlayers = RemoveFromArray(FilteredArray(PlayersWithinRadius(EyePosition(), 5, OppositeTeamOf(TeamOf()), RadiusLOS.Surfaces), IsInViewAngle(EventPlayer(), EyePosition(ArrayElement()), 90)), ExcludedPlayers);
+            Damage(TargetPlayers, EventPlayer(), 30);
+            ModifyVariable(ExcludedPlayers, Operation.AppendToArray, TargetPlayers);
+        }
+        Wait();
+    }
+    StopChasingVariable(TimeRemaining);
+
+    CleanupPersistantEffects();
+
+    # Stop movement
+    StopForcingThrottle();
+    SetMoveSpeed(MoveSpeedPercent: 0);
+    EnableMovementCollisionWithPlayers();
+    Galloping = false;
+
+    Wait(0.4);
+
+    # Start transition into first person camera
+    StartCamera(EyePosition: EyePosition(), LookAtPosition: EyePosition() + FacingDirectionOf(), BlendSpeed: 30);
+    Wait(0.25);
+    StopCamera();
+
+    # Re-enable
+    SetPrimaryFireEnabled(Enabled: true);
+    SetSecondaryFireEnabled(Enabled: true);
+    SetAbility2Enabled(Enabled: true);
+    AllowButton(Button: Button.Ultimate);
+
+    # Set cooldown / restore movement
+    SetAbilityCooldown(Button: Button.Ability2, Cooldown: 10);
+    SetMoveSpeed(MoveSpeedPercent: 100);
+    StopFacing();
+}
+
+void OrisaGallopKnockback() 'Subroutine: Orisa Galloping Knockback' {
+    ApplyImpulse(Victim(), EventDirection() + (Up() / 2), 20, Relative.ToWorld, ContraryMotion.Cancel);
+    SetEnvironmentCreditPlayer(EventPlayer(), Attacker());
+}
+
+void OrisaUltimate() 'Subroutine: Orisa Ultimate' {
+    Number TemporaryCooldown = AbilityCooldown(Button: Button.Ability2);
+
+    CastingUltimate = true;
+
+    SetProjectileSpeed(ProjectileSpeedPercent: 50);
+    SetProjectileGravity(ProjectileGravityPercent: AbsoluteValue(1000));
+    SetAbilityCooldown(Button: Button.Ability2, Cooldown: 0);
+    AllowButton(Button: Button.Ability2);
+    PressButton(Button: Button.Ability2);
+    DisallowButton(Button: Button.Ability2);
+    WaitUntil(!IsUsingAbility2(), 9999);
+    SetAbilityCooldown(Button: Button.Ability2, Cooldown: TemporaryCooldown);
+    SetProjectileGravity(ProjectileGravityPercent: 100);
+    SetProjectileSpeed(ProjectileSpeedPercent: 125);
+
+    CastingUltimate = false;
+}
+
+/* ================================================== */
+
+rule: 'Initial Orisa'
+Event.OngoingPlayer
+Player.Orisa
+{
+    InitialOrisa();
+}
+
+rule: 'Orisa Decrease Primary Fire Movement Speed Penalty'
+Event.OngoingPlayer
+Player.Orisa
+if (IsFiringPrimary()) {
+    OrisaDecreaseMovementPenalty();
+}
+
+rule: 'Orisa Gallop'
+Event.OngoingPlayer
+Player.Orisa
+if (!CastingUltimate)
+if (IsButtonHeld(Button: Button.Ability2))
+if (AbilityCooldown(Button: Button.Ability2) == 0)
+{
+    OrisaGallop();
+}
+
+rule: 'Orisa Galloping Knockback'
+Event.OnDamageTaken
+if (HeroOf(Attacker()) == Hero.Orisa || HeroBeingDuplicated(Attacker()) == Hero.Orisa)
+if (Attacker().Galloping)
+if (EventAbility() == null)
+{
+    OrisaGallopKnockback();
+}
+
+rule: 'Orisa Ultimate'
+Event.OngoingPlayer
+Player.Orisa
+if (IsUsingUltimate())
+{
+    OrisaUltimate();
+}
+
+rule: 'Initial Orisa (Duplicate)'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Orisa)
+{
+    InitialOrisa();
+}
+
+/* ================================================== */
+
+rule: 'Orisa Decrease Primary Fire Movement Speed Penalty (Duplicate)'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Orisa)
+if (IsFiringPrimary()) {
+    OrisaDecreaseMovementPenalty();
+}
+
+rule: 'Orisa Gallop (Duplicate)'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Orisa)
+if (!CastingUltimate)
+if (IsButtonHeld(Button: Button.Ability2))
+if (AbilityCooldown(Button: Button.Ability2) == 0)
+{
+    OrisaGallop();
+}
+
+rule: 'Orisa Ultimate (Duplicate)'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Orisa)
+if (IsUsingUltimate())
+{
+    OrisaUltimate();
+}
