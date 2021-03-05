@@ -1,0 +1,93 @@
+playervar Number HealingModification;
+
+/* ======================================================== */
+
+void CleanupBaptiste() 'Subroutine: Cleanup Baptiste' {
+    WaitUntil(HeroOf() != Hero.Baptiste && !IsDuplicating(), 9999);
+
+    Wait();
+
+    CleanupEffects();
+
+    AllowButton(Button: Button.Ability2);
+    ClearStatus(Status: Status.Rooted);
+    StopHealingModification(HealingModification);
+
+    ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Baptiste);
+}
+
+void BaptisteCastIF() 'Subroutine: Baptiste Cast Immortality Field' {  
+    for (define repeat = 0; 5; 1)
+    {
+        CreateEffect(AllPlayers(), Effect.HealTargetEffect, <Color>TeamOf(), UpdateEveryFrame(EyePosition()), 1, EffectRev.VisibleToPositionAndRadius);
+        ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+    }
+    CreateEffect(AllPlayers(), Effect.BaptisteImmortalityFieldProtectedSound, <Color>TeamOf(), EventPlayer(), 700, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+
+    SetStatus(EventPlayer(), null, Status.Rooted, 1.5);
+
+    WaitUntil(IsTrueForAny([HasStatus(Status: Status.Asleep), HasStatus(Status: Status.Hacked), HasStatus(Status: Status.KnockedDown), HasStatus(Status: Status.Stunned), HasStatus(Status: Status.Frozen)], ArrayElement() == true), 1);
+
+    # Stun check
+    if (IsTrueForAny([HasStatus(Status: Status.Asleep), HasStatus(Status: Status.Hacked), HasStatus(Status: Status.KnockedDown), HasStatus(Status: Status.Stunned), HasStatus(Status: Status.Frozen)], ArrayElement() == false)) {
+        AllowButton(Button: Button.Ability2);
+        PressButton(Button: Button.Ability2);
+        DisallowButton(Button: Button.Ability2);
+    }
+
+    CleanupEffects();
+
+    WaitUntil(!IsUsingAbility2(), 0.5);
+    SetAbilityCooldown(Button: Button.Ability2, Cooldown: 25);
+    ClearStatus(Status: Status.Rooted);
+}
+
+void InitialBaptiste() "Subroutine: Initial Baptiste" {
+    AbortIf(ArrayContains(ActiveHero, Hero.Baptiste));
+    Wait();
+
+    StartHealingModification(EventPlayer(), EventPlayer(), 50, HealingModificationRev.ReceiversAndHealers);
+    HealingModification = LastHealingModificationID();
+
+    ModifyVariable(ActiveHero, Operation.AppendToArray, Hero.Baptiste);
+    DisallowButton(Button: Button.Ability2);
+
+    async! CleanupBaptiste();
+}
+
+/* ======================================================== */
+
+rule: 'Initial Baptiste'
+Event.OngoingPlayer
+Player.Baptiste
+{
+    InitialBaptiste();
+}
+
+rule: 'Baptiste Cast IF'
+Event.OngoingPlayer
+Player.Baptiste
+if (IsButtonHeld(Button: Button.Ability2))
+if (AbilityCooldown(Button: Button.Ability2) == 0)
+{
+    BaptisteCastIF();
+}
+
+rule: 'Initial Baptiste (Duplication)'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Baptiste)
+{
+    InitialBaptiste();
+}
+
+rule: 'Baptiste Cast IF (Duplication)'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Baptiste)
+if (IsButtonHeld(Button: Button.Ability2))
+if (AbilityCooldown(Button: Button.Ability2) == 0)
+{
+    BaptisteCastIF();
+}

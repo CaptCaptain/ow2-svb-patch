@@ -1,22 +1,29 @@
-playervar Number SymmetraHud;
-playervar Number SymmetraEffects;
 playervar Player SymmetraBotPlayer;
 
 void CleanupSymmetra() "Subroutine: Cleanup Symmetra" {
     WaitUntil(HeroOf() != Hero.Symmetra && !IsDuplicating(), 9999);
-    foreach (define hud in SymmetraHud) {
-        DestroyHudText(hud);
-    }
-    foreach (define effect in SymmetraEffects) {
-        # Destroy Effects
-        DestroyEffect(effect);
-    }
+
+    Wait();
     DestroyDummyBot(TeamOf(SymmetraBotPlayer), SlotOf(SymmetraBotPlayer));
+
+    CleanupEffects();
+    CleanupTexts();
 
     AllowButton(Button: Button.Ultimate);
     SetUltimateAbilityEnabled(Enabled: true);
 
     ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Symmetra);
+}
+
+void CreateSymmetraBotEffects() "Subroutine: Create Symmetra Bot Effects" {
+    CreateEffect(AllPlayers(), Effect.BaptisteImmortalityFieldProtectedEffect, <Color>TeamOf(), SymmetraBotPlayer, 1, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+    WaitUntil(EntityExists(LastOf(HeroEffects)), 9999);
+    CreateEffect(AllPlayers(), Effect.EchoCloningEffect, <Color>TeamOf(), SymmetraBotPlayer, 1, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+    WaitUntil(EntityExists(LastOf(HeroEffects)), 9999);
+    CreateEffect(AllPlayers(), Effect.WinstonTeslaCannonTargetSound, <Color>TeamOf(), SymmetraBotPlayer, 700, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 }
 
 void InitialSymmetra() "Subroutine: Initial Symmetra" {
@@ -27,12 +34,11 @@ void InitialSymmetra() "Subroutine: Initial Symmetra" {
 
     DisallowButton(Button: Button.Ultimate);
 
+    # Create Hud
     CreateHudText(EventPlayer(), null, null, <"<0>(<1>)", <" \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n <0>", <"                                                                                                                            <0>", <"                                                                   <0>", " ">>>, "Light Clone">, Location.Left, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
-    ModifyVariable(SymmetraHud, Operation.AppendToArray, LastTextID());
+    ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
 
     async! CleanupSymmetra();
-
-    Wait(9999);
 }
 
 void SymmetraLightCloneUlt() "Subroutine: Symmetra Ult" {
@@ -50,12 +56,7 @@ void SymmetraLightCloneUlt() "Subroutine: Symmetra Ult" {
     SetAmmo(SymmetraBotPlayer, 0, Ammo(Clip: 0));
     SetDamageDealt(SymmetraBotPlayer, 50);
 
-    CreateEffect(AllPlayers(), Effect.EchoCloningEffect, <Color>TeamOf(), SymmetraBotPlayer, 1, EffectRev.VisibleToPositionAndRadius);
-    ModifyVariable(SymmetraEffects, Operation.AppendToArray, LastCreatedEntity());
-    CreateEffect(AllPlayers(), Effect.BaptisteImmortalityFieldProtectedEffect, <Color>TeamOf(), SymmetraBotPlayer, 1, EffectRev.VisibleToPositionAndRadius);
-    ModifyVariable(SymmetraEffects, Operation.AppendToArray, LastCreatedEntity());
-    CreateEffect(AllPlayers(), Effect.WinstonTeslaCannonTargetSound, <Color>TeamOf(), SymmetraBotPlayer, 700, EffectRev.VisibleToPositionAndRadius);
-    ModifyVariable(SymmetraEffects, Operation.AppendToArray, LastCreatedEntity());
+    async! CreateSymmetraBotEffects();
 
     PlayEffect(AllPlayers(), PlayEffect.SymmetraTeleporterReappearSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
     PlayEffect(AllPlayers(), PlayEffect.SombraEmpExplosionSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
@@ -71,10 +72,7 @@ void SymmetraLightCloneUlt() "Subroutine: Symmetra Ult" {
     SetUltimateAbilityEnabled(Enabled: true);
     SymmetraBotPlayer = [];
 
-    foreach (define effect in SymmetraEffects) {
-        # Destroy Effects
-        DestroyEffect(effect);
-    }
+    CleanupEffects();
 }
 
 void UpdateSymmetraAI() "Subroutine: Update Symmetra AI" {

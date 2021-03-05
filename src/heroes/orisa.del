@@ -1,29 +1,18 @@
-playervar Number OrisaHud;
-playervar Number PersistantEffects = [];
 playervar Boolean CastingUltimate;
 playervar Boolean Galloping;
 
-void CreatePersistantEffects() "Subroutine: Create Orisa Effects" {
+void CreateHeroEffects() "Subroutine: Create Orisa Effects" {
     CreateEffect(AllPlayers(), Effect.WinstonPrimalRageEffect, <Color>TeamOf(), UpdateEveryFrame(EyePosition()), 1, EffectRev.VisibleToPositionAndRadius);
-    ModifyVariable(PersistantEffects, Operation.AppendToArray, LastCreatedEntity());
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
     CreateEffect(AllPlayers(), Effect.AnaNanoBoostedSound, <Color>TeamOf(), UpdateEveryFrame(EyePosition()), 500, EffectRev.VisibleToPositionAndRadius);
-    ModifyVariable(PersistantEffects, Operation.AppendToArray, LastCreatedEntity());
-}
-
-void CleanupPersistantEffects() "Subroutine: Cleanup Orisa Effects" {
-    foreach (define effect in PersistantEffects) {
-        # Destroy Effects
-        DestroyEffect(effect);
-    }
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 }
 
 void CleanupOrisa() "Subroutine: Cleanup Orisa" {
     WaitUntil(HeroOf() != Hero.Orisa && !IsDuplicating(), 9999);
 
-    foreach (define hud in OrisaHud) {
-        DestroyHudText(hud);
-    }
-    CleanupPersistantEffects();
+    CleanupTexts();
+    CleanupEffects();
 
     AllowButton(Button: Button.Ability2);
     AllowButton(Button: Button.Ultimate);
@@ -51,13 +40,11 @@ void InitialOrisa() "Subroutine: Initial Orisa" {
     Wait();
 
     CreateHudText(EventPlayer(), null, null, <"<0>(<1>)", <" \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n <0>", <"                                                                                                                            <0>", <"                                                                                                                            <0>", "                                                                             ">>>, "Gallop">, Location.Left, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
-    ModifyVariable(OrisaHud, Operation.AppendToArray, LastTextID());
+    ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
 
     SetProjectileSpeed(ProjectileSpeedPercent: 125);
 
     async! CleanupOrisa();
-
-    Wait(9999);
 }
 
 void OrisaDecreaseMovementPenalty() "Subroutine: Orisa Decrease Primary Fire Movement Speed Penalty" {
@@ -81,7 +68,7 @@ void OrisaGallop() "Subroutine: Orisa Gallop" {
     StartCamera(EyePosition: RayCastHitPosition(WorldVectorOf(Vector(0, 0, 0), EventPlayer(), LocalVector.RotationAndTranslation), WorldVectorOf(Vector(0, 3, -2), EventPlayer(), LocalVector.RotationAndTranslation)), LookAtPosition: WorldVectorOf(Vector(0, 3, 0), EventPlayer(), LocalVector.RotationAndTranslation), BlendSpeed: 30);
 
     # Universal Effects
-    async! CreatePersistantEffects();
+    async! CreateHeroEffects();
     PlayEffect(AllPlayers(), PlayEffect.OrisaHaltImplosionSound, <Color>TeamOf(), EyePosition(), 500);
 
     # Casting
@@ -113,7 +100,7 @@ void OrisaGallop() "Subroutine: Orisa Gallop" {
     }
     StopChasingVariable(TimeRemaining);
 
-    CleanupPersistantEffects();
+    CleanupEffects();
 
     # Stop movement
     StopForcingThrottle();

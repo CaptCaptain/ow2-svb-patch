@@ -1,7 +1,49 @@
-globalvar define RolePassivesEnabled = true;
-playervar define SupportHealingID;
-playervar define NextUltCharge = 5;
-playervar define ActiveHero;
+globalvar Boolean RolePassivesEnabled = true;
+playervar Number SupportHealingID;
+playervar Number NextUltCharge = 5;
+playervar Hero ActiveHero = [];
+playervar Number HeroEffects = [];
+playervar Number HeroTexts = [];
+playervar Number HeroDamageModifications = [];
+playervar Number HeroHealingModifications = [];
+
+/* ======================================================== */
+
+void CleanupEffects() 'Subroutine: Cleanup Effects' {
+    // Cleanup effects
+    foreach (Number effectID in HeroEffects) {
+        DestroyEffect(effectID);
+    }
+
+    HeroEffects = [];
+}
+
+void CleanupTexts() 'Subroutine: Cleanup Texts' {
+    // Cleanup texts
+    foreach (Number textID in HeroTexts) {
+        DestroyHudText(textID);
+    }
+
+    HeroTexts = [];
+}
+
+void CleanupDamageMods() 'Subroutine: Cleanup Damage Modifications' {
+    // Cleanup texts
+    foreach (Number modificationID in HeroDamageModifications) {
+        StopDamageModification(modificationID);
+    }
+
+    HeroDamageModifications = [];
+}
+
+void CleanupHealingMods() 'Subroutine: Cleanup Healing Modifications' {
+    // Cleanup texts
+    foreach (Number modificationID in HeroHealingModifications) {
+        StopDamageModification(modificationID);
+    }
+
+    HeroHealingModifications = [];
+}
 
 /* ======================================================== */
 

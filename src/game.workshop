@@ -1,5 +1,7 @@
-import "customGameSettings.lobby";
+import "settings/customGameSettings.lobby";
+// import "settings/practiceRangeSettings.lobby";
 import "heroes/all.del";
+import "heroes/baptiste.del";
 import "heroes/echo.del";
 import "heroes/reinhardt.del";
 import "heroes/winston.del";
