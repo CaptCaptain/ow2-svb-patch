@@ -28,7 +28,7 @@ void InitialMercy() 'Subroutine: Initial Mercy' {
     }
     for (define slot = 0; 5; 1)
     {
-        StartHealingModification(PlayersInSlot(EvaluateOnce(slot), TeamOf()), EventPlayer(), HealingPercents[EvaluateOnce(slot)] * 100, HealingModificationRev.ReceiversDamagersAndDamagePercent);
+        StartHealingModification(PlayersInSlot(EvaluateOnce(slot), TeamOf()), EventPlayer(), HealingPercents[EvaluateOnce(slot)] * 100, HealingModificationRev.ReceiversHealersAndHealingPercent);
         ModifyVariable(HeroHealingModifications, Operation.AppendToArray, LastHealingModificationID());
 
         CreateInWorldText(EventPlayer(), <"[<0><1>%]\n", AbilityIconString(Hero.Baptiste, Button.Ability1), HealingPercents[EvaluateOnce(slot)] * 100>, PlayersInSlot(EvaluateOnce(slot), TeamOf()), 1, Clipping.ClipAgainstSurfaces, InworldTextRev.VisibleToPositionAndString);
