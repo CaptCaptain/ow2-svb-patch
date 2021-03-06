@@ -1,6 +1,5 @@
 playervar define ReinhardtFirestrikeCharges = 2;
 playervar define ReinhardtFirestrikeCooldown;
-playervar define ReinhardtHealthPool = [];
 playervar define facingAngle;
 
 /* ======================================================== */
@@ -8,24 +7,18 @@ playervar define facingAngle;
 void CleanupReinhardt() "Subroutine: Cleanup Reinhardt" {
     WaitUntil(HeroOf() != Hero.Reinhardt && !IsDuplicating(), 9999);
 
-    foreach (define healthPool in ReinhardtHealthPool) {
-        RemoveHealthPoolFromPlayer(healthPool);
-    }
+    CleanupHealthPools();
     CleanupTexts();
-
-    Wait();
-
     SetMaxHealth(HealthPercent: 100);
     SetAbility2Enabled(Enabled: true);
+
+    Wait();
 
     ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Reinhardt);
 }
 
 void InitialReinhardt() 'Subroutine: InitialReinhardt' {
-    AbortIf(ArrayContains(ActiveHero, Hero.Reinhardt));
-    Wait();
-
-    ModifyVariable(ActiveHero, Operation.AppendToArray, Hero.Reinhardt);
+    InitialHeroSetup(Hero.Reinhardt);
 
     Wait();
     
@@ -36,9 +29,9 @@ void InitialReinhardt() 'Subroutine: InitialReinhardt' {
     # Character setup
     SetMaxHealth(EventPlayer(), 50);
     AddHealthPoolToPlayer(EventPlayer(), HealthType.Health, 150, true, true);
-    ModifyVariable(ReinhardtHealthPool, Operation.AppendToArray, LastCreatedHealthPool());
+    ModifyVariable(HeroHealthPools, Operation.AppendToArray, LastCreatedHealthPool());
     AddHealthPoolToPlayer(EventPlayer(), HealthType.Armor, 125, true, true);
-    ModifyVariable(ReinhardtHealthPool, Operation.AppendToArray, LastCreatedHealthPool());
+    ModifyVariable(HeroHealthPools, Operation.AppendToArray, LastCreatedHealthPool());
 
     // Create hud text
     CreateHudText(EventPlayer(), null, null, <"<0>(<1>) [<2>]", <" \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n <0>", <"                                                                                                                            <0>", <"                                                                                                                            <0>", "                                                                         ">>>, RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) > 0 ? RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) : IconString(Icon.X), RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) == 2 ? IconString(Icon.Checkmark) : RoundToInteger(ReinhardtFirestrikeCooldown, Rounding.Up)>, Location.Left, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);

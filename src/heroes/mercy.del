@@ -1,0 +1,154 @@
+playervar Number HealingPercents = [];
+playervar Boolean DegenerationEnabled = [];
+playervar Player LastMercyTarget = [];
+define MercyDamageBoostTarget(in Player player): RemoveFromArray(SortedArray(FilteredArray(PlayersWithinRadius(EyePosition(player), 15, TeamOf(player), RadiusLOS.Surfaces), IsInViewAngle(player, ArrayElement(), 100) && IsAlive(ArrayElement())), DistanceBetween(player, ArrayElement())), player)[0];
+
+/* ======================================================== */
+
+void CleanupMercy() 'Subroutine: Cleanup Mercy' {
+    WaitUntil(HeroOf() != Hero.Mercy && !IsDuplicating(), 9999);
+
+    CleanupTexts();
+    CleanupHealingMods();
+
+    Wait();
+
+    ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Mercy);
+}
+
+void InitialMercy() 'Subroutine: Initial Mercy' {
+    InitialHeroSetup(Hero.Mercy);
+
+    HealingPercents = [];
+    DegenerationEnabled = [];
+    for (define repeat = 0; 5; 1)
+    {
+        ModifyVariable(HealingPercents, Operation.AppendToArray, 1);
+        ModifyVariable(DegenerationEnabled, Operation.AppendToArray, false);
+    }
+    for (define slot = 0; 5; 1)
+    {
+        StartHealingModification(PlayersInSlot(EvaluateOnce(slot), TeamOf()), EventPlayer(), HealingPercents[EvaluateOnce(slot)] * 100, HealingModificationRev.ReceiversDamagersAndDamagePercent);
+        ModifyVariable(HeroHealingModifications, Operation.AppendToArray, LastHealingModificationID());
+
+        CreateInWorldText(EventPlayer(), <"[<0><1>%]\n", AbilityIconString(Hero.Baptiste, Button.Ability1), HealingPercents[EvaluateOnce(slot)] * 100>, PlayersInSlot(EvaluateOnce(slot), TeamOf()), 1, Clipping.ClipAgainstSurfaces, InworldTextRev.VisibleToPositionAndString);
+        ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
+    }
+
+    async! CleanupMercy();
+}
+
+void MercyDegenerateBeam() 'Subroutine: Mercy Degenerate Healing Beam' {
+    HealingPercents[SlotOf(Healee())] = Max(HealingPercents[SlotOf(Healee())] - 0.07, 0.727272727);
+    LastMercyTarget = PlayersInSlot(SlotOf(Healee()), TeamOf());
+
+    Wait(1);
+}
+
+void MercyUpdateDegeneration() 'Subroutine: Mercy Update Degeneration' {
+    Healer().DegenerationEnabled[SlotOf(Healee())] = true;
+    Wait(0.9);
+    switch (Healer().LastMercyTarget) {
+        case EventPlayer():
+            LoopIf(Healer().LastMercyTarget == EventPlayer() && IsFiringSecondary(Healer()));
+        break;
+        default:
+            LoopIf(MercyDamageBoostTarget(Healer()) == EventPlayer() && IsFiringSecondary(Healer()));
+        break;
+    }
+    Healer().DegenerationEnabled[SlotOf(Healee())] = false;
+}
+
+void MercyRegenerateBeam() 'Subroutine: Mercy Regenerate Healing Beam' {
+    HealingPercents = IsUsingUltimate() ? MappedArray(HealingPercents, 1) : MappedArray(HealingPercents, DegenerationEnabled[CurrentArrayIndex()] == false ? Min(ArrayElement() + 0.07, 1) : ArrayElement());
+    Wait(1);
+    LoopIfConditionIsTrue();
+}
+
+void MercyClearLastTarget() 'Subroutine: Mercy Clear Last Target' {
+    WaitUntil((!IsFiringPrimary() && !IsFiringSecondary()) || IsUsingUltimate(), 9999);
+    LastMercyTarget = null;
+}
+
+/* ======================================================== */
+
+rule: 'Initial Mercy'
+Event.OngoingPlayer
+Player.Mercy
+{
+    InitialMercy();
+}
+
+rule: 'Mercy Degenerate Healing Beam'
+Event.OnHealingDealt
+Player.Mercy
+if (EventHealing() > 0)
+if (Healer() != Healee())
+if (!IsUsingUltimate())
+{
+    MercyDegenerateBeam();
+}
+
+rule: 'Mercy Regenerate Healing Beam'
+Event.OngoingPlayer
+Player.Mercy
+{
+    MercyRegenerateBeam();
+}
+
+rule: 'Mercy Update Degeneration'
+Event.OnHealingTaken
+if (HeroOf(Healer()) == Hero.Mercy || HeroBeingDuplicated(Healer()) == Hero.Mercy)
+if (Healer() != Healee())
+if (!IsUsingUltimate(Healer()))
+{
+    MercyUpdateDegeneration();
+}
+
+rule: 'Mercy Clear Last Target'
+Event.OngoingPlayer
+Player.Mercy
+if (!IsUsingUltimate())
+if (IsFiringSecondary())
+{
+    MercyClearLastTarget();
+}
+
+/* ======================================================== */
+
+rule: 'Initial Mercy (Duplication)'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Mercy)
+{
+    InitialMercy();
+}
+
+rule: 'Mercy Degenerate Healing Beam (Duplication)'
+Event.OnHealingDealt
+Player.Echo
+if (EventHealing() > 0)
+if (HeroBeingDuplicated() == Hero.Mercy)
+if (Healer() != Healee())
+if (!IsUsingUltimate())
+{
+    MercyDegenerateBeam();
+}
+
+rule: 'Mercy Regenerate Healing Beam (Duplication)'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Mercy)
+{
+    MercyRegenerateBeam();
+}
+
+rule: 'Mercy Clear Last Target'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Mercy)
+if (!IsUsingUltimate())
+if (IsFiringSecondary())
+{
+    MercyClearLastTarget();
+}

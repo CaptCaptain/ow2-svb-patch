@@ -26,14 +26,13 @@ void CleanupOrisa() "Subroutine: Cleanup Orisa" {
     StopFacing();
     StopCamera();
 
+    Wait();
+
     ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Orisa);
 }
 
 void InitialOrisa() "Subroutine: Initial Orisa" {
-    AbortIf(ArrayContains(ActiveHero, Hero.Orisa));
-    Wait();
-
-    ModifyVariable(ActiveHero, Operation.AppendToArray, Hero.Orisa);
+    InitialHeroSetup(Hero.Orisa);
 
     DisallowButton(Button: Button.Ability2);
 

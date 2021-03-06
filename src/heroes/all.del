@@ -1,13 +1,21 @@
-globalvar Boolean RolePassivesEnabled = true;
 playervar Number SupportHealingID;
 playervar Number NextUltCharge = 5;
 playervar Hero ActiveHero = [];
 playervar Number HeroEffects = [];
 playervar Number HeroTexts = [];
+playervar Number HeroHealthPools = [];
 playervar Number HeroDamageModifications = [];
 playervar Number HeroHealingModifications = [];
 
 /* ======================================================== */
+
+void InitialHeroSetup(in Hero hero) {
+    AbortIf(ArrayContains(ActiveHero, hero));
+    WaitUntil(CountOf(ActiveHero) == 0, 9999);
+    Wait();
+
+    ModifyVariable(ActiveHero, Operation.AppendToArray, hero);
+}
 
 void CleanupEffects() 'Subroutine: Cleanup Effects' {
     // Cleanup effects
@@ -18,10 +26,20 @@ void CleanupEffects() 'Subroutine: Cleanup Effects' {
     HeroEffects = [];
 }
 
+void CleanupHealthPools() 'Subroutine: Cleanup Health Pool' {
+    // Cleanup health pool
+    foreach (define healthPool in HeroHealthPools) {
+        RemoveHealthPoolFromPlayer(healthPool);
+    }
+
+    HeroHealthPools = [];
+}
+
 void CleanupTexts() 'Subroutine: Cleanup Texts' {
     // Cleanup texts
     foreach (Number textID in HeroTexts) {
         DestroyHudText(textID);
+        DestroyInWorldText(textID);
     }
 
     HeroTexts = [];
@@ -39,7 +57,7 @@ void CleanupDamageMods() 'Subroutine: Cleanup Damage Modifications' {
 void CleanupHealingMods() 'Subroutine: Cleanup Healing Modifications' {
     // Cleanup texts
     foreach (Number modificationID in HeroHealingModifications) {
-        StopDamageModification(modificationID);
+        StopHealingModification(modificationID);
     }
 
     HeroHealingModifications = [];
@@ -49,11 +67,10 @@ void CleanupHealingMods() 'Subroutine: Cleanup Healing Modifications' {
 
 rule: "Tank Passive: Reduce Ultimate Charge"
 Event.OnDamageDealt
-if (RolePassivesEnabled)
 if (UltimateChargePercent(Attacker()) < 100)
 if (EventAbility() != Button.Ultimate)
 if (UltimateChargePercent(Attacker()) > Attacker().NextUltCharge)
-if (IsTrueForAny(AllTankHeroes(), HeroOf(Victim()) == ArrayElement()) == true || IsTrueForAny(AllTankHeroes(), HeroBeingDuplicated(Victim()) == ArrayElement()) == true)
+if (ArrayContains(AllTankHeroes(), HeroOf()) || ArrayContains(AllTankHeroes(), HeroBeingDuplicated()))
 {
     SetUltimateCharge(Attacker(), UltimateChargePercent(Attacker()) - Max(4, EventDamage() / 50));
     Attacker().NextUltCharge = UltimateChargePercent(Attacker()) + 5;
@@ -61,7 +78,6 @@ if (IsTrueForAny(AllTankHeroes(), HeroOf(Victim()) == ArrayElement()) == true ||
 
 rule: "Reset Tank Passive"
 Event.OngoingPlayer
-if (RolePassivesEnabled)
 if (UltimateChargePercent() == 0)
 {
     NextUltCharge = 5;
@@ -69,40 +85,36 @@ if (UltimateChargePercent() == 0)
 
 rule: "Tank Passive: Reduced Knockback"
 Event.OngoingPlayer
-if (RolePassivesEnabled)
-if (IsTrueForAny(AllTankHeroes(), HeroOf() == ArrayElement() || HeroBeingDuplicated(EventPlayer()) == ArrayElement()))
+if (ArrayContains(AllTankHeroes(), HeroOf()) || ArrayContains(AllTankHeroes(), HeroBeingDuplicated()))
 {
     AbortIf(HeroOf() == Hero.Reinhardt);
     SetKnockbackReceived(EventPlayer(), 30);
-    WaitUntil(IsTrueForAll(AllTankHeroes(), HeroOf() != ArrayElement() && HeroBeingDuplicated(EventPlayer()) != ArrayElement()), 9999);
+    WaitUntil(!ArrayContains(AllTankHeroes(), HeroOf()) && !ArrayContains(AllTankHeroes(), HeroBeingDuplicated()), 9999);
     SetKnockbackReceived(EventPlayer(), 100);
 }
 
 rule: "Damage Passive"
 Event.OngoingPlayer
-if (RolePassivesEnabled)
-if (IsTrueForAny(AllDamageHeroes(), HeroOf() == ArrayElement() || HeroBeingDuplicated(EventPlayer()) == ArrayElement()))
+if (ArrayContains(AllDamageHeroes(), HeroOf()) || ArrayContains(AllDamageHeroes(), HeroBeingDuplicated()))
 {
     SetMoveSpeed(EventPlayer(), 115);
-    WaitUntil(IsTrueForAll(AllDamageHeroes(), HeroOf() != ArrayElement() && HeroBeingDuplicated(EventPlayer()) != ArrayElement()), 9999);
+    WaitUntil(!ArrayContains(AllDamageHeroes(), HeroOf()) && !ArrayContains(AllDamageHeroes(), HeroBeingDuplicated()), 9999);
     SetMoveSpeed(EventPlayer(), 100);
 }
 
 rule: "Support Passive"
 Event.OnDamageTaken
-if (RolePassivesEnabled)
-if (IsTrueForAny(AllSupportHeroes(), HeroOf() == ArrayElement() || HeroBeingDuplicated(EventPlayer()) == ArrayElement()))
+if (ArrayContains(AllSupportHeroes(), HeroOf()) || ArrayContains(AllSupportHeroes(), HeroBeingDuplicated()))
 {
     StopHealOverTime(SupportHealingID);
-    Wait(2, WaitBehavior.AbortWhenFalse);
+    Wait(1, WaitBehavior.RestartWhenTrue);
     StartHealOverTime(EventPlayer(), EventPlayer(), 9999, 20);
     SupportHealingID = LastHealOverTime();
 }
 
 rule: "Stop Support Passive"
 Event.OngoingPlayer
-if (RolePassivesEnabled)
-if (IsTrueForAll(AllSupportHeroes(), HeroOf() != ArrayElement() && HeroBeingDuplicated(EventPlayer()) != ArrayElement()) || NormalizedHealth() == 1)
+if ((!ArrayContains(AllSupportHeroes(), HeroOf()) && !ArrayContains(AllSupportHeroes(), HeroBeingDuplicated())) || NormalizedHealth() == 1)
 {
     StopHealOverTime(SupportHealingID);
 }

@@ -5,18 +5,19 @@ playervar Number HealingModification;
 void CleanupBaptiste() 'Subroutine: Cleanup Baptiste' {
     WaitUntil(HeroOf() != Hero.Baptiste && !IsDuplicating(), 9999);
 
-    Wait();
-
     CleanupEffects();
 
     AllowButton(Button: Button.Ability2);
     ClearStatus(Status: Status.Rooted);
     StopHealingModification(HealingModification);
 
+    Wait();
+
     ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Baptiste);
 }
 
 void BaptisteCastIF() 'Subroutine: Baptiste Cast Immortality Field' {  
+    // Create effects
     for (define repeat = 0; 5; 1)
     {
         CreateEffect(AllPlayers(), Effect.HealTargetEffect, <Color>TeamOf(), UpdateEveryFrame(EyePosition()), 1, EffectRev.VisibleToPositionAndRadius);
@@ -44,13 +45,10 @@ void BaptisteCastIF() 'Subroutine: Baptiste Cast Immortality Field' {
 }
 
 void InitialBaptiste() "Subroutine: Initial Baptiste" {
-    AbortIf(ArrayContains(ActiveHero, Hero.Baptiste));
-    Wait();
+    InitialHeroSetup(Hero.Baptiste);
 
     StartHealingModification(EventPlayer(), EventPlayer(), 50, HealingModificationRev.ReceiversAndHealers);
     HealingModification = LastHealingModificationID();
-
-    ModifyVariable(ActiveHero, Operation.AppendToArray, Hero.Baptiste);
     DisallowButton(Button: Button.Ability2);
 
     async! CleanupBaptiste();

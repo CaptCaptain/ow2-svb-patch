@@ -1,0 +1,19 @@
+import "settings/allyTestingSettings.lobby";
+import "shared.workshop";
+
+rule: 'Setup Bots'
+{
+    for (define slot = 0; 5; 1)
+    {
+        CreateDummyBot(Hero.Tracer, Team.Team1, slot);
+    }
+    CreateDummyBot(Hero.Mercy, Team.Team2, 0);
+}
+
+rule: 'Damage Bots'
+Event.OngoingPlayer
+if (IsDummyBot())
+if (NormalizedHealth()  == 1)
+{
+    Damage(EventPlayer(), null, Health() - 1);
+}

@@ -3,7 +3,6 @@ playervar Player SymmetraBotPlayer;
 void CleanupSymmetra() "Subroutine: Cleanup Symmetra" {
     WaitUntil(HeroOf() != Hero.Symmetra && !IsDuplicating(), 9999);
 
-    Wait();
     DestroyDummyBot(TeamOf(SymmetraBotPlayer), SlotOf(SymmetraBotPlayer));
 
     CleanupEffects();
@@ -11,6 +10,8 @@ void CleanupSymmetra() "Subroutine: Cleanup Symmetra" {
 
     AllowButton(Button: Button.Ultimate);
     SetUltimateAbilityEnabled(Enabled: true);
+
+    Wait();
 
     ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Symmetra);
 }
@@ -27,10 +28,7 @@ void CreateSymmetraBotEffects() "Subroutine: Create Symmetra Bot Effects" {
 }
 
 void InitialSymmetra() "Subroutine: Initial Symmetra" {
-    AbortIf(ArrayContains(ActiveHero, Hero.Symmetra));
-    Wait();
-
-    ModifyVariable(ActiveHero, Operation.AppendToArray, Hero.Symmetra);
+    InitialHeroSetup(Hero.Symmetra);
 
     DisallowButton(Button: Button.Ultimate);
 

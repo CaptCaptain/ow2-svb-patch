@@ -2,10 +2,15 @@
   "Lobby": {
     "Map Rotation": "After A Game",
     "Return To Lobby": "Never",
-    "Max Team 1 Players": 5
+    "Max Team 1 Players": 5,
+    "Max Team 2 Players": 5
   },
   "Modes": {
-    "Practice Range": {}
+    "Skirmish": {
+      "Enabled Maps": [
+        "Workshop Island (Night)"
+      ]
+    }
   },
   "Description": "OW2 SVB Changes",
   "Extensions": {

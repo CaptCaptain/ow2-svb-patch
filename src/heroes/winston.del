@@ -1,33 +1,23 @@
-playervar define WinstonHealthPool = [];
-
 void CleanupWinston() "Subroutine: Cleanup Winston" {
     WaitUntil(HeroOf() != Hero.Winston && !IsDuplicating(), 9999);
 
-    foreach (define healthPool in WinstonHealthPool) {
-        RemoveHealthPoolFromPlayer(healthPool);
-    }
+    CleanupHealthPools();
+    SetMaxHealth(HealthPercent: 100);
 
     Wait();
-
-    SetMaxHealth(HealthPercent: 100);
 
     ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Winston);
 }
 
 void InitialWinston() "Subroutine: Initial Winston" {
-    AbortIf(ArrayContains(ActiveHero, Hero.Winston));
-
-    Wait();
-
-    # Variable setup
-    ModifyVariable(ActiveHero, Operation.AppendToArray, Hero.Winston);
+    InitialHeroSetup(Hero.Winston);
 
     # Character setup
     SetMaxHealth(HealthPercent: 92.85714286);
     AddHealthPoolToPlayer(EventPlayer(), HealthType.Health, IsUsingUltimate() ? (60.71428569 + 50) : 75, true, true);
-    ModifyVariable(WinstonHealthPool, Operation.AppendToArray, LastCreatedHealthPool());
+    ModifyVariable(HeroHealthPools, Operation.AppendToArray, LastCreatedHealthPool());
     AddHealthPoolToPlayer(EventPlayer(), HealthType.Armor, IsUsingUltimate() ? 10.7 : 10.7, true, true);
-    ModifyVariable(WinstonHealthPool, Operation.AppendToArray, LastCreatedHealthPool());
+    ModifyVariable(HeroHealthPools, Operation.AppendToArray, LastCreatedHealthPool());
 
     # Start Rule
     async! CleanupWinston();
