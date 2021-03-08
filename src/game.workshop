@@ -1,2 +1,17 @@
 import "settings/customGameSettings.lobby";
 import "shared.workshop";
+Player PlayersOnRole(in Team team, in Hero[] role): FilteredArray(AllPlayers(team), ArrayContains(role, HeroOf(ArrayElement())));
+Player PlayersNotOnRole(in Team team, in Hero[] role): FilteredArray(AllPlayers(team), !ArrayContains(role, HeroOf(ArrayElement())));
+Number NumberOfPlayersPerRole(in Team team, in Hero[] role): CountOf(PlayersOnRole(team, role));
+
+Hero AllowedRoles(in Player player = EventPlayer(), in Team team = TeamOf()): AllHeroes().Remove(NumberOfPlayersPerRole(team, AllTankHeroes()) >= 1 && !ArrayContains(AllTankHeroes(), HeroOf(player)) ? AllTankHeroes() : null).Remove(NumberOfPlayersPerRole(team, AllDamageHeroes()) >= 2 && !ArrayContains(AllDamageHeroes(), HeroOf(player)) ? AllDamageHeroes() : null).Remove(NumberOfPlayersPerRole(team, AllSupportHeroes()) >= 2 && !ArrayContains(AllSupportHeroes(), HeroOf(player)) ? AllSupportHeroes() : null);
+
+rule: 'Update Role Lock'
+Event.OngoingPlayer
+if (IsInSpawnRoom() || IsDead())
+{
+    WaitUntil(!IsAssemblingHeroes(), 9999);
+    SetAllowedHeroes(EventPlayer(), AllowedRoles());
+    Wait(0.25);
+    Loop();
+}
