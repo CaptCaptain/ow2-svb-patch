@@ -11,7 +11,7 @@ void CleanupWidowmaker() "Subroutine: Cleanup Widowmaker" {
 }
 
 void InitialWidowmaker() "Subroutine: Initial Widowmaker" {
-    InitialHeroSetup(Hero.Winston);
+    InitialHeroSetup(Hero.Widowmaker);
 
     StartDamageModification(TargetPlayer, EventPlayer(), !IsMeleeing() && IsFiringSecondary() ? Min(Max(25, DistanceBetween(EventPlayer(), TargetPlayer) * 3.33333333333), 100) : 100, DamageModificationRev.ReceiversDamagersAndDamagePercent);
     ModifyVariable(HeroDamageModifications, Operation.AppendToArray, LastDamageModificationID());
