@@ -17,7 +17,11 @@ void CleanupSymmetra() "Subroutine: Cleanup Symmetra" {
 }
 
 void CreateSymmetraBotEffects() "Subroutine: Create Symmetra Bot Effects" {
-    CreateEffect(AllPlayers(), Effect.BaptisteImmortalityFieldProtectedEffect, <Color>TeamOf(), SymmetraBotPlayer, 1, EffectRev.VisibleToPositionAndRadius);
+    CreateBeamEffect(AllPlayers(), BeamType.BadBeam, UpdateEveryFrame(EyePosition(SymmetraBotPlayer) + (Up() * 2)), UpdateEveryFrame(EyePosition(SymmetraBotPlayer)), <Color>TeamOf(), EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+    CreateEffect(AllPlayers(), Effect.Orb, <Color>TeamOf(), UpdateEveryFrame(EyePosition(SymmetraBotPlayer) + (Up() * 2)), 1, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+    CreateEffect(AllPlayers(), Effect.GoodAura, <Color>TeamOf(), UpdateEveryFrame(EyePosition(SymmetraBotPlayer) + (Up() * 2)), 0.5, EffectRev.VisibleToPositionAndRadius);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
     WaitUntil(EntityExists(LastOf(HeroEffects)), 9999);
     CreateEffect(AllPlayers(), Effect.EchoCloningEffect, <Color>TeamOf(), SymmetraBotPlayer, 1, EffectRev.VisibleToPositionAndRadius);
@@ -56,13 +60,17 @@ void SymmetraLightCloneUlt() "Subroutine: Symmetra Ult" {
 
     async! CreateSymmetraBotEffects();
 
+    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, <Color>TeamOf(), PositionOf(SymmetraBotPlayer), 10);
     PlayEffect(AllPlayers(), PlayEffect.SymmetraTeleporterReappearSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
     PlayEffect(AllPlayers(), PlayEffect.SombraEmpExplosionSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
+
+    Communicate(EventPlayer(), Communication.Attacking);
 
     WaitUntil(IsDead(SymmetraBotPlayer), 12);
     StartForcingDummyBotName(SymmetraBotPlayer, <"<0>'s Light Clone", EventPlayer()>);
     Wait();
 
+    PlayEffect(AllPlayers(), PlayEffect.BadExplosion, <Color>TeamOf(), PositionOf(SymmetraBotPlayer), 10);
     PlayEffect(AllPlayers(), PlayEffect.SombraTranslocatorDisappearSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
     PlayEffect(AllPlayers(), PlayEffect.SombraEmpExplosionSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
     DestroyDummyBot(TeamOf(SymmetraBotPlayer), SlotOf(SymmetraBotPlayer));

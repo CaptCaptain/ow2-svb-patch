@@ -1,2 +1,10 @@
 import "settings/practiceRangeSettings.lobby";
 import "shared.workshop";
+
+rule: 'Set Ultimate Charge'
+if (IsTrueForAny(AllLivingPlayers(), UltimateChargePercent(ArrayElement()) < 100))
+{
+    SetUltimateCharge(AllLivingPlayers(), 100);
+    Wait(0.25);
+    LoopIfConditionIsTrue();
+}

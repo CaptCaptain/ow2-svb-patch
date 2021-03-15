@@ -1,3 +1,5 @@
+import '../../../OSTWUtils/EasingFunctions.del';
+
 playervar Number HealingModification;
 
 /* ======================================================== */
@@ -8,12 +10,30 @@ void CleanupBaptiste() 'Subroutine: Cleanup Baptiste' {
     CleanupEffects();
 
     AllowButton(Button: Button.Ability2);
-    ClearStatus(Status: Status.Rooted);
     StopHealingModification(HealingModification);
+    SetMoveSpeed(MoveSpeedPercent: 100);
 
     Wait();
 
     ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Baptiste);
+}
+
+void SlowdownBaptiste() 'Subroutine: Slowdown Baptiste' {
+    for (define frac = 1; frac > 0.25; frac -= 0.024)
+    {
+        AbortIf(!IsHero(Hero.Baptiste));
+        SetMoveSpeed(MoveSpeedPercent: EasingFunctions.EaseInOutCubic(frac) * 100);
+        Wait();
+    }
+}
+
+void ReturnBaptisteToNormalSpeed() 'Subroutine: Return Baptiste to Normal Speed' {
+    for (define frac = 0.25; frac < 1; frac += 0.032)
+    {
+        AbortIf(!IsHero(Hero.Baptiste));
+        SetMoveSpeed(MoveSpeedPercent: EasingFunctions.EaseInOutCubic(frac) * 100);
+        Wait();
+    }
 }
 
 void BaptisteCastIF() 'Subroutine: Baptiste Cast Immortality Field' {  
@@ -23,10 +43,14 @@ void BaptisteCastIF() 'Subroutine: Baptiste Cast Immortality Field' {
         CreateEffect(AllPlayers(), Effect.HealTargetEffect, <Color>TeamOf(), UpdateEveryFrame(EyePosition()), 1, EffectRev.VisibleToPositionAndRadius);
         ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
     }
-    CreateEffect(AllPlayers(), Effect.BaptisteImmortalityFieldProtectedSound, <Color>TeamOf(), EventPlayer(), 700, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(LocalPlayer(), Effect.BaptisteImmortalityFieldProtectedEffect, <Color>TeamOf(), EventPlayer(), 1, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+    CreateEffect(LocalPlayer(), Effect.BaptisteImmortalityFieldProtectedSound, <Color>TeamOf(), EventPlayer(), 700, EffectRev.VisibleToPositionAndRadius);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
-    SetStatus(EventPlayer(), null, Status.Rooted, 1.5);
+    async! SlowdownBaptiste();
+
+    Communicate(EventPlayer(), Communication.WithYou);
 
     WaitUntil(IsTrueForAny([HasStatus(Status: Status.Asleep), HasStatus(Status: Status.Hacked), HasStatus(Status: Status.KnockedDown), HasStatus(Status: Status.Stunned), HasStatus(Status: Status.Frozen)], ArrayElement() == true), 1);
 
@@ -39,9 +63,10 @@ void BaptisteCastIF() 'Subroutine: Baptiste Cast Immortality Field' {
 
     CleanupEffects();
 
+    async! ReturnBaptisteToNormalSpeed();
+
     WaitUntil(!IsUsingAbility2(), 0.5);
     SetAbilityCooldown(Button: Button.Ability2, Cooldown: 25);
-    ClearStatus(Status: Status.Rooted);
 }
 
 void InitialBaptiste() "Subroutine: Initial Baptiste" {

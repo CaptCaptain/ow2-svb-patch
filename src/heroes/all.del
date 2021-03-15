@@ -1,3 +1,5 @@
+import '../../../OSTWUtils/Miscellaneous.del';
+
 playervar Number SupportHealingID;
 playervar Number NextUltCharge = 5;
 playervar Hero ActiveHero = [];
@@ -98,8 +100,10 @@ Event.OngoingPlayer
 if (ArrayContains(AllDamageHeroes(), HeroOf()) || ArrayContains(AllDamageHeroes(), HeroBeingDuplicated()))
 {
     SetMoveSpeed(EventPlayer(), 115);
-    WaitUntil(!ArrayContains(AllDamageHeroes(), HeroOf()) && !ArrayContains(AllDamageHeroes(), HeroBeingDuplicated()), 9999);
+    WaitUntil((!ArrayContains(AllDamageHeroes(), HeroOf()) && !ArrayContains(AllDamageHeroes(), HeroBeingDuplicated())) || (HeroOf() == Hero.Echo && IsDuplicating() && !ArrayContains(AllDamageHeroes(), HeroBeingDuplicated())), 9999);
     SetMoveSpeed(EventPlayer(), 100);
+    WaitUntil(HeroOf() == Hero.Echo && !IsDuplicating(), 9999);
+    LoopIf(HeroOf() == Hero.Echo && !IsDuplicating());
 }
 
 rule: "Support Passive"

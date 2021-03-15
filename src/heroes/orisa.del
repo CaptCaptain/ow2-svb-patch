@@ -4,7 +4,7 @@ playervar Boolean Galloping;
 void CreateHeroEffects() "Subroutine: Create Orisa Effects" {
     CreateEffect(AllPlayers(), Effect.WinstonPrimalRageEffect, <Color>TeamOf(), UpdateEveryFrame(EyePosition()), 1, EffectRev.VisibleToPositionAndRadius);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
-    CreateEffect(AllPlayers(), Effect.AnaNanoBoostedSound, <Color>TeamOf(), UpdateEveryFrame(EyePosition()), 500, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(), Effect.EnergySound, <Color>TeamOf(), UpdateEveryFrame(EyePosition()), 500, EffectRev.VisibleToPositionAndRadius);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 }
 
@@ -141,8 +141,8 @@ void OrisaUltimate() 'Subroutine: Orisa Ultimate' {
     SetAbilityCooldown(Button: Button.Ability2, Cooldown: 0);
     AllowButton(Button: Button.Ability2);
     PressButton(Button: Button.Ability2);
-    DisallowButton(Button: Button.Ability2);
     WaitUntil(!IsUsingAbility2(), 9999);
+    DisallowButton(Button: Button.Ability2);
     SetAbilityCooldown(Button: Button.Ability2, Cooldown: TemporaryCooldown);
     SetProjectileGravity(ProjectileGravityPercent: 100);
     SetProjectileSpeed(ProjectileSpeedPercent: 125);
