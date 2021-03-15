@@ -61,18 +61,18 @@ void SymmetraLightCloneUlt() "Subroutine: Symmetra Ult" {
     async! CreateSymmetraBotEffects();
 
     PlayEffect(AllPlayers(), PlayEffect.RingExplosion, <Color>TeamOf(), PositionOf(SymmetraBotPlayer), 10);
-    PlayEffect(AllPlayers(), PlayEffect.SymmetraTeleporterReappearSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
-    PlayEffect(AllPlayers(), PlayEffect.SombraEmpExplosionSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
+    PlayEffect(AllPlayers(), PlayEffect.SombraTranslocatorDisappearSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
+    PlayEffect(AllPlayers(), PlayEffect.DoomfistRisingUppercutImpactSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
 
     Communicate(EventPlayer(), Communication.Attacking);
 
-    WaitUntil(IsDead(SymmetraBotPlayer), 12);
+    WaitUntil(IsDead(SymmetraBotPlayer) || IsDead(), 12);
     StartForcingDummyBotName(SymmetraBotPlayer, <"<0>'s Light Clone", EventPlayer()>);
     Wait();
 
     PlayEffect(AllPlayers(), PlayEffect.BadExplosion, <Color>TeamOf(), PositionOf(SymmetraBotPlayer), 10);
     PlayEffect(AllPlayers(), PlayEffect.SombraTranslocatorDisappearSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
-    PlayEffect(AllPlayers(), PlayEffect.SombraEmpExplosionSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
+    PlayEffect(AllPlayers(), PlayEffect.DoomfistRisingUppercutImpactSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
     DestroyDummyBot(TeamOf(SymmetraBotPlayer), SlotOf(SymmetraBotPlayer));
 
     SetUltimateAbilityEnabled(Enabled: true);
@@ -157,6 +157,16 @@ void UpdateSymmetraAI() "Subroutine: Update Symmetra AI" {
             break;
             case false:
                 StopHoldingButton(SymmetraBotPlayer, Button.Crouch);
+            break;
+        }
+        switch (IsButtonHeld(Button: Button.Interact)) {
+            case true:
+                if (!IsButtonHeld(Player: SymmetraBotPlayer, Button: Button.Interact)) {
+                    StartHoldingButton(SymmetraBotPlayer, Button.Interact);
+                }
+            break;
+            case false:
+                StopHoldingButton(SymmetraBotPlayer, Button.Interact);
             break;
         }
         Wait();

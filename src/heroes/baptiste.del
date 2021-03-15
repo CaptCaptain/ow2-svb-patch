@@ -12,6 +12,7 @@ void CleanupBaptiste() 'Subroutine: Cleanup Baptiste' {
     AllowButton(Button: Button.Ability2);
     StopHealingModification(HealingModification);
     SetMoveSpeed(MoveSpeedPercent: 100);
+    SetJumpVerticalSpeed(JumpVerticalSpeedPercent: 100);
 
     Wait();
 
@@ -23,6 +24,7 @@ void SlowdownBaptiste() 'Subroutine: Slowdown Baptiste' {
     {
         AbortIf(!IsHero(Hero.Baptiste));
         SetMoveSpeed(MoveSpeedPercent: EasingFunctions.EaseInOutCubic(frac) * 100);
+        SetJumpVerticalSpeed(JumpVerticalSpeedPercent: EasingFunctions.EaseInOutCubic(frac) * 100);
         Wait();
     }
 }
@@ -32,6 +34,7 @@ void ReturnBaptisteToNormalSpeed() 'Subroutine: Return Baptiste to Normal Speed'
     {
         AbortIf(!IsHero(Hero.Baptiste));
         SetMoveSpeed(MoveSpeedPercent: EasingFunctions.EaseInOutCubic(frac) * 100);
+        SetJumpVerticalSpeed(JumpVerticalSpeedPercent: EasingFunctions.EaseInOutCubic(frac) * 100);
         Wait();
     }
 }
@@ -43,9 +46,7 @@ void BaptisteCastIF() 'Subroutine: Baptiste Cast Immortality Field' {
         CreateEffect(AllPlayers(), Effect.HealTargetEffect, <Color>TeamOf(), UpdateEveryFrame(EyePosition()), 1, EffectRev.VisibleToPositionAndRadius);
         ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
     }
-    CreateEffect(LocalPlayer(), Effect.BaptisteImmortalityFieldProtectedEffect, <Color>TeamOf(), EventPlayer(), 1, EffectRev.VisibleToPositionAndRadius);
-    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
-    CreateEffect(LocalPlayer(), Effect.BaptisteImmortalityFieldProtectedSound, <Color>TeamOf(), EventPlayer(), 700, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(EventPlayer(), Effect.GoodAuraSound, <Color>TeamOf(), EventPlayer(), 700, EffectRev.VisibleToPositionAndRadius);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
     async! SlowdownBaptiste();
