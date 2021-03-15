@@ -70,9 +70,9 @@ Event.OnDamageDealt
 if (UltimateChargePercent(Attacker()) < 100)
 if (EventAbility() != Button.Ultimate)
 if (UltimateChargePercent(Attacker()) > Attacker().NextUltCharge)
-if (ArrayContains(AllTankHeroes(), HeroOf()) || ArrayContains(AllTankHeroes(), HeroBeingDuplicated()))
+if (ArrayContains(AllTankHeroes(), HeroOf(Victim())) || ArrayContains(AllTankHeroes(), HeroBeingDuplicated(Victim())))
 {
-    SetUltimateCharge(Attacker(), UltimateChargePercent(Attacker()) - Max(4, EventDamage() / 50));
+    SetUltimateCharge(Attacker(), UltimateChargePercent(Attacker()) - Max(1, EventDamage() / 250));
     Attacker().NextUltCharge = UltimateChargePercent(Attacker()) + 5;
 }
 

@@ -15,3 +15,12 @@ if (IsInSpawnRoom() || IsDead())
     Wait(0.25);
     Loop();
 }
+
+rule: 'Skip Assembling Hero Time / Extend Setup Time'
+{
+    WaitUntil(IsAssemblingHeroes(), 9999);
+    SetMatchTime(0);
+    WaitUntil(IsInSetup(), 9999);
+    Wait();
+    SetMatchTime(MatchTime() + 30);
+}
