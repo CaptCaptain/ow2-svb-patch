@@ -1,5 +1,5 @@
 playervar define ReinhardtFirestrikeCharges = 2;
-playervar define ReinhardtFirestrikeCooldown;
+playervar define ReinhardtFirestrikeCooldown = 6;
 playervar define facingAngle;
 
 /* ======================================================== */
@@ -11,6 +11,8 @@ void CleanupReinhardt() "Subroutine: Cleanup Reinhardt" {
     CleanupTexts();
     SetMaxHealth(HealthPercent: 100);
     SetAbility2Enabled(Enabled: true);
+    StopChasingVariable(ReinhardtFirestrikeCooldown);
+    StopAccelerating();
 
     Wait();
 
@@ -24,6 +26,7 @@ void InitialReinhardt() 'Subroutine: InitialReinhardt' {
     
     # Variable setup
     ReinhardtFirestrikeCharges = 2;
+    ReinhardtFirestrikeCooldown = 6;
     ChaseVariableAtRate(ReinhardtFirestrikeCooldown, 0, 1, RateChaseReevaluation.DestinationAndRate);
     
     # Character setup
@@ -61,7 +64,7 @@ void ReinhardtRefreshFirestrike() 'Subroutine: Reinhardt Refresh Firestrike' {
 void ReinhardtFirestrikeRecharge() 'Subroutine: Reinhardt Firestrike Recharge' {
     ReinhardtFirestrikeCooldown = 6;
     WaitUntil(ReinhardtFirestrikeCooldown == 0, 9999);
-    ReinhardtFirestrikeCharges += 1;
+    ReinhardtFirestrikeCharges = Min(ReinhardtFirestrikeCharges + 1, 2);
     LoopIfConditionIsTrue();
 }
 

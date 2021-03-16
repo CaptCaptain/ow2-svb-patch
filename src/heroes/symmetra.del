@@ -17,16 +17,24 @@ void CleanupSymmetra() "Subroutine: Cleanup Symmetra" {
 }
 
 void CreateSymmetraBotEffects() "Subroutine: Create Symmetra Bot Effects" {
-    CreateBeamEffect(AllPlayers(), BeamType.BadBeam, UpdateEveryFrame(EyePosition(SymmetraBotPlayer) + (Up() * 2)), UpdateEveryFrame(EyePosition(SymmetraBotPlayer)), <Color>TeamOf(), EffectRev.VisibleToPositionAndRadius);
+    for (define repeat = 0; 3; 1)
+    {
+        CreateEffect(AllPlayers(), Effect.BadAura, <Color>TeamOf(), SymmetraBotPlayer, 0, EffectRev.VisibleToPositionAndRadius);
+        ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+
+        WaitUntil(EntityExists(LastOf(HeroEffects)), 9999);
+    }
+    
+    CreateEffect(AllPlayers(), Effect.BadAura, <Color>TeamOf(), SymmetraBotPlayer, 0, EffectRev.VisibleToPositionAndRadius);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
-    CreateEffect(AllPlayers(), Effect.Orb, <Color>TeamOf(), UpdateEveryFrame(EyePosition(SymmetraBotPlayer) + (Up() * 2)), 1, EffectRev.VisibleToPositionAndRadius);
-    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
-    CreateEffect(AllPlayers(), Effect.GoodAura, <Color>TeamOf(), UpdateEveryFrame(EyePosition(SymmetraBotPlayer) + (Up() * 2)), 0.5, EffectRev.VisibleToPositionAndRadius);
-    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+
     WaitUntil(EntityExists(LastOf(HeroEffects)), 9999);
+
     CreateEffect(AllPlayers(), Effect.EchoCloningEffect, <Color>TeamOf(), SymmetraBotPlayer, 1, EffectRev.VisibleToPositionAndRadius);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+
     WaitUntil(EntityExists(LastOf(HeroEffects)), 9999);
+
     CreateEffect(AllPlayers(), Effect.WinstonTeslaCannonTargetSound, <Color>TeamOf(), SymmetraBotPlayer, 700, EffectRev.VisibleToPositionAndRadius);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 }
