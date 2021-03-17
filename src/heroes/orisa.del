@@ -22,6 +22,7 @@ void CleanupOrisa() "Subroutine: Cleanup Orisa" {
     AllowButton(Button: Button.Ultimate);
     SetMoveSpeed(MoveSpeedPercent: 100);
     SetProjectileGravity(ProjectileGravityPercent: 100);
+    SetDamageDealt(DamageDealtPercent: 100);
     SetProjectileSpeed(ProjectileSpeedPercent: 100);
     SetPrimaryFireEnabled(Enabled: true);
     SetSecondaryFireEnabled(Enabled: true);
@@ -59,6 +60,12 @@ void OrisaDecreaseMovementPenalty() "Subroutine: Orisa Decrease Primary Fire Mov
 void OrisaGallop() "Subroutine: Orisa Gallop" {
     AbortIf(IsTrueForAny([HasStatus(Status: Status.Asleep), HasStatus(Status: Status.Hacked), HasStatus(Status: Status.KnockedDown), HasStatus(Status: Status.Stunned), HasStatus(Status: Status.Frozen)], ArrayElement() == true));
 
+    # Communication
+    SetDamageDealt(DamageDealtPercent: 0);
+    PressButton(Button: Button.Melee);
+    CancelPrimaryAction();
+    SetAbilityCooldown(Button: Button.Melee, Cooldown: 0);
+
     # Disable
     SetPrimaryFireEnabled(Enabled: false);
     SetSecondaryFireEnabled(Enabled: false);
@@ -79,6 +86,8 @@ void OrisaGallop() "Subroutine: Orisa Gallop" {
     SetMoveSpeed(MoveSpeedPercent: 0);
     StartFacing(EventPlayer(), Vector(0, 0, 1), 500, Relative.ToPlayer, FacingRev.DirectionAndTurnRate);
     WaitUntil(IsTrueForAny([HasStatus(Status: Status.Asleep), HasStatus(Status: Status.Hacked), HasStatus(Status: Status.KnockedDown), HasStatus(Status: Status.Stunned), HasStatus(Status: Status.Frozen)], ArrayElement() == true), 0.6);
+
+    SetDamageDealt(DamageDealtPercent: 100);
 
     # Gallop    
     ForceThrottle(MinForward: 1, MaxForward: 1);

@@ -20,23 +20,27 @@ void CleanupBaptiste() 'Subroutine: Cleanup Baptiste' {
 }
 
 void SlowdownBaptiste() 'Subroutine: Slowdown Baptiste' {
-    for (define frac = 1; frac > 0.25; frac -= 0.024)
-    {
-        AbortIf(!IsHero(Hero.Baptiste));
+    Number frac = 1;
+    ChaseVariableOverTime(frac, 0.25, 1, TimeChaseReevaluation.DestinationAndDuration);
+    while (frac > 0.25) {
+        if (!IsHero(Hero.Baptiste)) {break;}
         SetMoveSpeed(MoveSpeedPercent: EasingFunctions.EaseInOutCubic(frac) * 100);
         SetJumpVerticalSpeed(JumpVerticalSpeedPercent: EasingFunctions.EaseInOutCubic(frac) * 100);
         Wait();
     }
+    StopChasingVariable(frac);
 }
 
 void ReturnBaptisteToNormalSpeed() 'Subroutine: Return Baptiste to Normal Speed' {
-    for (define frac = 0.25; frac < 1; frac += 0.032)
-    {
-        AbortIf(!IsHero(Hero.Baptiste));
+    Number frac = 0.25;
+    ChaseVariableOverTime(frac, 1, 1, TimeChaseReevaluation.DestinationAndDuration);
+    while (frac < 1) {
+        if (!IsHero(Hero.Baptiste)) {break;}
         SetMoveSpeed(MoveSpeedPercent: EasingFunctions.EaseInOutCubic(frac) * 100);
         SetJumpVerticalSpeed(JumpVerticalSpeedPercent: EasingFunctions.EaseInOutCubic(frac) * 100);
         Wait();
     }
+    StopChasingVariable(frac);
 }
 
 void BaptisteCastIF() 'Subroutine: Baptiste Cast Immortality Field' {  
