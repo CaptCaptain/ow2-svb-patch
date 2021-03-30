@@ -5,7 +5,7 @@ playervar Number HealingModification;
 /* ======================================================== */
 
 void CleanupBaptiste() '[baptiste.del] Subroutine: Cleanup' {
-    WaitUntil(HeroOf() != EvaluateOnce(HeroOf()), 9999);
+    StoppedBeingHero();
 
     CleanupEffects();
 

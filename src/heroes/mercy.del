@@ -6,7 +6,7 @@ define MercyDamageBoostTarget(in Player player): RemoveFromArray(SortedArray(Fil
 /* ======================================================== */
 
 void CleanupMercy() '[mercy.del] Subroutine: Cleanup' {
-    WaitUntil(HeroOf() != EvaluateOnce(HeroOf()), 9999);
+    StoppedBeingHero();
 
     CleanupTexts();
     CleanupHealingMods();

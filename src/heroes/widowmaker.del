@@ -1,5 +1,5 @@
 void CleanupWidowmaker() "[widowmaker.del] Subroutine: Cleanup" {
-    WaitUntil(HeroOf() != EvaluateOnce(HeroOf()), 9999);
+    StoppedBeingHero();
 
     CleanupDamageMods();
 

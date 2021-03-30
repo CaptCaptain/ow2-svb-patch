@@ -13,7 +13,7 @@ void CreateHeroEffects() "[orisa.del] Subroutine: Create Effects" {
 }
 
 void CleanupOrisa() "[orisa.del] Subroutine: Cleanup" {
-    WaitUntil(HeroOf() != EvaluateOnce(HeroOf()), 9999);
+    StoppedBeingHero();
 
     CleanupTexts();
     CleanupEffects();

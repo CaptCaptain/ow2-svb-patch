@@ -1,7 +1,7 @@
 playervar Player SymmetraBotPlayer;
 
 void CleanupSymmetra() "[symmetra.del] Subroutine: Cleanup" {
-    WaitUntil(HeroOf() != EvaluateOnce(HeroOf()), 9999);
+    StoppedBeingHero();
 
     DestroyDummyBot(TeamOf(SymmetraBotPlayer), SlotOf(SymmetraBotPlayer));
 

@@ -12,6 +12,7 @@ rule: '[allyTesting.workshop] Setup Bots'
 
 rule: '[allyTesting.workshop] Damage Bots'
 Event.OngoingPlayer
+Team.Team1
 if (IsDummyBot())
 if (NormalizedHealth()  == 1)
 {

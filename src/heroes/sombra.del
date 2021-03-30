@@ -5,7 +5,7 @@ Player TargetPlayer: SortedArray(FilteredArray(PlayersWithinRadius(EyePosition()
 Boolean IsBarrierBlocking(Vector PositionA, Vector PositionB, Vector Direction): IsInLineOfSight(PositionA, PositionA + Direction) && !IsInLineOfSight(PositionA, PositionA + Direction, BarrierLOS.EnemyBarriersBlock);
 
 void CleanupSombra() '[sombra.del] Subroutine: Cleanup' {
-    WaitUntil(HeroOf() != EvaluateOnce(HeroOf()), 9999);
+    StoppedBeingHero();
 
     CleanupEffects();
     AllowButton(Button: Button.SecondaryFire);
@@ -59,7 +59,7 @@ void SombraLaunchProjectile() '[sombra.del] Subroutine: Launch Projectile' {
 
     SombraProjectilePosition = EyePosition();
 
-    ChaseVariableAtRate(SombraProjectilePosition, SombraSelectedTarget.EyePosition(), 30, RateChaseReevaluation.DestinationAndRate);
+    ChaseVariableAtRate(SombraProjectilePosition, SombraSelectedTarget.EyePosition(), 50, RateChaseReevaluation.DestinationAndRate);
 }
 
 void SombraProjectileHit() '[sombra.del] Subroutine: Projectile Hit' {

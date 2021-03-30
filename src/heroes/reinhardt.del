@@ -5,7 +5,7 @@ playervar define facingAngle;
 /* ======================================================== */
 
 void CleanupReinhardt() "[reinhardt.del] Subroutine: Cleanup" {
-    WaitUntil(HeroOf() != EvaluateOnce(HeroOf()), 9999);
+    StoppedBeingHero();
 
     CleanupHealthPools();
     CleanupTexts();
@@ -69,9 +69,9 @@ void ReinhardtFirestrikeRecharge() '[reinhardt.del] Subroutine: Firestrike Recha
 }
 
 void ReinhardtDetectFacingAngle() '[reinhardt.del] Subroutine: Detect Facing Angle' {
+    # Code snippet provided by Lotto!
     facingAngle = HorizontalFacingAngleOf(EventPlayer());
     MinWait();
-    # steering right
     if (AngleDifference(HorizontalFacingAngleOf(EventPlayer()), facingAngle) > 0)
     {
         if (IsInAir(EventPlayer()))

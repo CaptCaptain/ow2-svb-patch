@@ -11,6 +11,8 @@ playervar Number HeroHealingModifications = [];
 
 /* ======================================================== */
 
+Boolean StoppedBeingHero(Player player = EventPlayer()): WaitUntil(HeroOf(player) != EvaluateOnce(HeroOf(player)) || HeroBeingDuplicated(player) != EvaluateOnce(HeroBeingDuplicated(player)), 9999);
+
 void InitialHeroSetup(in Hero hero) {
     WaitUntil(CountOf(ActiveHero) == 0, 9999);
     AbortIf(ArrayContains(ActiveHero, hero));

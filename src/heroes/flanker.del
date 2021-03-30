@@ -7,7 +7,7 @@ void FlankerSetup(Hero hero) playervar '[flanker.del] Subroutine: Setup' {
 }
 
 void FlankerCleanup(Hero hero) playervar '[flanker.del] Subroutine: Cleanup' {
-    WaitUntil(HeroOf() != EvaluateOnce(HeroOf()), 9999);
+    StoppedBeingHero();
 
     SetMoveSpeed(MoveSpeedPercent: 115);
 
