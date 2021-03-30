@@ -1,0 +1,51 @@
+void FlankerSetup(Hero hero) playervar '[flanker.del] Subroutine: Setup' {
+    InitialHeroSetup(hero);
+
+    SetMoveSpeed(MoveSpeedPercent: 91.6666667 + 13.75);
+
+    async! FlankerCleanup(hero);
+}
+
+void FlankerCleanup(Hero hero) playervar '[flanker.del] Subroutine: Cleanup' {
+    WaitUntil(HeroOf() != EvaluateOnce(HeroOf()), 9999);
+
+    SetMoveSpeed(MoveSpeedPercent: 115);
+
+    Wait();
+
+    ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, hero);
+}
+
+/* ======================================================== */
+
+rule: '[flanker.del] Initial Tracer'
+Event.OngoingPlayer
+Player.Tracer
+{
+    FlankerSetup(Hero.Tracer);
+}
+
+rule: '[flanker.del] Initial Genji'
+Event.OngoingPlayer
+Player.Genji
+{
+    FlankerSetup(Hero.Genji);
+}
+
+/* ======================================================== */
+
+rule: '[flanker.del] Initial Tracer (Duplication)'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Tracer)
+{
+    FlankerSetup(Hero.Tracer);
+}
+
+rule: '[flanker.del] Initial Genji (Duplication)'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Genji)
+{
+    FlankerSetup(Hero.Genji);
+}

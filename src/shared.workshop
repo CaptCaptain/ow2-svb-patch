@@ -7,3 +7,5 @@ import "heroes/widowmaker.del";
 import "heroes/orisa.del";
 import "heroes/mercy.del";
 import "heroes/symmetra.del";
+import "heroes/flanker.del";
+import "heroes/sombra.del";

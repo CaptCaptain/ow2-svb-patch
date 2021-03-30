@@ -12,14 +12,14 @@ playervar Number HeroHealingModifications = [];
 /* ======================================================== */
 
 void InitialHeroSetup(in Hero hero) {
-    AbortIf(ArrayContains(ActiveHero, hero));
     WaitUntil(CountOf(ActiveHero) == 0, 9999);
+    AbortIf(ArrayContains(ActiveHero, hero));
     Wait();
 
     ModifyVariable(ActiveHero, Operation.AppendToArray, hero);
 }
 
-void CleanupEffects() 'Subroutine: Cleanup Effects' {
+void CleanupEffects() '[all.del] Subroutine: Cleanup Effects' {
     // Cleanup effects
     foreach (Number effectID in HeroEffects) {
         DestroyEffect(effectID);
@@ -28,7 +28,7 @@ void CleanupEffects() 'Subroutine: Cleanup Effects' {
     HeroEffects = [];
 }
 
-void CleanupHealthPools() 'Subroutine: Cleanup Health Pool' {
+void CleanupHealthPools() '[all.del] Subroutine: Cleanup Health Pool' {
     // Cleanup health pool
     foreach (define healthPool in HeroHealthPools) {
         RemoveHealthPoolFromPlayer(healthPool);
@@ -37,7 +37,7 @@ void CleanupHealthPools() 'Subroutine: Cleanup Health Pool' {
     HeroHealthPools = [];
 }
 
-void CleanupTexts() 'Subroutine: Cleanup Texts' {
+void CleanupTexts() '[all.del] Subroutine: Cleanup Texts' {
     // Cleanup texts
     foreach (Number textID in HeroTexts) {
         DestroyHudText(textID);
@@ -47,7 +47,7 @@ void CleanupTexts() 'Subroutine: Cleanup Texts' {
     HeroTexts = [];
 }
 
-void CleanupDamageMods() 'Subroutine: Cleanup Damage Modifications' {
+void CleanupDamageMods() '[all.del] Subroutine: Cleanup Damage Modifications' {
     // Cleanup texts
     foreach (Number modificationID in HeroDamageModifications) {
         StopDamageModification(modificationID);
@@ -56,7 +56,7 @@ void CleanupDamageMods() 'Subroutine: Cleanup Damage Modifications' {
     HeroDamageModifications = [];
 }
 
-void CleanupHealingMods() 'Subroutine: Cleanup Healing Modifications' {
+void CleanupHealingMods() '[all.del] Subroutine: Cleanup Healing Modifications' {
     // Cleanup texts
     foreach (Number modificationID in HeroHealingModifications) {
         StopHealingModification(modificationID);
@@ -67,7 +67,7 @@ void CleanupHealingMods() 'Subroutine: Cleanup Healing Modifications' {
 
 /* ======================================================== */
 
-rule: "Tank Passive: Reduce Ultimate Charge"
+rule: "[all.del] Tank Passive: Reduce Ultimate Charge"
 Event.OnDamageDealt
 if (UltimateChargePercent(Attacker()) < 100)
 if (EventAbility() != Button.Ultimate)
@@ -78,45 +78,45 @@ if (ArrayContains(AllTankHeroes(), HeroOf(Victim())) || ArrayContains(AllTankHer
     Attacker().NextUltCharge = UltimateChargePercent(Attacker()) + 5;
 }
 
-rule: "Reset Tank Passive"
+rule: "[all.del] Reset Tank Passive"
 Event.OngoingPlayer
 if (UltimateChargePercent() == 0)
 {
     NextUltCharge = 5;
 }
 
-rule: "Tank Passive: Reduced Knockback"
+rule: "[all.del] Tank Passive: Reduced Knockback"
 Event.OngoingPlayer
 if (ArrayContains(AllTankHeroes(), HeroOf()) || ArrayContains(AllTankHeroes(), HeroBeingDuplicated()))
 {
     AbortIf(HeroOf() == Hero.Reinhardt);
-    SetKnockbackReceived(EventPlayer(), 30);
+    SetKnockbackReceived(EventPlayer(), 70);
     WaitUntil(!ArrayContains(AllTankHeroes(), HeroOf()) && !ArrayContains(AllTankHeroes(), HeroBeingDuplicated()), 9999);
     SetKnockbackReceived(EventPlayer(), 100);
 }
 
-rule: "Damage Passive"
+rule: "[all.del] Damage Passive"
 Event.OngoingPlayer
 if (ArrayContains(AllDamageHeroes(), HeroOf()) || ArrayContains(AllDamageHeroes(), HeroBeingDuplicated()))
 {
     SetMoveSpeed(EventPlayer(), 115);
     WaitUntil((!ArrayContains(AllDamageHeroes(), HeroOf()) && !ArrayContains(AllDamageHeroes(), HeroBeingDuplicated())) || (HeroOf() == Hero.Echo && IsDuplicating() && !ArrayContains(AllDamageHeroes(), HeroBeingDuplicated())), 9999);
     SetMoveSpeed(EventPlayer(), 100);
-    WaitUntil(HeroOf() == Hero.Echo && !IsDuplicating(), 9999);
+    WaitUntil((HeroOf() == Hero.Echo && !IsDuplicating()) || !ArrayContains(AllDamageHeroes(), HeroOf()), 9999);
     LoopIf(HeroOf() == Hero.Echo && !IsDuplicating());
 }
 
-rule: "Support Passive"
+rule: "[all.del] Support Passive"
 Event.OnDamageTaken
 if (ArrayContains(AllSupportHeroes(), HeroOf()) || ArrayContains(AllSupportHeroes(), HeroBeingDuplicated()))
 {
     StopHealOverTime(SupportHealingID);
-    Wait(1, WaitBehavior.RestartWhenTrue);
-    StartHealOverTime(EventPlayer(), EventPlayer(), 9999, 20);
+    Wait(2, WaitBehavior.RestartWhenTrue);
+    StartHealOverTime(EventPlayer(), EventPlayer(), 9999, 10);
     SupportHealingID = LastHealOverTime();
 }
 
-rule: "Stop Support Passive"
+rule: "[all.del] Stop Support Passive"
 Event.OngoingPlayer
 if ((!ArrayContains(AllSupportHeroes(), HeroOf()) && !ArrayContains(AllSupportHeroes(), HeroBeingDuplicated())) || NormalizedHealth() == 1)
 {

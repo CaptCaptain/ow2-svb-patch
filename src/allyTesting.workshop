@@ -1,7 +1,7 @@
 import "settings/allyTestingSettings.lobby";
 import "shared.workshop";
 
-rule: 'Setup Bots'
+rule: '[allyTesting.workshop] Setup Bots'
 {
     for (define slot = 0; 5; 1)
     {
@@ -10,7 +10,7 @@ rule: 'Setup Bots'
     CreateDummyBot(Hero.Mercy, Team.Team2, 0);
 }
 
-rule: 'Damage Bots'
+rule: '[allyTesting.workshop] Damage Bots'
 Event.OngoingPlayer
 if (IsDummyBot())
 if (NormalizedHealth()  == 1)

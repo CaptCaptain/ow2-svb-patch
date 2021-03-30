@@ -1,4 +1,4 @@
-rule: 'Echo Not At Full Health Fix'
+rule: '[echo.del] Not At Full Health Fix'
 Event.OngoingPlayer
 Player.Echo
 {

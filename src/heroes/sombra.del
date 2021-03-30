@@ -1,0 +1,148 @@
+playervar Vector SombraProjectilePosition;
+playervar Player SombraSelectedTarget = TargetPlayer;
+Vector CenterPosition(Player player = EventPlayer()): (player.EyePosition() + player.Position()) / 2;
+Player TargetPlayer: SortedArray(FilteredArray(PlayersWithinRadius(EyePosition(), 30, OppositeTeamOf(TeamOf()), RadiusLOS.Off), IsInViewAngle(EventPlayer(), ArrayElement(), 30) && IsAlive(ArrayElement())), DistanceBetween(EventPlayer(), ArrayElement())).First;
+Boolean IsBarrierBlocking(Vector PositionA, Vector PositionB, Vector Direction): IsInLineOfSight(PositionA, PositionA + Direction) && !IsInLineOfSight(PositionA, PositionA + Direction, BarrierLOS.EnemyBarriersBlock);
+
+void CleanupSombra() '[sombra.del] Subroutine: Cleanup' {
+    WaitUntil(HeroOf() != EvaluateOnce(HeroOf()), 9999);
+
+    CleanupEffects();
+    AllowButton(Button: Button.SecondaryFire);
+    SetSecondaryFireEnabled(Enabled: true);
+
+    SombraProjectilePosition = null;
+    SombraSelectedTarget = null;
+    StopChasingVariable(SombraProjectilePosition);
+    
+    Wait();
+    
+    ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Sombra);
+}
+
+void InitialSombra() '[sombra.del] Subroutine: Initial' {
+    InitialHeroSetup(Hero.Sombra);
+
+    # Team Effects
+    CreateEffect(SombraProjectilePosition != null ? AllPlayers(TeamOf()) : null, Effect.BadAura, Color.Purple, UpdateEveryFrame(SombraProjectilePosition), 0, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+    CreateEffect(SombraProjectilePosition != null ? AllPlayers(TeamOf()) : null, Effect.Orb, Color.Purple, UpdateEveryFrame(SombraProjectilePosition), 0.5, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+
+    # Enemy Effects
+    CreateEffect(SombraProjectilePosition != null ? AllPlayers(OppositeTeamOf(TeamOf())) : null, Effect.BadAura, Color.Red, UpdateEveryFrame(SombraProjectilePosition), 0, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+    CreateEffect(SombraProjectilePosition != null ? AllPlayers(OppositeTeamOf(TeamOf())) : null, Effect.Orb, Color.Red, UpdateEveryFrame(SombraProjectilePosition), 0.5, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+
+    async! CleanupSombra();
+}
+
+void SombraLaunchProjectile() '[sombra.del] Subroutine: Launch Projectile' {
+    SombraSelectedTarget = TargetPlayer;
+
+    # Check if we can target the enemy
+    WaitUntil(
+        !IsFiringSecondary() ||
+        (DistanceBetween(EventPlayer(), SombraSelectedTarget) <= 15.1 && IsInLineOfSight(EventPlayer(), SombraSelectedTarget, BarrierLOS.EnemyBarriersBlock)), 
+        9999
+    );
+    AbortIf(
+        !IsFiringSecondary() ||
+        DistanceBetween(EventPlayer(), SombraSelectedTarget) > 15.1 ||
+        !EntityExists(SombraSelectedTarget) ||
+        !IsInLineOfSight(EventPlayer(), SombraSelectedTarget, BarrierLOS.EnemyBarriersBlock)
+    );
+
+    DisallowButton(Button: Button.SecondaryFire);
+    SetSecondaryFireEnabled(Enabled: false);
+
+    SombraProjectilePosition = EyePosition();
+
+    ChaseVariableAtRate(SombraProjectilePosition, SombraSelectedTarget.EyePosition(), 30, RateChaseReevaluation.DestinationAndRate);
+}
+
+void SombraProjectileHit() '[sombra.del] Subroutine: Projectile Hit' {
+    SetAbilityCooldown(Button: Button.SecondaryFire, Cooldown: 10);
+    AllowButton(Button: Button.SecondaryFire);
+    SetSecondaryFireEnabled(Enabled: true);
+    StopChasingVariable(SombraProjectilePosition);
+
+    # If the projectile isn't blocked by a barrier or the target is not phased out, we can apply the hack status
+    if (
+        !HasStatus(SombraSelectedTarget, Status.PhasedOut) &&
+        !HasStatus(SombraSelectedTarget, Status.Invincible) &&
+        !IsBarrierBlocking(SombraProjectilePosition, SombraSelectedTarget.EyePosition(), DirectionTowards(SombraProjectilePosition, SombraSelectedTarget.EyePosition()))
+    ) {
+        SetStatus(SombraSelectedTarget, EventPlayer(), Status.Hacked, 2);
+    }
+
+    # Team Effects
+    PlayEffect(AllPlayers(TeamOf()), PlayEffect.BadExplosion, Color.Purple, SombraProjectilePosition, 1);
+
+    # Enemy Effects
+    PlayEffect(AllPlayers(OppositeTeamOf(TeamOf())), PlayEffect.BadExplosion, Color.Red, SombraProjectilePosition, 1);
+
+    # Effects
+    PlayEffect(AllPlayers(), PlayEffect.ExplosionSound, Color.White, SombraProjectilePosition, 100);
+
+    SombraProjectilePosition = null;
+    SombraSelectedTarget = null;
+}
+
+rule: '[sombra.del] Initial'
+Event.OngoingPlayer
+Player.Sombra
+{
+    InitialSombra();
+}
+
+rule: '[sombra.del] Projectile Hit'
+Event.OngoingPlayer
+Player.Sombra
+if (SombraProjectilePosition != null)
+if (DistanceBetween(SombraSelectedTarget.EyePosition(), SombraProjectilePosition) < 1 || (IsBarrierBlocking(SombraProjectilePosition, SombraSelectedTarget.EyePosition(), DirectionTowards(SombraProjectilePosition, SombraSelectedTarget.EyePosition())) && DistanceBetween(SombraProjectilePosition, SombraSelectedTarget.EyePosition()) < 5)) 
+{
+    SombraProjectileHit();
+}
+
+rule: '[sombra.del] Launch Projectile'
+Event.OngoingPlayer
+Player.Sombra
+if (IsFiringSecondary())
+if (AbilityCooldown(Button: Button.SecondaryFire) == 0)
+if (TargetPlayer)
+{
+    SombraLaunchProjectile();
+}
+
+/* ================================================== */
+
+rule: '[sombra.del] Initial (Duplication)'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Sombra)
+{
+    InitialSombra();
+}
+
+rule: '[sombra.del] Projectile Hit (Duplication)'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Sombra)
+if (SombraProjectilePosition != null)
+if (DistanceBetween(SombraSelectedTarget.EyePosition(), SombraProjectilePosition) < 1 || (IsBarrierBlocking(SombraProjectilePosition, SombraSelectedTarget.EyePosition(), DirectionTowards(SombraProjectilePosition, SombraSelectedTarget.EyePosition())) && DistanceBetween(SombraProjectilePosition, SombraSelectedTarget.EyePosition()) < 5)) 
+{
+    SombraProjectileHit();
+}
+
+rule: '[sombra.del] Launch Projectile (Duplication)'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Sombra)
+if (IsFiringSecondary())
+if (AbilityCooldown(Button: Button.SecondaryFire) == 0)
+if (TargetPlayer)
+{
+    SombraLaunchProjectile();
+}

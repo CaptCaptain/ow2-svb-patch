@@ -6,9 +6,9 @@ Number NumberOfPlayersPerRole(in Team team, in Hero[] role): CountOf(PlayersOnRo
 
 Hero AllowedRoles(in Player player = EventPlayer(), in Team team = TeamOf()): AllHeroes().Remove(NumberOfPlayersPerRole(team, AllTankHeroes()) >= 1 && !ArrayContains(AllTankHeroes(), HeroOf(player)) ? AllTankHeroes() : null).Remove(NumberOfPlayersPerRole(team, AllDamageHeroes()) >= 2 && !ArrayContains(AllDamageHeroes(), HeroOf(player)) ? AllDamageHeroes() : null).Remove(NumberOfPlayersPerRole(team, AllSupportHeroes()) >= 2 && !ArrayContains(AllSupportHeroes(), HeroOf(player)) ? AllSupportHeroes() : null);
 
-rule: 'Update Role Lock'
+rule: '[game.workshop] Update Role Lock'
 Event.OngoingPlayer
-if (IsInSpawnRoom() || IsDead())
+if (IsInSpawnRoom() || IsDead() || !HasSpawned())
 {
     WaitUntil(!IsAssemblingHeroes(), 9999);
     SetAllowedHeroes(EventPlayer(), AllowedRoles());
@@ -16,7 +16,7 @@ if (IsInSpawnRoom() || IsDead())
     Loop();
 }
 
-rule: 'Skip Assembling Hero Time / Extend Setup Time'
+rule: '[game.workshop] Skip Assembling Hero Time / Extend Setup Time'
 {
     WaitUntil(IsAssemblingHeroes(), 9999);
     SetMatchTime(0);

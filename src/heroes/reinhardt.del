@@ -4,8 +4,8 @@ playervar define facingAngle;
 
 /* ======================================================== */
 
-void CleanupReinhardt() "Subroutine: Cleanup Reinhardt" {
-    WaitUntil(HeroOf() != Hero.Reinhardt && !IsDuplicating(), 9999);
+void CleanupReinhardt() "[reinhardt.del] Subroutine: Cleanup" {
+    WaitUntil(HeroOf() != EvaluateOnce(HeroOf()), 9999);
 
     CleanupHealthPools();
     CleanupTexts();
@@ -19,7 +19,7 @@ void CleanupReinhardt() "Subroutine: Cleanup Reinhardt" {
     ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Reinhardt);
 }
 
-void InitialReinhardt() 'Subroutine: InitialReinhardt' {
+void InitialReinhardt() '[reinhardt.del] Subroutine: Initial' {
     InitialHeroSetup(Hero.Reinhardt);
 
     Wait();
@@ -44,31 +44,31 @@ void InitialReinhardt() 'Subroutine: InitialReinhardt' {
     async! CleanupReinhardt();
 }
 
-void ReinhardtChargeCancelling() 'Subroutine: Reinhardt Charge Cancelling' {
+void ReinhardtChargeCancelling() '[reinhardt.del] Subroutine: Charge Cancelling' {
     Wait(1);
     WaitUntil(!IsButtonHeld(EventPlayer(), Button.Ability1) || !IsUsingAbility1(EventPlayer()), 99999);
     WaitUntil(!IsUsingAbility1(EventPlayer()) || IsButtonHeld(EventPlayer(), Button.Ability1), 99999);
     CancelPrimaryAction(EventPlayer());
 }
 
-void ReinhardtLowerChargeCooldown() 'Subroutine: Reinhardt Lower Charge Cooldown' {
+void ReinhardtLowerChargeCooldown() '[reinhardt.del] Subroutine: Lower Charge Cooldown' {
     WaitUntil(IsUsingAbility1(EventPlayer()) == false, 9999);
     SetAbilityCooldown(EventPlayer(), Button.Ability1, 8);
 }
 
-void ReinhardtRefreshFirestrike() 'Subroutine: Reinhardt Refresh Firestrike' {
+void ReinhardtRefreshFirestrike() '[reinhardt.del] Subroutine: Refresh Firestrike' {
     WaitUntil(IsUsingAbility2(EventPlayer()) == false, 9999);
     SetAbilityCooldown(EventPlayer(), Button.Ability2, 0);
 }
 
-void ReinhardtFirestrikeRecharge() 'Subroutine: Reinhardt Firestrike Recharge' {
+void ReinhardtFirestrikeRecharge() '[reinhardt.del] Subroutine: Firestrike Recharge' {
     ReinhardtFirestrikeCooldown = 6;
     WaitUntil(ReinhardtFirestrikeCooldown == 0, 9999);
     ReinhardtFirestrikeCharges = Min(ReinhardtFirestrikeCharges + 1, 2);
     LoopIfConditionIsTrue();
 }
 
-void ReinhardtDetectFacingAngle() 'Subroutine: Reinhardt Detect Facing Angle' {
+void ReinhardtDetectFacingAngle() '[reinhardt.del] Subroutine: Detect Facing Angle' {
     facingAngle = HorizontalFacingAngleOf(EventPlayer());
     MinWait();
     # steering right
@@ -104,14 +104,14 @@ void ReinhardtDetectFacingAngle() 'Subroutine: Reinhardt Detect Facing Angle' {
 
 /* ======================================================== */
 
-rule: "Initial Reinhardt"
+rule: "[reinhardt.del] Initial"
 Event.OngoingPlayer
 Player.Reinhardt
 {
     InitialReinhardt();
 }
 
-rule: "Reinhardt Charge Cancelling"
+rule: "[reinhardt.del] Charge Cancelling"
 Event.OngoingPlayer
 Player.Reinhardt
 if (IsUsingAbility1(EventPlayer()) == true)
@@ -119,7 +119,7 @@ if (IsUsingAbility1(EventPlayer()) == true)
     ReinhardtChargeCancelling();
 }
 
-rule: "Reinhardt Lower Charge Cooldown"
+rule: "[reinhardt.del] Lower Charge Cooldown"
 Event.OngoingPlayer
 Player.Reinhardt
 if (IsUsingAbility1(EventPlayer()) == true)
@@ -127,7 +127,7 @@ if (IsUsingAbility1(EventPlayer()) == true)
     ReinhardtLowerChargeCooldown();
 }
 
-rule: "Refresh Reinhardt Firestrike"
+rule: "[reinhardt.del] Refresh Firestrike"
 Event.OngoingPlayer
 Player.Reinhardt
 if (IsUsingAbility2(EventPlayer()) == true)
@@ -135,7 +135,7 @@ if (IsUsingAbility2(EventPlayer()) == true)
     ReinhardtRefreshFirestrike();
 }
 
-rule: "Reinhardt Firestrike Recharge"
+rule: "[reinhardt.del] Firestrike Recharge"
 Event.OngoingPlayer
 Player.Reinhardt
 if (RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) < 2)
@@ -143,7 +143,7 @@ if (RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) < 2)
     ReinhardtFirestrikeRecharge();
 }
 
-rule: "Reinhardt Firestrike Expends Charge"
+rule: "[reinhardt.del] Firestrike Expends Charge"
 Event.OngoingPlayer
 Player.Reinhardt
 if (IsUsingAbility2(EventPlayer()) == true)
@@ -151,7 +151,7 @@ if (IsUsingAbility2(EventPlayer()) == true)
     ReinhardtFirestrikeCharges -= 1;
 }
 
-rule: "Reinhardt Enable Firestrike when charges are available"
+rule: "[reinhardt.del] Enable Firestrike when charges are available"
 Event.OngoingPlayer
 Player.Reinhardt
 if (RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) > 0)
@@ -159,7 +159,7 @@ if (RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) > 0)
     SetAbility2Enabled(EventPlayer(), true);
 }
 
-rule: "Reinhardt Disable Firestrike when charges are not available"
+rule: "[reinhardt.del] Disable Firestrike when charges are not available"
 Event.OngoingPlayer
 Player.Reinhardt
 if (RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) <= 0)
@@ -167,7 +167,7 @@ if (RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) <= 0)
     SetAbility2Enabled(EventPlayer(), false);
 }
 
-rule: "Reinhardt Detect Facing Angle"
+rule: "[reinhardt.del] Detect Facing Angle"
 Event.OngoingPlayer
 Player.Reinhardt
 if (IsUsingAbility1(EventPlayer()) == true)
@@ -177,7 +177,7 @@ if (IsUsingAbility1(EventPlayer()) == true)
 
 /* ======================================================== */
 
-rule: "Initial Reinhardt (Duplication)"
+rule: "[reinhardt.del] Initial (Duplication)"
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Reinhardt)
@@ -185,7 +185,7 @@ if (HeroBeingDuplicated() == Hero.Reinhardt)
     InitialReinhardt();
 }
 
-rule: "Reinhardt Charge Cancelling (Duplication)"
+rule: "[reinhardt.del] Charge Cancelling (Duplication)"
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Reinhardt)
@@ -194,7 +194,7 @@ if (IsUsingAbility1(EventPlayer()) == true)
     ReinhardtChargeCancelling();
 }
 
-rule: "Reinhardt Lower Charge Cooldown (Duplication)"
+rule: "[reinhardt.del] Lower Charge Cooldown (Duplication)"
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Reinhardt)
@@ -203,7 +203,7 @@ if (IsUsingAbility1(EventPlayer()) == true)
     ReinhardtLowerChargeCooldown();
 }
 
-rule: "Refresh Reinhardt Firestrike (Duplication)"
+rule: "[reinhardt.del] Refresh Firestrike (Duplication)"
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Reinhardt)
@@ -212,7 +212,7 @@ if (IsUsingAbility2(EventPlayer()) == true)
     ReinhardtRefreshFirestrike();
 }
 
-rule: "Reinhardt Firestrike Recharge (Duplication)"
+rule: "[reinhardt.del] Firestrike Recharge (Duplication)"
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Reinhardt)
@@ -221,7 +221,7 @@ if (RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) < 2)
     ReinhardtFirestrikeRecharge();
 }
 
-rule: "Reinhardt Firestrike Expends Charge (Duplication)"
+rule: "[reinhardt.del] Firestrike Expends Charge (Duplication)"
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Reinhardt)
@@ -230,7 +230,7 @@ if (IsUsingAbility2(EventPlayer()) == true)
     ReinhardtFirestrikeCharges -= 1;
 }
 
-rule: "Reinhardt Enable Firestrike when charges are available (Duplication)"
+rule: "[reinhardt.del] Enable Firestrike when charges are available (Duplication)"
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Reinhardt)
@@ -239,7 +239,7 @@ if (RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) > 0)
     SetAbility2Enabled(EventPlayer(), true);
 }
 
-rule: "Reinhardt Disable Firestrike when charges are not available (Duplication)"
+rule: "[reinhardt.del] Disable Firestrike when charges are not available (Duplication)"
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Reinhardt)
@@ -248,7 +248,7 @@ if (RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) <= 0)
     SetAbility2Enabled(EventPlayer(), false);
 }
 
-rule: "Reinhardt Detect Facing Angle (Duplication)"
+rule: "[reinhardt.del] Detect Facing Angle (Duplication)"
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Reinhardt)

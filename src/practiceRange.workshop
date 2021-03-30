@@ -1,7 +1,7 @@
 import "settings/practiceRangeSettings.lobby";
 import "shared.workshop";
 
-rule: 'Set Ultimate Charge'
+rule: '[practiceRange.workshop] Set Ultimate Charge'
 if (IsTrueForAny(AllLivingPlayers(), UltimateChargePercent(ArrayElement()) < 100))
 {
     SetUltimateCharge(AllLivingPlayers(), 100);

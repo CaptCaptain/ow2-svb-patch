@@ -1,7 +1,7 @@
 playervar Player SymmetraBotPlayer;
 
-void CleanupSymmetra() "Subroutine: Cleanup Symmetra" {
-    WaitUntil(HeroOf() != Hero.Symmetra && !IsDuplicating(), 9999);
+void CleanupSymmetra() "[symmetra.del] Subroutine: Cleanup" {
+    WaitUntil(HeroOf() != EvaluateOnce(HeroOf()), 9999);
 
     DestroyDummyBot(TeamOf(SymmetraBotPlayer), SlotOf(SymmetraBotPlayer));
 
@@ -16,7 +16,7 @@ void CleanupSymmetra() "Subroutine: Cleanup Symmetra" {
     ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Symmetra);
 }
 
-void CreateSymmetraBotEffects() "Subroutine: Create Symmetra Bot Effects" {
+void CreateSymmetraBotEffects() "[symmetra.del] Subroutine: Create Clone Effects" {
     for (define repeat = 0; 3; 1)
     {
         CreateEffect(AllPlayers(), Effect.BadAura, <Color>TeamOf(), SymmetraBotPlayer, 0, EffectRev.VisibleToPositionAndRadius);
@@ -39,7 +39,7 @@ void CreateSymmetraBotEffects() "Subroutine: Create Symmetra Bot Effects" {
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 }
 
-void InitialSymmetra() "Subroutine: Initial Symmetra" {
+void InitialSymmetra() "[symmetra.del] Subroutine: Initial" {
     InitialHeroSetup(Hero.Symmetra);
 
     DisallowButton(Button: Button.Ultimate);
@@ -51,7 +51,7 @@ void InitialSymmetra() "Subroutine: Initial Symmetra" {
     async! CleanupSymmetra();
 }
 
-void SymmetraLightCloneUlt() "Subroutine: Symmetra Ult" {
+void SymmetraLightCloneUlt() "[symmetra.del] Subroutine: Ult" {
     SetUltimateCharge(ChargePercent: 0);
     SetUltimateAbilityEnabled(Enabled: false);
 
@@ -89,7 +89,7 @@ void SymmetraLightCloneUlt() "Subroutine: Symmetra Ult" {
     CleanupEffects();
 }
 
-void UpdateSymmetraAI() "Subroutine: Update Symmetra AI" {
+void UpdateSymmetraAI() "[symmetra.del] Subroutine: Update Symmetra AI" {
     StartThrottleInDirection(SymmetraBotPlayer, DirectionTowards(WorldVectorOf(Vector(), EventPlayer(), LocalVector.RotationAndTranslation), WorldVectorOf(Vector(-1 * ThrottleOf().X, 0, ThrottleOf().Z), EventPlayer(), LocalVector.RotationAndTranslation)), HorizontalSpeedOf(), Relative.ToWorld, ThrottleBehavior.ReplaceExistingThrottle);
     StartFacing(SymmetraBotPlayer, UpdateEveryFrame(DirectionTowards(EyePosition(SymmetraBotPlayer), RayCastHitPosition(EyePosition(), EyePosition() + (FacingDirectionOf() * 500), AllPlayers(OppositeTeamOf(TeamOf())), [SymmetraBotPlayer, EventPlayer()], false))), 1000, Relative.ToWorld, FacingRev.DirectionAndTurnRate);
     DisableMovementCollisionWithPlayers(SymmetraBotPlayer);
@@ -183,14 +183,14 @@ void UpdateSymmetraAI() "Subroutine: Update Symmetra AI" {
 
 /* ================================================== */
 
-rule: 'Initial Symmetra'
+rule: '[symmetra.del] Initial'
 Event.OngoingPlayer
 Player.Symmetra
 {
     InitialSymmetra();
 }
 
-rule: 'Symmetra Light Clone Ult'
+rule: '[symmetra.del] Light Clone Ult'
 Event.OngoingPlayer
 Player.Symmetra
 if (IsButtonHeld(Button: Button.Ultimate))
@@ -200,7 +200,7 @@ if (UltimateChargePercent() == 100)
     SymmetraLightCloneUlt();
 }
 
-rule: 'Symmetra Light Clone AI'
+rule: '[symmetra.del] Light Clone AI'
 Event.OngoingPlayer
 Player.Symmetra
 if (EntityExists(SymmetraBotPlayer))
@@ -210,7 +210,7 @@ if (EntityExists(SymmetraBotPlayer))
 
 /* ================================================== */
 
-rule: 'Initial Symmetra (Duplication)'
+rule: '[symmetra.del] Initial (Duplication)'
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Symmetra)
@@ -218,7 +218,7 @@ if (HeroBeingDuplicated() == Hero.Symmetra)
     InitialSymmetra();
 }
 
-rule: 'Symmetra Light Clone Ult (Duplication)'
+rule: '[symmetra.del] Light Clone Ult (Duplication)'
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Symmetra)
@@ -228,7 +228,7 @@ if (UltimateChargePercent() == 100)
     SymmetraLightCloneUlt();
 }
 
-rule: 'Symmetra Light Clone AI (Duplication)'
+rule: '[symmetra.del] Light Clone AI (Duplication)'
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Symmetra)

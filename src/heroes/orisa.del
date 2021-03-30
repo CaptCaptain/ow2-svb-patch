@@ -1,7 +1,7 @@
 playervar Boolean CastingUltimate;
 playervar Boolean Galloping;
 
-void CreateHeroEffects() "Subroutine: Create Orisa Effects" {
+void CreateHeroEffects() "[orisa.del] Subroutine: Create Effects" {
     CreateEffect(AllPlayers(TeamOf()), Effect.GoodAura, Color.LimeGreen, UpdateEveryFrame(EyePosition()), 0.5, EffectRev.VisibleToPositionAndRadius);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
     CreateEffect(AllPlayers(OppositeTeamOf(TeamOf())), Effect.GoodAura, Color.Red, UpdateEveryFrame(EyePosition()), 0.5, EffectRev.VisibleToPositionAndRadius);
@@ -12,8 +12,8 @@ void CreateHeroEffects() "Subroutine: Create Orisa Effects" {
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 }
 
-void CleanupOrisa() "Subroutine: Cleanup Orisa" {
-    WaitUntil(HeroOf() != Hero.Orisa && !IsDuplicating(), 9999);
+void CleanupOrisa() "[orisa.del] Subroutine: Cleanup" {
+    WaitUntil(HeroOf() != EvaluateOnce(HeroOf()), 9999);
 
     CleanupTexts();
     CleanupEffects();
@@ -36,7 +36,7 @@ void CleanupOrisa() "Subroutine: Cleanup Orisa" {
     ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Orisa);
 }
 
-void InitialOrisa() "Subroutine: Initial Orisa" {
+void InitialOrisa() "[orisa.del] Subroutine: Initial" {
     InitialHeroSetup(Hero.Orisa);
 
     DisallowButton(Button: Button.Ability2);
@@ -51,13 +51,13 @@ void InitialOrisa() "Subroutine: Initial Orisa" {
     async! CleanupOrisa();
 }
 
-void OrisaDecreaseMovementPenalty() "Subroutine: Orisa Decrease Primary Fire Movement Speed Penalty" {
+void OrisaDecreaseMovementPenalty() "[orisa.del] Subroutine: Decrease Primary Fire Movement Speed Penalty" {
     SetMoveSpeed(MoveSpeedPercent: 120);
     WaitUntil(!IsFiringPrimary(), 9999);
     SetMoveSpeed(MoveSpeedPercent: 100);
 }
 
-void OrisaGallop() "Subroutine: Orisa Gallop" {
+void OrisaGallop() "[orisa.del] Subroutine: Gallop" {
     AbortIf(IsTrueForAny([HasStatus(Status: Status.Asleep), HasStatus(Status: Status.Hacked), HasStatus(Status: Status.KnockedDown), HasStatus(Status: Status.Stunned), HasStatus(Status: Status.Frozen)], ArrayElement() == true));
 
     # Communication
@@ -142,12 +142,12 @@ void OrisaGallop() "Subroutine: Orisa Gallop" {
     StopFacing();
 }
 
-void OrisaGallopKnockback() 'Subroutine: Orisa Galloping Knockback' {
+void OrisaGallopKnockback() '[orisa.del] Subroutine: Galloping Knockback' {
     ApplyImpulse(Victim(), EventDirection() + (Up() / 2), 20, Relative.ToWorld, ContraryMotion.Cancel);
     SetEnvironmentCreditPlayer(EventPlayer(), Attacker());
 }
 
-void OrisaUltimate() 'Subroutine: Orisa Ultimate' {
+void OrisaUltimate() '[orisa.del] Subroutine: Ultimate' {
     Number TemporaryCooldown = AbilityCooldown(Button: Button.Ability2);
 
     CastingUltimate = true;
@@ -168,21 +168,21 @@ void OrisaUltimate() 'Subroutine: Orisa Ultimate' {
 
 /* ================================================== */
 
-rule: 'Initial Orisa'
+rule: '[orisa.del] Initial'
 Event.OngoingPlayer
 Player.Orisa
 {
     InitialOrisa();
 }
 
-rule: 'Orisa Decrease Primary Fire Movement Speed Penalty'
+rule: '[orisa.del] Decrease Primary Fire Movement Speed Penalty'
 Event.OngoingPlayer
 Player.Orisa
 if (IsFiringPrimary()) {
     OrisaDecreaseMovementPenalty();
 }
 
-rule: 'Orisa Gallop'
+rule: '[orisa.del] Gallop'
 Event.OngoingPlayer
 Player.Orisa
 if (!CastingUltimate)
@@ -192,7 +192,7 @@ if (AbilityCooldown(Button: Button.Ability2) == 0)
     OrisaGallop();
 }
 
-rule: 'Orisa Galloping Knockback'
+rule: '[orisa.del] Galloping Knockback'
 Event.OnDamageTaken
 if (HeroOf(Attacker()) == Hero.Orisa || HeroBeingDuplicated(Attacker()) == Hero.Orisa)
 if (Attacker().Galloping)
@@ -201,7 +201,7 @@ if (EventAbility() == null)
     OrisaGallopKnockback();
 }
 
-rule: 'Orisa Ultimate'
+rule: '[orisa.del] Ultimate'
 Event.OngoingPlayer
 Player.Orisa
 if (IsUsingUltimate())
@@ -209,7 +209,9 @@ if (IsUsingUltimate())
     OrisaUltimate();
 }
 
-rule: 'Initial Orisa (Duplicate)'
+/* ================================================== */
+
+rule: '[orisa.del] Initial (Duplicate)'
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Orisa)
@@ -217,9 +219,7 @@ if (HeroBeingDuplicated() == Hero.Orisa)
     InitialOrisa();
 }
 
-/* ================================================== */
-
-rule: 'Orisa Decrease Primary Fire Movement Speed Penalty (Duplicate)'
+rule: '[orisa.del] Decrease Primary Fire Movement Speed Penalty (Duplicate)'
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Orisa)
@@ -227,7 +227,7 @@ if (IsFiringPrimary()) {
     OrisaDecreaseMovementPenalty();
 }
 
-rule: 'Orisa Gallop (Duplicate)'
+rule: '[orisa.del] Gallop (Duplicate)'
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Orisa)
@@ -238,7 +238,7 @@ if (AbilityCooldown(Button: Button.Ability2) == 0)
     OrisaGallop();
 }
 
-rule: 'Orisa Ultimate (Duplicate)'
+rule: '[orisa.del] Ultimate (Duplicate)'
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Orisa)

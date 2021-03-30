@@ -4,8 +4,8 @@ playervar Number HealingModification;
 
 /* ======================================================== */
 
-void CleanupBaptiste() 'Subroutine: Cleanup Baptiste' {
-    WaitUntil(HeroOf() != Hero.Baptiste && !IsDuplicating(), 9999);
+void CleanupBaptiste() '[baptiste.del] Subroutine: Cleanup' {
+    WaitUntil(HeroOf() != EvaluateOnce(HeroOf()), 9999);
 
     CleanupEffects();
 
@@ -19,7 +19,7 @@ void CleanupBaptiste() 'Subroutine: Cleanup Baptiste' {
     ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Baptiste);
 }
 
-void SlowdownBaptiste() 'Subroutine: Slowdown Baptiste' {
+void SlowdownBaptiste() '[baptiste.del] Subroutine: Slowdown' {
     Number frac = 1;
     ChaseVariableOverTime(frac, 0.25, 1, TimeChaseReevaluation.DestinationAndDuration);
     while (frac > 0.25) {
@@ -31,7 +31,7 @@ void SlowdownBaptiste() 'Subroutine: Slowdown Baptiste' {
     StopChasingVariable(frac);
 }
 
-void ReturnBaptisteToNormalSpeed() 'Subroutine: Return Baptiste to Normal Speed' {
+void ReturnBaptisteToNormalSpeed() '[baptiste.del] Subroutine: Transition to Normal Speed' {
     Number frac = 0.25;
     ChaseVariableOverTime(frac, 1, 1, TimeChaseReevaluation.DestinationAndDuration);
     while (frac < 1) {
@@ -43,7 +43,7 @@ void ReturnBaptisteToNormalSpeed() 'Subroutine: Return Baptiste to Normal Speed'
     StopChasingVariable(frac);
 }
 
-void BaptisteCastIF() 'Subroutine: Baptiste Cast Immortality Field' {  
+void BaptisteCastIF() '[baptiste.del] Subroutine: Cast Immortality Field' {  
     // Create effects
     for (define repeat = 0; 5; 1)
     {
@@ -74,7 +74,7 @@ void BaptisteCastIF() 'Subroutine: Baptiste Cast Immortality Field' {
     SetAbilityCooldown(Button: Button.Ability2, Cooldown: 25);
 }
 
-void InitialBaptiste() "Subroutine: Initial Baptiste" {
+void InitialBaptiste() "[baptiste.del] Subroutine: Initial" {
     InitialHeroSetup(Hero.Baptiste);
 
     StartHealingModification(EventPlayer(), EventPlayer(), 50, HealingModificationRev.ReceiversAndHealers);
@@ -86,14 +86,14 @@ void InitialBaptiste() "Subroutine: Initial Baptiste" {
 
 /* ======================================================== */
 
-rule: 'Initial Baptiste'
+rule: '[baptiste.del] Initial'
 Event.OngoingPlayer
 Player.Baptiste
 {
     InitialBaptiste();
 }
 
-rule: 'Baptiste Cast IF'
+rule: '[baptiste.del] Cast IF'
 Event.OngoingPlayer
 Player.Baptiste
 if (IsButtonHeld(Button: Button.Ability2))
@@ -102,7 +102,7 @@ if (AbilityCooldown(Button: Button.Ability2) == 0)
     BaptisteCastIF();
 }
 
-rule: 'Initial Baptiste (Duplication)'
+rule: '[baptiste.del] Initial (Duplication)'
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Baptiste)
@@ -110,7 +110,7 @@ if (HeroBeingDuplicated() == Hero.Baptiste)
     InitialBaptiste();
 }
 
-rule: 'Baptiste Cast IF (Duplication)'
+rule: '[baptiste.del] Cast IF (Duplication)'
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Baptiste)

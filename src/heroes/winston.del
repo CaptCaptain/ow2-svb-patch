@@ -1,5 +1,5 @@
-void CleanupWinston() "Subroutine: Cleanup Winston" {
-    WaitUntil(HeroOf() != Hero.Winston && !IsDuplicating(), 9999);
+void CleanupWinston() "[winston.del] Subroutine: Cleanup" {
+    WaitUntil(HeroOf() != EvaluateOnce(HeroOf()), 9999);
 
     CleanupHealthPools();
     SetMaxHealth(HealthPercent: 100);
@@ -9,7 +9,7 @@ void CleanupWinston() "Subroutine: Cleanup Winston" {
     ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Winston);
 }
 
-void InitialWinston() "Subroutine: Initial Winston" {
+void InitialWinston() "[winston.del] Subroutine: Initial" {
     InitialHeroSetup(Hero.Winston);
 
     # Character setup
@@ -23,14 +23,14 @@ void InitialWinston() "Subroutine: Initial Winston" {
     async! CleanupWinston();
 }
 
-rule: "Initial Winston"
+rule: "[winston.del] Initial"
 Event.OngoingPlayer
 Player.Winston
 {
     InitialWinston();
 }
 
-rule: "Initial Winston (Duplication)"
+rule: "[winston.del] Initial (Duplication)"
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Winston)

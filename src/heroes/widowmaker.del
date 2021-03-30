@@ -1,14 +1,14 @@
-void CleanupWidowmaker() "Subroutine: Cleanup Widowmaker" {
-    WaitUntil(HeroOf() != Hero.Widowmaker && !IsDuplicating(), 9999);
+void CleanupWidowmaker() "[widowmaker.del] Subroutine: Cleanup" {
+    WaitUntil(HeroOf() != EvaluateOnce(HeroOf()), 9999);
 
     CleanupDamageMods();
 
-    ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Widowmaker);
-
     Wait();
+
+    ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Widowmaker);
 }
 
-void InitialWidowmaker() "Subroutine: Initial Widowmaker" {
+void InitialWidowmaker() "[widowmaker.del] Subroutine: Initial" {
     InitialHeroSetup(Hero.Widowmaker);
 
     for (define slot = 0; 5; 1)
@@ -22,7 +22,7 @@ void InitialWidowmaker() "Subroutine: Initial Widowmaker" {
 
 /* ================================================== */
 
-rule: 'Initial Widowmaker'
+rule: '[widowmaker.del] Initial'
 Event.OngoingPlayer
 Player.Widowmaker
 {
@@ -31,7 +31,7 @@ Player.Widowmaker
 
 /* ================================================== */
 
-rule: 'Initial Widowmaker (Duplication)'
+rule: '[widowmaker.del] Initial (Duplication)'
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Widowmaker)
