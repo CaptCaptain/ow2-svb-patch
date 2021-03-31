@@ -9,7 +9,7 @@ void FlankerSetup(Hero hero) playervar '[flanker.del] Subroutine: Setup' {
 void FlankerCleanup(Hero hero) playervar '[flanker.del] Subroutine: Cleanup' {
     StoppedBeingHero();
 
-    SetMoveSpeed(MoveSpeedPercent: 115);
+    if (ArrayContains(AllDamageHeroes(), HeroOf()) || ArrayContains(AllDamageHeroes(), HeroBeingDuplicated())) { SetMoveSpeed(MoveSpeedPercent: 115); } else { SetMoveSpeed(MoveSpeedPercent: 100); }
 
     Wait();
 
