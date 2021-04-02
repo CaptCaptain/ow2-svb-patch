@@ -2,16 +2,18 @@ import '../../../OSTWUtils/Miscellaneous.del';
 
 playervar Number SupportHealingID;
 playervar Number NextUltCharge = 5;
-playervar Hero ActiveHero = [];
-playervar Number HeroEffects = [];
-playervar Number HeroTexts = [];
-playervar Number HeroHealthPools = [];
-playervar Number HeroDamageModifications = [];
-playervar Number HeroHealingModifications = [];
+playervar Hero[] ActiveHero = [];
+playervar Number[] HeroEffects = [];
+playervar Number[] HeroTexts = [];
+playervar Number[] HeroHealthPools = [];
+playervar Number[] HeroDamageModifications = [];
+playervar Number[] HeroHealingModifications = [];
 
 /* ======================================================== */
 
 Boolean StoppedBeingHero(Player player = EventPlayer()): WaitUntil(HeroOf(player) != EvaluateOnce(HeroOf(player)) || HeroBeingDuplicated(player) != EvaluateOnce(HeroBeingDuplicated(player)), 9999);
+
+Player GetPlayerTarget(Player player = EventPlayer(), Team team = TeamOf(), RadiusLOS radiusLOS = RadiusLOS.Off, Number angle, Number radius): SortedArray(FilteredArray(PlayersWithinRadius(EyePosition(player), radius, team, radiusLOS).Remove(EventPlayer()), IsInViewAngle(player, ArrayElement(), angle) && IsAlive(ArrayElement())), DistanceBetween(RayCastHitPosition(player.EyePosition(), player.EyePosition() + (FacingDirectionOf(player) * radius), AllPlayers(), player, false), ArrayElement())).First;
 
 void InitialHeroSetup(in Hero hero) {
     WaitUntil(CountOf(ActiveHero) == 0, 9999);

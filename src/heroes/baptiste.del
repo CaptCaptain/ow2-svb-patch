@@ -1,7 +1,5 @@
 import '../../../OSTWUtils/EasingFunctions.del';
 
-playervar Number HealingModification;
-
 /* ======================================================== */
 
 void CleanupBaptiste() '[baptiste.del] Subroutine: Cleanup' {
@@ -10,7 +8,7 @@ void CleanupBaptiste() '[baptiste.del] Subroutine: Cleanup' {
     CleanupEffects();
 
     AllowButton(Button: Button.Ability2);
-    StopHealingModification(HealingModification);
+    CleanupHealingMods();
     SetMoveSpeed(MoveSpeedPercent: 100);
     SetJumpVerticalSpeed(JumpVerticalSpeedPercent: 100);
 
@@ -78,7 +76,7 @@ void InitialBaptiste() "[baptiste.del] Subroutine: Initial" {
     InitialHeroSetup(Hero.Baptiste);
 
     StartHealingModification(EventPlayer(), EventPlayer(), 50, HealingModificationRev.ReceiversAndHealers);
-    HealingModification = LastHealingModificationID();
+    ModifyVariable(HeroHealingModifications, Operation.AppendToArray, LastHealingModificationID());
     DisallowButton(Button: Button.Ability2);
 
     async! CleanupBaptiste();
