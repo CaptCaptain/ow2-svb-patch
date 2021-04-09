@@ -1,6 +1,6 @@
 playervar Player SymmetraBotPlayer;
 
-void CleanupSymmetra() "[symmetra.del] Subroutine: Cleanup" {
+void CleanupSymmetra() playervar "[symmetra.del] Subroutine: Cleanup" {
     StoppedBeingHero();
 
     DestroyDummyBot(TeamOf(SymmetraBotPlayer), SlotOf(SymmetraBotPlayer));
@@ -16,7 +16,7 @@ void CleanupSymmetra() "[symmetra.del] Subroutine: Cleanup" {
     ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Symmetra);
 }
 
-void CreateSymmetraBotEffects() "[symmetra.del] Subroutine: Create Clone Effects" {
+void CreateSymmetraBotEffects() playervar "[symmetra.del] Subroutine: Create Clone Effects" {
     for (define repeat = 0; 3; 1)
     {
         CreateEffect(AllPlayers(), Effect.BadAura, <Color>TeamOf(), SymmetraBotPlayer, 0, EffectRev.VisibleToPositionAndRadius);
@@ -39,7 +39,7 @@ void CreateSymmetraBotEffects() "[symmetra.del] Subroutine: Create Clone Effects
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 }
 
-void InitialSymmetra() "[symmetra.del] Subroutine: Initial" {
+void InitialSymmetra() playervar "[symmetra.del] Subroutine: Initial" {
     InitialHeroSetup(Hero.Symmetra);
 
     DisallowButton(Button: Button.Ultimate);
@@ -51,7 +51,7 @@ void InitialSymmetra() "[symmetra.del] Subroutine: Initial" {
     async! CleanupSymmetra();
 }
 
-void SymmetraLightCloneUlt() "[symmetra.del] Subroutine: Ult" {
+void SymmetraLightCloneUlt() playervar "[symmetra.del] Subroutine: Ult" {
     SetUltimateCharge(ChargePercent: 0);
     SetUltimateAbilityEnabled(Enabled: false);
 
@@ -89,7 +89,7 @@ void SymmetraLightCloneUlt() "[symmetra.del] Subroutine: Ult" {
     CleanupEffects();
 }
 
-void UpdateSymmetraAI() "[symmetra.del] Subroutine: Update Symmetra AI" {
+void UpdateSymmetraAI() playervar "[symmetra.del] Subroutine: Update Symmetra AI" {
     StartThrottleInDirection(SymmetraBotPlayer, DirectionTowards(WorldVectorOf(Vector(), EventPlayer(), LocalVector.RotationAndTranslation), WorldVectorOf(Vector(-1 * ThrottleOf().X, 0, ThrottleOf().Z), EventPlayer(), LocalVector.RotationAndTranslation)), HorizontalSpeedOf(), Relative.ToWorld, ThrottleBehavior.ReplaceExistingThrottle);
     StartFacing(SymmetraBotPlayer, UpdateEveryFrame(DirectionTowards(EyePosition(SymmetraBotPlayer), RayCastHitPosition(EyePosition(), EyePosition() + (FacingDirectionOf() * 500), AllPlayers(OppositeTeamOf(TeamOf())), [SymmetraBotPlayer, EventPlayer()], false))), 1000, Relative.ToWorld, FacingRev.DirectionAndTurnRate);
     DisableMovementCollisionWithPlayers(SymmetraBotPlayer);

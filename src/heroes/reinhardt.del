@@ -4,7 +4,7 @@ playervar define facingAngle;
 
 /* ======================================================== */
 
-void CleanupReinhardt() "[reinhardt.del] Subroutine: Cleanup" {
+void CleanupReinhardt() playervar "[reinhardt.del] Subroutine: Cleanup" {
     StoppedBeingHero();
 
     CleanupHealthPools();
@@ -19,7 +19,7 @@ void CleanupReinhardt() "[reinhardt.del] Subroutine: Cleanup" {
     ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Reinhardt);
 }
 
-void InitialReinhardt() '[reinhardt.del] Subroutine: Initial' {
+void InitialReinhardt() playervar '[reinhardt.del] Subroutine: Initial' {
     InitialHeroSetup(Hero.Reinhardt);
 
     Wait();
@@ -44,31 +44,31 @@ void InitialReinhardt() '[reinhardt.del] Subroutine: Initial' {
     async! CleanupReinhardt();
 }
 
-void ReinhardtChargeCancelling() '[reinhardt.del] Subroutine: Charge Cancelling' {
+void ReinhardtChargeCancelling() playervar '[reinhardt.del] Subroutine: Charge Cancelling' {
     Wait(1);
     WaitUntil(!IsButtonHeld(EventPlayer(), Button.Ability1) || !IsUsingAbility1(EventPlayer()), 99999);
     WaitUntil(!IsUsingAbility1(EventPlayer()) || IsButtonHeld(EventPlayer(), Button.Ability1), 99999);
     CancelPrimaryAction(EventPlayer());
 }
 
-void ReinhardtLowerChargeCooldown() '[reinhardt.del] Subroutine: Lower Charge Cooldown' {
+void ReinhardtLowerChargeCooldown() playervar '[reinhardt.del] Subroutine: Lower Charge Cooldown' {
     WaitUntil(IsUsingAbility1(EventPlayer()) == false, 9999);
     SetAbilityCooldown(EventPlayer(), Button.Ability1, 8);
 }
 
-void ReinhardtRefreshFirestrike() '[reinhardt.del] Subroutine: Refresh Firestrike' {
+void ReinhardtRefreshFirestrike() playervar '[reinhardt.del] Subroutine: Refresh Firestrike' {
     WaitUntil(IsUsingAbility2(EventPlayer()) == false, 9999);
     SetAbilityCooldown(EventPlayer(), Button.Ability2, 0);
 }
 
-void ReinhardtFirestrikeRecharge() '[reinhardt.del] Subroutine: Firestrike Recharge' {
+void ReinhardtFirestrikeRecharge() playervar '[reinhardt.del] Subroutine: Firestrike Recharge' {
     ReinhardtFirestrikeCooldown = 6;
     WaitUntil(ReinhardtFirestrikeCooldown == 0, 9999);
     ReinhardtFirestrikeCharges = Min(ReinhardtFirestrikeCharges + 1, 2);
     LoopIfConditionIsTrue();
 }
 
-void ReinhardtDetectFacingAngle() '[reinhardt.del] Subroutine: Detect Facing Angle' {
+void ReinhardtDetectFacingAngle() playervar '[reinhardt.del] Subroutine: Detect Facing Angle' {
     # Code snippet provided by Lotto!
     facingAngle = HorizontalFacingAngleOf(EventPlayer());
     MinWait();

@@ -1,12 +1,21 @@
 import "settings/allyTestingSettings.lobby";
 import "shared.workshop";
 
+rule: '[practiceRange.workshop] Set Ultimate Charge'
+if (IsTrueForAny(AllLivingPlayers(), UltimateChargePercent(ArrayElement()) < 100))
+{
+    SetUltimateCharge(AllLivingPlayers(), 100);
+    Wait(0.25);
+    LoopIfConditionIsTrue();
+}
+
 rule: '[allyTesting.workshop] Setup Bots'
 {
-    for (define slot = 0; 5; 1)
+    for (define slot = 0; 4; 1)
     {
         CreateDummyBot(Hero.Tracer, Team.Team1, slot);
     }
+    CreateDummyBot(Hero.Mercy, Team.Team1, 4, Left() * 5);
     CreateDummyBot(Hero.Mercy, Team.Team2, 0);
 }
 
@@ -17,4 +26,16 @@ if (IsDummyBot())
 if (NormalizedHealth()  == 1)
 {
     Damage(EventPlayer(), null, Health() - 1);
+}
+
+rule: '[allyTesting.workshop] Mercy Angelic Blessing'
+Event.OngoingPlayer
+Team.Team1
+Player.Mercy
+if (IsDummyBot())
+if (AbilityCooldown(Button: Button.Ability2) == 0)
+{
+    PressButton(Button: Button.Ability2);
+    Wait(1);
+    LoopIfConditionIsTrue();
 }

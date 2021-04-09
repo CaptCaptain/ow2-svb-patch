@@ -1,4 +1,5 @@
 import '../../../OSTWUtils/Miscellaneous.del';
+import '../../../OSTWUtils/OnScreenText.del';
 
 playervar Number SupportHealingID;
 playervar Number NextUltCharge = 5;
@@ -13,17 +14,20 @@ playervar Number[] HeroHealingModifications = [];
 
 Boolean StoppedBeingHero(Player player = EventPlayer()): WaitUntil(HeroOf(player) != EvaluateOnce(HeroOf(player)) || HeroBeingDuplicated(player) != EvaluateOnce(HeroBeingDuplicated(player)), 9999);
 
-Player GetPlayerTarget(Player player = EventPlayer(), Team team = TeamOf(), RadiusLOS radiusLOS = RadiusLOS.Off, Number angle, Number radius): SortedArray(FilteredArray(PlayersWithinRadius(EyePosition(player), radius, team, radiusLOS).Remove(EventPlayer()), IsInViewAngle(player, ArrayElement(), angle) && IsAlive(ArrayElement())), DistanceBetween(RayCastHitPosition(player.EyePosition(), player.EyePosition() + (FacingDirectionOf(player) * radius), AllPlayers(), player, false), ArrayElement())).First;
+Boolean UsingForbiddenAbility(Player player = EventPlayer()): ((IsHero(Hero.Doomfist, player) || IsHero(Hero.Dva, player)) && IsUsingUltimate(player));
+
+Boolean UsingExistingAbility(Player player = EventPlayer()): ((IsHero(Hero.Torbjorn, player) || IsHero(Hero.Sombra, player)) && IsUsingAbility2());
+
+Player GetPlayerTarget(Player player = EventPlayer(), Team team = TeamOf(), RadiusLOS radiusLOS = RadiusLOS.Off, Number angle, Number radius): SortedArray(FilteredArray(PlayersWithinRadius(EyePosition(player), radius, team, radiusLOS).Remove(player).Remove(AllDeadPlayers()), IsInViewAngle(player, ArrayElement(), angle) && !UsingForbiddenAbility(ArrayElement())), AngleBetweenVectors(FacingDirectionOf(player), DirectionTowards(player.EyePosition(), (<Player>ArrayElement()).EyePosition())) + DistanceBetween(player.EyePosition(), (<Player>ArrayElement()).EyePosition())).First;
 
 void InitialHeroSetup(in Hero hero) {
     WaitUntil(CountOf(ActiveHero) == 0, 9999);
     AbortIf(ArrayContains(ActiveHero, hero));
     Wait();
-
     ModifyVariable(ActiveHero, Operation.AppendToArray, hero);
 }
 
-void CleanupEffects() '[all.del] Subroutine: Cleanup Effects' {
+void CleanupEffects() playervar '[all.del] Subroutine: Cleanup Effects' {
     // Cleanup effects
     foreach (Number effectID in HeroEffects) {
         DestroyEffect(effectID);
@@ -32,7 +36,7 @@ void CleanupEffects() '[all.del] Subroutine: Cleanup Effects' {
     HeroEffects = [];
 }
 
-void CleanupHealthPools() '[all.del] Subroutine: Cleanup Health Pool' {
+void CleanupHealthPools() playervar '[all.del] Subroutine: Cleanup Health Pool' {
     // Cleanup health pool
     foreach (define healthPool in HeroHealthPools) {
         RemoveHealthPoolFromPlayer(healthPool);
@@ -41,7 +45,7 @@ void CleanupHealthPools() '[all.del] Subroutine: Cleanup Health Pool' {
     HeroHealthPools = [];
 }
 
-void CleanupTexts() '[all.del] Subroutine: Cleanup Texts' {
+void CleanupTexts() playervar '[all.del] Subroutine: Cleanup Texts' {
     // Cleanup texts
     foreach (Number textID in HeroTexts) {
         DestroyHudText(textID);
@@ -51,7 +55,7 @@ void CleanupTexts() '[all.del] Subroutine: Cleanup Texts' {
     HeroTexts = [];
 }
 
-void CleanupDamageMods() '[all.del] Subroutine: Cleanup Damage Modifications' {
+void CleanupDamageMods() playervar '[all.del] Subroutine: Cleanup Damage Modifications' {
     // Cleanup texts
     foreach (Number modificationID in HeroDamageModifications) {
         StopDamageModification(modificationID);
@@ -60,7 +64,7 @@ void CleanupDamageMods() '[all.del] Subroutine: Cleanup Damage Modifications' {
     HeroDamageModifications = [];
 }
 
-void CleanupHealingMods() '[all.del] Subroutine: Cleanup Healing Modifications' {
+void CleanupHealingMods() playervar '[all.del] Subroutine: Cleanup Healing Modifications' {
     // Cleanup texts
     foreach (Number modificationID in HeroHealingModifications) {
         StopHealingModification(modificationID);

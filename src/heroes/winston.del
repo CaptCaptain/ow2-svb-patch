@@ -1,4 +1,4 @@
-void CleanupWinston() "[winston.del] Subroutine: Cleanup" {
+void CleanupWinston() playervar "[winston.del] Subroutine: Cleanup" {
     StoppedBeingHero();
 
     CleanupHealthPools();
@@ -9,7 +9,7 @@ void CleanupWinston() "[winston.del] Subroutine: Cleanup" {
     ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Winston);
 }
 
-void InitialWinston() "[winston.del] Subroutine: Initial" {
+void InitialWinston() playervar "[winston.del] Subroutine: Initial" {
     InitialHeroSetup(Hero.Winston);
 
     # Character setup

@@ -1,4 +1,4 @@
-void CleanupWidowmaker() "[widowmaker.del] Subroutine: Cleanup" {
+void CleanupWidowmaker() playervar "[widowmaker.del] Subroutine: Cleanup" {
     StoppedBeingHero();
 
     CleanupDamageMods();
@@ -8,7 +8,7 @@ void CleanupWidowmaker() "[widowmaker.del] Subroutine: Cleanup" {
     ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Widowmaker);
 }
 
-void InitialWidowmaker() "[widowmaker.del] Subroutine: Initial" {
+void InitialWidowmaker() playervar "[widowmaker.del] Subroutine: Initial" {
     InitialHeroSetup(Hero.Widowmaker);
 
     for (define slot = 0; 5; 1)

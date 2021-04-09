@@ -1,51 +1,60 @@
 playervar Number HealingPercents = [];
 playervar Boolean DegenerationEnabled = [];
 playervar Player LastMercyTarget = [];
-define MercyDamageBoostTarget(in Player player): RemoveFromArray(SortedArray(FilteredArray(PlayersWithinRadius(EyePosition(player), 15, TeamOf(player), RadiusLOS.Surfaces), IsInViewAngle(player, ArrayElement(), 100) && IsAlive(ArrayElement())), DistanceBetween(player, ArrayElement())), player)[0];
+playervar Vector AngelicBlessingPosition;
+playervar Player AngelicBlessingTarget;
+playervar Player[] AngelicBlessings = [];
+
+Player GetAngelicBlessingFlyTarget(): GetPlayerTarget(player: AngelicBlessingTarget, radiusLOS: RadiusLOS.Surfaces, angle: 70, radius: 30);
 
 /* ======================================================== */
 
-void CleanupMercy() '[mercy.del] Subroutine: Cleanup' {
+void CleanupMercy() playervar '[mercy.del] Subroutine: Cleanup' {
     StoppedBeingHero();
 
     CleanupTexts();
     CleanupHealingMods();
+    CleanupEffects();
+    StopForcingPlayerOutlines(AllPlayers(), AngelicBlessingTarget);
+    SetAbility2Enabled(Enabled: true);
+    AllowButton(Button: Button.Ability2);
+    AllowButton(Player: AngelicBlessingTarget, Button: Button.Interact);
 
     Wait();
 
     ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Mercy);
 }
 
-void InitialMercy() '[mercy.del] Subroutine: Initial' {
+void InitialMercy() playervar '[mercy.del] Subroutine: Initial' {
     InitialHeroSetup(Hero.Mercy);
 
     HealingPercents = [];
     DegenerationEnabled = [];
-    for (define repeat = 0; 5; 1)
-    {
-        ModifyVariable(HealingPercents, Operation.AppendToArray, 1);
-        ModifyVariable(DegenerationEnabled, Operation.AppendToArray, false);
+    for (define slot = 0; slot < 5; slot++) {
+        HealingPercents[slot] = 1;
+        DegenerationEnabled[slot] = false;
     }
-    for (define slot = 0; 5; 1)
+    for (define slot = 0; slot < 5; slot++)
     {
         StartHealingModification(PlayersInSlot(EvaluateOnce(slot), TeamOf()), EventPlayer(), HealingPercents[EvaluateOnce(slot)] * 100, HealingModificationRev.ReceiversHealersAndHealingPercent);
         ModifyVariable(HeroHealingModifications, Operation.AppendToArray, LastHealingModificationID());
 
-        CreateInWorldText(EventPlayer(), <"[<0><1>%]\n", AbilityIconString(Hero.Baptiste, Button.Ability1), HealingPercents[EvaluateOnce(slot)] * 100>, PlayersInSlot(EvaluateOnce(slot), TeamOf()), 1, Clipping.ClipAgainstSurfaces, InworldTextRev.VisibleToPositionAndString);
+        CreateInWorldText(!UsingForbiddenAbility(PlayersInSlot(EvaluateOnce(slot), TeamOf())) ? EventPlayer() : null, <"[<0><1>%]\n", AbilityIconString(Hero.Baptiste, Button.Ability1), HealingPercents[EvaluateOnce(slot)] * 100>, PlayersInSlot(EvaluateOnce(slot), TeamOf()), 1, Clipping.ClipAgainstSurfaces, InworldTextRev.VisibleToPositionAndString);
         ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
     }
+    DisallowButton(Button: Button.Ability2);
 
     async! CleanupMercy();
 }
 
-void MercyDegenerateBeam() '[mercy.del] Subroutine: Degenerate Healing Beam' {
+void MercyDegenerateBeam() playervar '[mercy.del] Subroutine: Degenerate Healing Beam' {
     HealingPercents[SlotOf(Healee())] = Max(HealingPercents[SlotOf(Healee())] - 0.07, 0.727272727);
     LastMercyTarget = PlayersInSlot(SlotOf(Healee()), TeamOf());
 
     Wait(1);
 }
 
-void MercyUpdateDegeneration() '[mercy.del] Subroutine: Update Degeneration' {
+void MercyUpdateDegeneration() playervar '[mercy.del] Subroutine: Update Degeneration' {
     Healer().DegenerationEnabled[SlotOf(Healee())] = true;
     Wait(0.9);
     switch (Healer().LastMercyTarget) {
@@ -53,21 +62,148 @@ void MercyUpdateDegeneration() '[mercy.del] Subroutine: Update Degeneration' {
             LoopIf(Healer().LastMercyTarget == EventPlayer() && IsFiringSecondary(Healer()));
         break;
         default:
-            LoopIf(MercyDamageBoostTarget(Healer()) == EventPlayer() && IsFiringSecondary(Healer()));
+            LoopIf(GetPlayerTarget(Healer(), TeamOf(Healer()), RadiusLOS.Surfaces, 360, 15) == EventPlayer() && IsFiringSecondary(Healer()));
         break;
     }
     Healer().DegenerationEnabled[SlotOf(Healee())] = false;
 }
 
-void MercyRegenerateBeam() '[mercy.del] Subroutine: Regenerate Healing Beam' {
+void MercyRegenerateBeam() playervar '[mercy.del] Subroutine: Regenerate Healing Beam' {
     HealingPercents = IsUsingUltimate() ? MappedArray(HealingPercents, 1) : MappedArray(HealingPercents, DegenerationEnabled[CurrentArrayIndex()] == false ? Min(ArrayElement() + 0.07, 1) : ArrayElement());
     Wait(1);
     LoopIfConditionIsTrue();
 }
 
-void MercyClearLastTarget() '[mercy.del] Subroutine: Clear Last Target' {
+void MercyClearLastTarget() playervar '[mercy.del] Subroutine: Clear Last Target' {
     WaitUntil((!IsFiringPrimary() && !IsFiringSecondary()) || IsUsingUltimate(), 9999);
     LastMercyTarget = null;
+}
+
+void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Blessing' {
+    # Get target
+    AngelicBlessingTarget = GetPlayerTarget(radiusLOS: RadiusLOS.Surfaces, angle: 70, radius: 30);
+    
+    # Abort if Target is not valid
+    AbortIf(AngelicBlessingTarget == null);
+
+    # Casting
+    PressButton(Button: Button.Melee);
+    SetAbilityCooldown(Button: Button.Melee, Cooldown: 0);
+    AngelicBlessingPosition = EyePosition();
+    SetAbility2Enabled(Enabled: false);
+
+    # Team Effects
+    CreateEffect(
+        VisibleTo: AllPlayers(TeamOf()),
+        Type: Effect.Orb,
+        Color: Color.Yellow,
+        Position: AngelicBlessingPosition,
+        Radius: 1,
+        Reevaluation: EffectRev.VisibleToPositionAndRadius
+    );
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+
+    # Enemy Effects
+    CreateEffect(
+        VisibleTo: AllPlayers(OppositeTeamOf(TeamOf()
+        )),
+        Type: Effect.Orb,
+        Color: Color.Orange,
+        Position: AngelicBlessingPosition,
+        Radius: 1,
+        Reevaluation: EffectRev.VisibleToPositionAndRadius
+    );
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+    
+    Communicate(Type: Communication.Go);
+    ChaseVariableAtRate(AngelicBlessingPosition, AngelicBlessingTarget
+    .EyePosition(), 100, RateChaseReevaluation.DestinationAndRate);
+
+    WaitUntil(DistanceBetween(AngelicBlessingPosition, AngelicBlessingTarget.EyePosition()) < 1, 9999);
+
+    # Angelic Blessing Target
+    CreateInWorldText(
+        VisibleTo: AllPlayers(),
+        Header: <"<0><1>", AbilityIconString(Hero.Mercy, Button.Ability1), StringSlice("\n\n", 0, IsHero(Hero.Mercy, LocalPlayer()) && AngelicBlessingTarget.Team() == LocalPlayer().Team() ? 2 : 1)>,
+        Position: AngelicBlessingTarget,
+        Scale: 1.5,
+        Clipping: Clipping.ClipAgainstSurfaces,
+        Reevaluation: InworldTextRev.VisibleToPositionAndString
+    );
+    Number AngelicBlessingTextID = LastTextID();
+    ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
+
+    # Angelic Blessing Player Target
+    CreateHudText(
+        VisibleTo: AngelicBlessingTarget,
+        Text: <"<1>Guardian Angel [<0>] |                                | [<0>] Guardian Angel", InputBindingString(Button.Interact), " \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n">,
+        Location: Location.Top,
+        SortOrder: 2
+    );
+    Number AngelicBlessingConfirmID = LastTextID();
+    ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
+
+    SmallMessage(AngelicBlessingTarget, <"Angelic Blessing Received by <0>", EventPlayer()>);
+    StopChasingVariable(AngelicBlessingPosition);
+    CleanupEffects();
+
+    AngelicBlessings.ModAppend(AngelicBlessingTarget);
+
+    # Team Effects
+    CreateEffect(AllPlayers(), Effect.HealTargetEffect, <Color>TeamOf(), AngelicBlessingTarget, 1, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+
+    PlayEffect(AllPlayers(TeamOf()), PlayEffect.GoodExplosion, Color.Yellow, AngelicBlessingPosition, 1);
+
+    # Enemy Effects
+    CreateEffect(AllPlayers(), Effect.HealTargetEffect, <Color>OppositeTeamOf(TeamOf()),AngelicBlessingTarget, 1, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+
+    PlayEffect(AllPlayers(OppositeTeamOf(TeamOf())), PlayEffect.GoodExplosion, Color.Orange, AngelicBlessingPosition, 1);
+
+    # Effects
+    CreateEffect(AllPlayers(), Effect.Soldier76SprintingEffect, Color.White, AngelicBlessingTarget, 1, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+
+    PlayEffect(AllPlayers(), PlayEffect.BuffExplosionSound, Color.White, AngelicBlessingPosition, 100);
+
+    AngelicBlessingPosition = null;
+    SetAbilityCooldown(Button: Button.Ability2, Cooldown: 12);
+    SetAbility2Enabled(Enabled: true);
+    DisallowButton(Player: AngelicBlessingTarget, Button: Button.Interact);
+
+    WaitUntil((AngelicBlessingTarget.IsButtonHeld(Button.Interact) && GetAngelicBlessingFlyTarget()) || UsingForbiddenAbility(AngelicBlessingTarget) || HeroBeingDuplicated(AngelicBlessingTarget) != EvaluateOnce(HeroBeingDuplicated(AngelicBlessingTarget)), 6);
+
+    Player AngelicBlessingFlyTarget = GetAngelicBlessingFlyTarget();
+    DestroyHudText(AngelicBlessingConfirmID);
+    DestroyInWorldText(AngelicBlessingTextID);
+
+    StopForcingPlayerOutlines(AllPlayers(), AngelicBlessingTarget);
+    CleanupEffects();
+
+    if (AngelicBlessingTarget.IsButtonHeld(Button.Interact) && AngelicBlessingFlyTarget && !UsingForbiddenAbility(AngelicBlessingTarget)) {
+        PlayEffect(AllPlayers(), PlayEffect.BuffExplosionSound, Color.White, AngelicBlessingPosition, 100);
+        ApplyImpulse(
+            Player: AngelicBlessingTarget,
+            Direction: DirectionTowards(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position() + (Up() * 2)),
+            Speed: DistanceBetween(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position()) * 2.5,
+            Motion: ContraryMotion.CancelXYZ
+        );
+        AllowButton(Player: AngelicBlessingTarget, Button: Button.Interact);
+        AngelicBlessingTarget = null;
+        Wait(1);
+    }
+
+    # Cleanup
+    AngelicBlessingTarget = null;
+    ModifyVariable(HeroTexts, Operation.RemoveFromArrayByValue, AngelicBlessingTextID);
+}
+
+void MercyAngelicBlessingOutline() playervar '[mercy.del] Subroutine: Update Mercy Angelic Blessing Player Target Outline' {
+    Wait(0.032, WaitBehavior.AbortWhenFalse);
+    StopForcingPlayerOutlines(AllPlayers().Remove(GetAngelicBlessingFlyTarget()), AngelicBlessingTarget);
+    StartForcingPlayerOutlines(GetAngelicBlessingFlyTarget(), AngelicBlessingTarget, true, Color.Yellow, OutlineType.Always);
+    LoopIfConditionIsTrue();
 }
 
 /* ======================================================== */
@@ -114,6 +250,23 @@ if (IsFiringSecondary())
     MercyClearLastTarget();
 }
 
+rule: '[mercy.del] Angelic Blessing'
+Event.OngoingPlayer
+Player.Mercy
+if (IsButtonHeld(Button: Button.Ability2))
+if (AbilityCooldown(Button: Button.Ability2) == 0)
+{
+    MercyAngelicBlessing();
+}
+
+rule: '[mercy.del] Update Angelic Blessing Player Target Outline'
+Event.OngoingPlayer
+Player.Mercy
+if (AngelicBlessingTarget)
+{
+    MercyAngelicBlessingOutline();
+}
+
 /* ======================================================== */
 
 rule: '[mercy.del] Initial (Duplication)'
@@ -143,7 +296,7 @@ if (HeroBeingDuplicated() == Hero.Mercy)
     MercyRegenerateBeam();
 }
 
-rule: '[mercy.del] Clear Last Target'
+rule: '[mercy.del] Clear Last Target (Duplication)'
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Mercy)
@@ -151,4 +304,23 @@ if (!IsUsingUltimate())
 if (IsFiringSecondary())
 {
     MercyClearLastTarget();
+}
+
+rule: '[mercy.del] Angelic Blessing (Duplication)'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Mercy)
+if (IsButtonHeld(Button: Button.Ability2))
+if (AbilityCooldown(Button: Button.Ability2) == 0)
+{
+    MercyAngelicBlessing();
+}
+
+rule: '[mercy.del] Update Angelic Blessing Player Target Outline (Duplication)'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Mercy)
+if (AngelicBlessingTarget)
+{
+    MercyAngelicBlessingOutline();
 }

@@ -1,7 +1,7 @@
 playervar Boolean CastingUltimate;
 playervar Boolean Galloping;
 
-void CreateHeroEffects() "[orisa.del] Subroutine: Create Effects" {
+void CreateHeroEffects() playervar "[orisa.del] Subroutine: Create Effects" {
     CreateEffect(AllPlayers(TeamOf()), Effect.GoodAura, Color.LimeGreen, UpdateEveryFrame(EyePosition()), 0.5, EffectRev.VisibleToPositionAndRadius);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
     CreateEffect(AllPlayers(OppositeTeamOf(TeamOf())), Effect.GoodAura, Color.Red, UpdateEveryFrame(EyePosition()), 0.5, EffectRev.VisibleToPositionAndRadius);
@@ -12,7 +12,7 @@ void CreateHeroEffects() "[orisa.del] Subroutine: Create Effects" {
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 }
 
-void CleanupOrisa() "[orisa.del] Subroutine: Cleanup" {
+void CleanupOrisa() playervar "[orisa.del] Subroutine: Cleanup" {
     StoppedBeingHero();
 
     CleanupTexts();
@@ -36,7 +36,7 @@ void CleanupOrisa() "[orisa.del] Subroutine: Cleanup" {
     ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Orisa);
 }
 
-void InitialOrisa() "[orisa.del] Subroutine: Initial" {
+void InitialOrisa() playervar "[orisa.del] Subroutine: Initial" {
     InitialHeroSetup(Hero.Orisa);
 
     DisallowButton(Button: Button.Ability2);
@@ -51,13 +51,13 @@ void InitialOrisa() "[orisa.del] Subroutine: Initial" {
     async! CleanupOrisa();
 }
 
-void OrisaDecreaseMovementPenalty() "[orisa.del] Subroutine: Decrease Primary Fire Movement Speed Penalty" {
+void OrisaDecreaseMovementPenalty() playervar "[orisa.del] Subroutine: Decrease Primary Fire Movement Speed Penalty" {
     SetMoveSpeed(MoveSpeedPercent: 120);
     WaitUntil(!IsFiringPrimary(), 9999);
     SetMoveSpeed(MoveSpeedPercent: 100);
 }
 
-void OrisaGallop() "[orisa.del] Subroutine: Gallop" {
+void OrisaGallop() playervar "[orisa.del] Subroutine: Gallop" {
     AbortIf(IsTrueForAny([HasStatus(Status: Status.Asleep), HasStatus(Status: Status.Hacked), HasStatus(Status: Status.KnockedDown), HasStatus(Status: Status.Stunned), HasStatus(Status: Status.Frozen)], ArrayElement() == true));
 
     # Communication
@@ -142,12 +142,12 @@ void OrisaGallop() "[orisa.del] Subroutine: Gallop" {
     StopFacing();
 }
 
-void OrisaGallopKnockback() '[orisa.del] Subroutine: Galloping Knockback' {
+void OrisaGallopKnockback() playervar '[orisa.del] Subroutine: Galloping Knockback' {
     ApplyImpulse(Victim(), EventDirection() + (Up() / 2), 20, Relative.ToWorld, ContraryMotion.Cancel);
     SetEnvironmentCreditPlayer(EventPlayer(), Attacker());
 }
 
-void OrisaUltimate() '[orisa.del] Subroutine: Ultimate' {
+void OrisaUltimate() playervar '[orisa.del] Subroutine: Ultimate' {
     Number TemporaryCooldown = AbilityCooldown(Button: Button.Ability2);
 
     CastingUltimate = true;

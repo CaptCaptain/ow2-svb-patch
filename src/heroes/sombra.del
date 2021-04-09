@@ -5,7 +5,7 @@ Vector CenterPosition(Player player = EventPlayer()): (player.EyePosition() + pl
 Player SombraHackTarget: GetPlayerTarget(EventPlayer(), OppositeTeamOf(TeamOf(EventPlayer())), RadiusLOS.Off, 30, 30);
 Boolean IsBarrierBlocking(Vector PositionA, Vector PositionB, Vector Direction): IsInLineOfSight(PositionA, PositionA + Direction) && !IsInLineOfSight(PositionA, PositionA + Direction, BarrierLOS.EnemyBarriersBlock);
 
-void CleanupSombra() '[sombra.del] Subroutine: Cleanup' {
+void CleanupSombra() playervar '[sombra.del] Subroutine: Cleanup' {
     StoppedBeingHero();
 
     CleanupEffects();
@@ -21,7 +21,7 @@ void CleanupSombra() '[sombra.del] Subroutine: Cleanup' {
     ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Sombra);
 }
 
-void InitialSombra() '[sombra.del] Subroutine: Initial' {
+void InitialSombra() playervar '[sombra.del] Subroutine: Initial' {
     InitialHeroSetup(Hero.Sombra);
 
     # Team Effects
@@ -39,7 +39,7 @@ void InitialSombra() '[sombra.del] Subroutine: Initial' {
     async! CleanupSombra();
 }
 
-void SombraLaunchProjectile() '[sombra.del] Subroutine: Launch Projectile' {
+void SombraLaunchProjectile() playervar '[sombra.del] Subroutine: Launch Projectile' {
     SombraSelectedTarget = SombraHackTarget;
 
     # Check if we can target the enemy
@@ -63,7 +63,7 @@ void SombraLaunchProjectile() '[sombra.del] Subroutine: Launch Projectile' {
     ChaseVariableAtRate(SombraProjectilePosition, SombraSelectedTarget.EyePosition(), 50, RateChaseReevaluation.DestinationAndRate);
 }
 
-void SombraProjectileHit() '[sombra.del] Subroutine: Projectile Hit' {
+void SombraProjectileHit() playervar '[sombra.del] Subroutine: Projectile Hit' {
     SetAbilityCooldown(Button: Button.SecondaryFire, Cooldown: 10);
     AllowButton(Button: Button.SecondaryFire);
     SetSecondaryFireEnabled(Enabled: true);

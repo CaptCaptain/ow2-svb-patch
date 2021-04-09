@@ -2,7 +2,7 @@ import '../../../OSTWUtils/EasingFunctions.del';
 
 /* ======================================================== */
 
-void CleanupBaptiste() '[baptiste.del] Subroutine: Cleanup' {
+void CleanupBaptiste() playervar '[baptiste.del] Subroutine: Cleanup' {
     StoppedBeingHero();
 
     CleanupEffects();
@@ -17,7 +17,7 @@ void CleanupBaptiste() '[baptiste.del] Subroutine: Cleanup' {
     ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Baptiste);
 }
 
-void SlowdownBaptiste() '[baptiste.del] Subroutine: Slowdown' {
+void SlowdownBaptiste() playervar '[baptiste.del] Subroutine: Slowdown' {
     Number frac = 1;
     ChaseVariableOverTime(frac, 0.25, 1, TimeChaseReevaluation.DestinationAndDuration);
     while (frac > 0.25) {
@@ -29,7 +29,7 @@ void SlowdownBaptiste() '[baptiste.del] Subroutine: Slowdown' {
     StopChasingVariable(frac);
 }
 
-void ReturnBaptisteToNormalSpeed() '[baptiste.del] Subroutine: Transition to Normal Speed' {
+void ReturnBaptisteToNormalSpeed() playervar '[baptiste.del] Subroutine: Transition to Normal Speed' {
     Number frac = 0.25;
     ChaseVariableOverTime(frac, 1, 1, TimeChaseReevaluation.DestinationAndDuration);
     while (frac < 1) {
@@ -41,7 +41,7 @@ void ReturnBaptisteToNormalSpeed() '[baptiste.del] Subroutine: Transition to Nor
     StopChasingVariable(frac);
 }
 
-void BaptisteCastIF() '[baptiste.del] Subroutine: Cast Immortality Field' {  
+void BaptisteCastIF() playervar '[baptiste.del] Subroutine: Cast Immortality Field' {  
     // Create effects
     for (define repeat = 0; 5; 1)
     {
@@ -72,7 +72,7 @@ void BaptisteCastIF() '[baptiste.del] Subroutine: Cast Immortality Field' {
     SetAbilityCooldown(Button: Button.Ability2, Cooldown: 25);
 }
 
-void InitialBaptiste() "[baptiste.del] Subroutine: Initial" {
+void InitialBaptiste() playervar "[baptiste.del] Subroutine: Initial" {
     InitialHeroSetup(Hero.Baptiste);
 
     StartHealingModification(EventPlayer(), EventPlayer(), 50, HealingModificationRev.ReceiversAndHealers);
