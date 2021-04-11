@@ -43,6 +43,7 @@ void InitialOrisa() playervar "[orisa.del] Subroutine: Initial" {
 
     Wait();
 
+    # Create Hud
     CreateHudText(EventPlayer(), null, null, <"<0>(<1>)", <" \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n <0>", <"                                                                                                                            <0>", <"                                                                                                                            <0>", "                                                                             ">>>, "Gallop">, Location.Left, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
     ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
 
@@ -152,12 +153,17 @@ void OrisaUltimate() playervar '[orisa.del] Subroutine: Ultimate' {
 
     CastingUltimate = true;
 
+    # Deploy shield
     SetProjectileSpeed(ProjectileSpeedPercent: 50);
     SetProjectileGravity(ProjectileGravityPercent: AbsoluteValue(1000));
     SetAbilityCooldown(Button: Button.Ability2, Cooldown: 0);
     AllowButton(Button: Button.Ability2);
     PressButton(Button: Button.Ability2);
+
+    # Wait until shield is deployed
     WaitUntil(!IsUsingAbility2(), 9999);
+
+    # Reset
     DisallowButton(Button: Button.Ability2);
     SetAbilityCooldown(Button: Button.Ability2, Cooldown: TemporaryCooldown);
     SetProjectileGravity(ProjectileGravityPercent: 100);

@@ -1,7 +1,6 @@
 playervar Vector SombraProjectilePosition;
 playervar Player SombraSelectedTarget;
 
-Vector CenterPosition(Player player = EventPlayer()): (player.EyePosition() + player.Position()) / 2;
 Player SombraHackTarget: GetPlayerTarget(EventPlayer(), OppositeTeamOf(TeamOf(EventPlayer())), RadiusLOS.Off, 30, 30);
 Boolean IsBarrierBlocking(Vector PositionA, Vector PositionB, Vector Direction): IsInLineOfSight(PositionA, PositionA + Direction) && !IsInLineOfSight(PositionA, PositionA + Direction, BarrierLOS.EnemyBarriersBlock);
 

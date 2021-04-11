@@ -3,6 +3,7 @@ playervar Boolean DegenerationEnabled = [];
 playervar Player LastMercyTarget = [];
 playervar Vector AngelicBlessingPosition;
 playervar Player AngelicBlessingTarget;
+playervar Player AngelicBlessingFlyTarget;
 playervar Player[] AngelicBlessings = [];
 
 Player GetAngelicBlessingFlyTarget(): GetPlayerTarget(player: AngelicBlessingTarget, radiusLOS: RadiusLOS.Surfaces, angle: 70, radius: 30);
@@ -87,6 +88,7 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     AbortIf(AngelicBlessingTarget == null);
 
     # Casting
+    SetDamageDealt(DamageDealtPercent: 0);
     PressButton(Button: Button.Melee);
     SetAbilityCooldown(Button: Button.Melee, Cooldown: 0);
     AngelicBlessingPosition = EyePosition();
@@ -120,6 +122,7 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     .EyePosition(), 100, RateChaseReevaluation.DestinationAndRate);
 
     WaitUntil(DistanceBetween(AngelicBlessingPosition, AngelicBlessingTarget.EyePosition()) < 1, 9999);
+    SetDamageDealt(DamageDealtPercent: 100);
 
     # Angelic Blessing Target
     CreateInWorldText(
@@ -133,7 +136,7 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     Number AngelicBlessingTextID = LastTextID();
     ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
 
-    # Angelic Blessing Player Target
+    # Angelic Blessing Player Hud
     CreateHudText(
         VisibleTo: AngelicBlessingTarget,
         Text: <"<1>Guardian Angel [<0>] |                                | [<0>] Guardian Angel", InputBindingString(Button.Interact), " \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n">,
@@ -167,35 +170,59 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
 
     PlayEffect(AllPlayers(), PlayEffect.BuffExplosionSound, Color.White, AngelicBlessingPosition, 100);
 
+    # Stop casting
     AngelicBlessingPosition = null;
     SetAbilityCooldown(Button: Button.Ability2, Cooldown: 12);
     SetAbility2Enabled(Enabled: true);
     DisallowButton(Player: AngelicBlessingTarget, Button: Button.Interact);
 
+    # Wait until target chooses to fly to a target, after 6 seconds have elapsed, or if the target is using an ability that restricts their movement
     WaitUntil((AngelicBlessingTarget.IsButtonHeld(Button.Interact) && GetAngelicBlessingFlyTarget()) || UsingForbiddenAbility(AngelicBlessingTarget) || HeroBeingDuplicated(AngelicBlessingTarget) != EvaluateOnce(HeroBeingDuplicated(AngelicBlessingTarget)), 6);
 
-    Player AngelicBlessingFlyTarget = GetAngelicBlessingFlyTarget();
+    AngelicBlessingFlyTarget = GetAngelicBlessingFlyTarget();
+    
+    # Cleanup
     DestroyHudText(AngelicBlessingConfirmID);
     DestroyInWorldText(AngelicBlessingTextID);
-
     StopForcingPlayerOutlines(AllPlayers(), AngelicBlessingTarget);
     CleanupEffects();
 
+    # If there is a valid fly target and the player isn't using an ability that restricts their movement, we GA
     if (AngelicBlessingTarget.IsButtonHeld(Button.Interact) && AngelicBlessingFlyTarget && !UsingForbiddenAbility(AngelicBlessingTarget)) {
         PlayEffect(AllPlayers(), PlayEffect.BuffExplosionSound, Color.White, AngelicBlessingPosition, 100);
-        ApplyImpulse(
-            Player: AngelicBlessingTarget,
-            Direction: DirectionTowards(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position() + (Up() * 2)),
-            Speed: DistanceBetween(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position()) * 2.5,
-            Motion: ContraryMotion.CancelXYZ
-        );
+        SetGravity(AngelicBlessingTarget, 0);
+        SetJumpVerticalSpeed(AngelicBlessingTarget, 0);
+
+        while (DistanceBetween(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position()) > 2 && !UsingForbiddenAbility(AngelicBlessingTarget) && !AngelicBlessingTarget.IsButtonHeld(Button.Jump)) {
+            # Impulse loop while the player isn't close to the fly target, isn't using any ability that restricts their movement, or hasn't jumped.
+            ApplyImpulse(
+                Player: AngelicBlessingTarget,
+                Direction: DirectionTowards(CenterPosition(AngelicBlessingTarget), CenterPosition(AngelicBlessingFlyTarget)),
+                Speed: 17 * EasingFunctions.EaseOutQuint(Min(15, DistanceBetween(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position())) / 15),
+                Motion: ContraryMotion.CancelXYZ
+            );
+            Wait();
+        }
+        if (AngelicBlessingTarget.IsButtonHeld(Button.Jump)) {
+            # If the player jumps at any point during the GA, retain momentum and send them forward
+            ApplyImpulse(
+                Player: AngelicBlessingTarget,
+                Direction: DirectionTowards(CenterPosition(AngelicBlessingTarget), CenterPosition(AngelicBlessingFlyTarget)),
+                Speed: 8.5 * EasingFunctions.EaseOutQuint(Min(15, DistanceBetween(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position())) / 15),
+                Motion: ContraryMotion.Incorporate
+            );
+        }
+
+        SetGravity(AngelicBlessingTarget, 100);
+        SetJumpVerticalSpeed(AngelicBlessingTarget, 100);
         AllowButton(Player: AngelicBlessingTarget, Button: Button.Interact);
-        AngelicBlessingTarget = null;
         Wait(1);
     }
 
     # Cleanup
     AngelicBlessingTarget = null;
+    AngelicBlessingFlyTarget = null;
+    StopForcingPlayerOutlines(AllPlayers(), AngelicBlessingTarget);
     ModifyVariable(HeroTexts, Operation.RemoveFromArrayByValue, AngelicBlessingTextID);
 }
 
@@ -204,6 +231,7 @@ void MercyAngelicBlessingOutline() playervar '[mercy.del] Subroutine: Update Mer
     StopForcingPlayerOutlines(AllPlayers().Remove(GetAngelicBlessingFlyTarget()), AngelicBlessingTarget);
     StartForcingPlayerOutlines(GetAngelicBlessingFlyTarget(), AngelicBlessingTarget, true, Color.Yellow, OutlineType.Always);
     LoopIfConditionIsTrue();
+    StopForcingPlayerOutlines(AllPlayers(), AngelicBlessingTarget);
 }
 
 /* ======================================================== */
@@ -262,7 +290,7 @@ if (AbilityCooldown(Button: Button.Ability2) == 0)
 rule: '[mercy.del] Update Angelic Blessing Player Target Outline'
 Event.OngoingPlayer
 Player.Mercy
-if (AngelicBlessingTarget)
+if (AngelicBlessingTarget && !AngelicBlessingFlyTarget)
 {
     MercyAngelicBlessingOutline();
 }
@@ -320,7 +348,7 @@ rule: '[mercy.del] Update Angelic Blessing Player Target Outline (Duplication)'
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Mercy)
-if (AngelicBlessingTarget)
+if (AngelicBlessingTarget && !AngelicBlessingFlyTarget)
 {
     MercyAngelicBlessingOutline();
 }

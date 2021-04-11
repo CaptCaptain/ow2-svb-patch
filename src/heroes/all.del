@@ -1,5 +1,6 @@
 import '../../../OSTWUtils/Miscellaneous.del';
 import '../../../OSTWUtils/OnScreenText.del';
+import '../../../OSTWUtils/EasingFunctions.del';
 
 playervar Number SupportHealingID;
 playervar Number NextUltCharge = 5;
@@ -12,9 +13,11 @@ playervar Number[] HeroHealingModifications = [];
 
 /* ======================================================== */
 
+Vector CenterPosition(Player player = EventPlayer()): (player.EyePosition() + player.Position()) / 2;
+
 Boolean StoppedBeingHero(Player player = EventPlayer()): WaitUntil(HeroOf(player) != EvaluateOnce(HeroOf(player)) || HeroBeingDuplicated(player) != EvaluateOnce(HeroBeingDuplicated(player)), 9999);
 
-Boolean UsingForbiddenAbility(Player player = EventPlayer()): ((IsHero(Hero.Doomfist, player) || IsHero(Hero.Dva, player)) && IsUsingUltimate(player));
+Boolean UsingForbiddenAbility(Player player = EventPlayer()): ((IsHero(Hero.Doomfist, player) || IsHero(Hero.Dva, player) || IsHero(Hero.Pharah)) && IsUsingUltimate(player));
 
 Boolean UsingExistingAbility(Player player = EventPlayer()): ((IsHero(Hero.Torbjorn, player) || IsHero(Hero.Sombra, player)) && IsUsingAbility2());
 

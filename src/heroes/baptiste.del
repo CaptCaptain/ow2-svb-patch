@@ -1,5 +1,3 @@
-import '../../../OSTWUtils/EasingFunctions.del';
-
 /* ======================================================== */
 
 void CleanupBaptiste() playervar '[baptiste.del] Subroutine: Cleanup' {
@@ -20,12 +18,14 @@ void CleanupBaptiste() playervar '[baptiste.del] Subroutine: Cleanup' {
 void SlowdownBaptiste() playervar '[baptiste.del] Subroutine: Slowdown' {
     Number frac = 1;
     ChaseVariableOverTime(frac, 0.25, 1, TimeChaseReevaluation.DestinationAndDuration);
+
     while (frac > 0.25) {
         if (!IsHero(Hero.Baptiste)) {break;}
         SetMoveSpeed(MoveSpeedPercent: EasingFunctions.EaseInOutCubic(frac) * 100);
         SetJumpVerticalSpeed(JumpVerticalSpeedPercent: EasingFunctions.EaseInOutCubic(frac) * 100);
         Wait();
     }
+
     StopChasingVariable(frac);
 }
 

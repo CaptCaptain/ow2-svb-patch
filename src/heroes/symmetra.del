@@ -55,6 +55,7 @@ void SymmetraLightCloneUlt() playervar "[symmetra.del] Subroutine: Ult" {
     SetUltimateCharge(ChargePercent: 0);
     SetUltimateAbilityEnabled(Enabled: false);
 
+    # Create bot
     CreateDummyBot(Hero.Symmetra, TeamOf(), Min(5, NumberOfLivingPlayers()), PositionOf(), FacingDirectionOf());
     SymmetraBotPlayer = LastCreatedEntity();
 
@@ -66,23 +67,27 @@ void SymmetraLightCloneUlt() playervar "[symmetra.del] Subroutine: Ult" {
     SetAmmo(SymmetraBotPlayer, 0, Ammo(Clip: 0));
     SetDamageDealt(SymmetraBotPlayer, 50);
 
+    # Create effects
     async! CreateSymmetraBotEffects();
 
+    # Casting
     PlayEffect(AllPlayers(), PlayEffect.RingExplosion, <Color>TeamOf(), PositionOf(SymmetraBotPlayer), 10);
     PlayEffect(AllPlayers(), PlayEffect.SombraTranslocatorDisappearSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
     PlayEffect(AllPlayers(), PlayEffect.DoomfistRisingUppercutImpactSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
 
     Communicate(EventPlayer(), Communication.Attacking);
 
+    # Wait until the bot is dead or after 12 seconds have elapsed
     WaitUntil(IsDead(SymmetraBotPlayer) || IsDead(), 12);
     StartForcingDummyBotName(SymmetraBotPlayer, <"<0>'s Light Clone", EventPlayer()>);
     Wait();
 
+    # Cleanup
     PlayEffect(AllPlayers(), PlayEffect.BadExplosion, <Color>TeamOf(), PositionOf(SymmetraBotPlayer), 10);
     PlayEffect(AllPlayers(), PlayEffect.SombraTranslocatorDisappearSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
     PlayEffect(AllPlayers(), PlayEffect.DoomfistRisingUppercutImpactSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
     DestroyDummyBot(TeamOf(SymmetraBotPlayer), SlotOf(SymmetraBotPlayer));
-
+    
     SetUltimateAbilityEnabled(Enabled: true);
     SymmetraBotPlayer = [];
 
@@ -90,12 +95,16 @@ void SymmetraLightCloneUlt() playervar "[symmetra.del] Subroutine: Ult" {
 }
 
 void UpdateSymmetraAI() playervar "[symmetra.del] Subroutine: Update Symmetra AI" {
+    # Mirror the player's movement
     StartThrottleInDirection(SymmetraBotPlayer, DirectionTowards(WorldVectorOf(Vector(), EventPlayer(), LocalVector.RotationAndTranslation), WorldVectorOf(Vector(-1 * ThrottleOf().X, 0, ThrottleOf().Z), EventPlayer(), LocalVector.RotationAndTranslation)), HorizontalSpeedOf(), Relative.ToWorld, ThrottleBehavior.ReplaceExistingThrottle);
+
     StartFacing(SymmetraBotPlayer, UpdateEveryFrame(DirectionTowards(EyePosition(SymmetraBotPlayer), RayCastHitPosition(EyePosition(), EyePosition() + (FacingDirectionOf() * 500), AllPlayers(OppositeTeamOf(TeamOf())), [SymmetraBotPlayer, EventPlayer()], false))), 1000, Relative.ToWorld, FacingRev.DirectionAndTurnRate);
+
     DisableMovementCollisionWithPlayers(SymmetraBotPlayer);
     Teleport(SymmetraBotPlayer, PositionOf());
 
     while (EntityExists(SymmetraBotPlayer)) {
+        # Mirror the player's actions
         StartModifyingHeroVoiceLines(SymmetraBotPlayer, RandomReal(0, 2), false);
         switch (IsFiringPrimary()) {
             case true:
