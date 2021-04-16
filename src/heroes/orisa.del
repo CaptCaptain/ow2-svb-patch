@@ -33,7 +33,7 @@ void CleanupOrisa() playervar "[orisa.del] Subroutine: Cleanup" {
 
     Wait();
 
-    ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Orisa);
+    ModifyVariable(HeroActive, Operation.RemoveFromArrayByValue, Hero.Orisa);
 }
 
 void InitialOrisa() playervar "[orisa.del] Subroutine: Initial" {

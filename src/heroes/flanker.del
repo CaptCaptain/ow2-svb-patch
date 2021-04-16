@@ -13,7 +13,7 @@ void FlankerCleanup(Hero hero) playervar '[flanker.del] Subroutine: Cleanup' {
 
     Wait();
 
-    ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, hero);
+    ModifyVariable(HeroActive, Operation.RemoveFromArrayByValue, hero);
 }
 
 /* ======================================================== */

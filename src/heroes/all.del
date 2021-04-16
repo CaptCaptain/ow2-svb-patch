@@ -4,7 +4,7 @@ import '../../../OSTWUtils/EasingFunctions.del';
 
 playervar Number SupportHealingID;
 playervar Number NextUltCharge = 5;
-playervar Hero[] ActiveHero = [];
+playervar Hero[] HeroActive = [];
 playervar Number[] HeroEffects = [];
 playervar Number[] HeroTexts = [];
 playervar Number[] HeroHealthPools = [];
@@ -24,10 +24,10 @@ Boolean UsingExistingAbility(Player player = EventPlayer()): ((IsHero(Hero.Torbj
 Player GetPlayerTarget(Player player = EventPlayer(), Team team = TeamOf(), RadiusLOS radiusLOS = RadiusLOS.Off, Number angle, Number radius): SortedArray(FilteredArray(PlayersWithinRadius(EyePosition(player), radius, team, radiusLOS).Remove(player).Remove(AllDeadPlayers()), IsInViewAngle(player, ArrayElement(), angle) && !UsingForbiddenAbility(ArrayElement())), AngleBetweenVectors(FacingDirectionOf(player), DirectionTowards(player.EyePosition(), (<Player>ArrayElement()).EyePosition())) + DistanceBetween(player.EyePosition(), (<Player>ArrayElement()).EyePosition())).First;
 
 void InitialHeroSetup(in Hero hero) {
-    WaitUntil(CountOf(ActiveHero) == 0, 9999);
-    AbortIf(ArrayContains(ActiveHero, hero));
+    WaitUntil(CountOf(HeroActive) == 0, 9999);
+    AbortIf(ArrayContains(HeroActive, hero));
     Wait();
-    ModifyVariable(ActiveHero, Operation.AppendToArray, hero);
+    ModifyVariable(HeroActive, Operation.AppendToArray, hero);
 }
 
 void CleanupEffects() playervar '[all.del] Subroutine: Cleanup Effects' {

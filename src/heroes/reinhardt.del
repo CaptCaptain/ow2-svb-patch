@@ -16,7 +16,7 @@ void CleanupReinhardt() playervar "[reinhardt.del] Subroutine: Cleanup" {
 
     Wait();
 
-    ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Reinhardt);
+    ModifyVariable(HeroActive, Operation.RemoveFromArrayByValue, Hero.Reinhardt);
 }
 
 void InitialReinhardt() playervar '[reinhardt.del] Subroutine: Initial' {

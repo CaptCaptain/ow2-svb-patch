@@ -13,7 +13,7 @@ void CleanupSymmetra() playervar "[symmetra.del] Subroutine: Cleanup" {
 
     Wait();
 
-    ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Symmetra);
+    ModifyVariable(HeroActive, Operation.RemoveFromArrayByValue, Hero.Symmetra);
 }
 
 void CreateSymmetraBotEffects() playervar "[symmetra.del] Subroutine: Create Clone Effects" {

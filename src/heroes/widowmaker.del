@@ -5,7 +5,7 @@ void CleanupWidowmaker() playervar "[widowmaker.del] Subroutine: Cleanup" {
 
     Wait();
 
-    ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Widowmaker);
+    ModifyVariable(HeroActive, Operation.RemoveFromArrayByValue, Hero.Widowmaker);
 }
 
 void InitialWidowmaker() playervar "[widowmaker.del] Subroutine: Initial" {

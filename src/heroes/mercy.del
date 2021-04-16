@@ -23,7 +23,7 @@ void CleanupMercy() playervar '[mercy.del] Subroutine: Cleanup' {
 
     Wait();
 
-    ModifyVariable(ActiveHero, Operation.RemoveFromArrayByValue, Hero.Mercy);
+    ModifyVariable(HeroActive, Operation.RemoveFromArrayByValue, Hero.Mercy);
 }
 
 void InitialMercy() playervar '[mercy.del] Subroutine: Initial' {
