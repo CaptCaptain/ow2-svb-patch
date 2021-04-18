@@ -1,4 +1,5 @@
 playervar Boolean CastingUltimate;
+playervar Number OrisaMoveSpeedID;
 playervar Boolean Galloping;
 
 void CreateHeroEffects() playervar "[orisa.del] Subroutine: Create Effects" {
@@ -20,7 +21,7 @@ void CleanupOrisa() playervar "[orisa.del] Subroutine: Cleanup" {
 
     AllowButton(Button: Button.Ability2);
     AllowButton(Button: Button.Ultimate);
-    SetMoveSpeed(MoveSpeedPercent: 100);
+    CleanupMoveSpeedMods();
     SetProjectileGravity(ProjectileGravityPercent: 100);
     SetDamageDealt(DamageDealtPercent: 100);
     SetProjectileSpeed(ProjectileSpeedPercent: 100);
@@ -49,13 +50,17 @@ void InitialOrisa() playervar "[orisa.del] Subroutine: Initial" {
 
     SetProjectileSpeed(ProjectileSpeedPercent: 125);
 
+    CustomModifications.StartModifyingMoveSpeed(EventPlayer(), 100);
+    OrisaMoveSpeedID = MoveSpeedModification.LastMoveSpeedModificationID;
+    ModifyVariable(HeroMoveSpeedModifications, Operation.AppendToArray, MoveSpeedModification.LastMoveSpeedModificationID);
+
     async! CleanupOrisa();
 }
 
 void OrisaDecreaseMovementPenalty() playervar "[orisa.del] Subroutine: Decrease Primary Fire Movement Speed Penalty" {
-    SetMoveSpeed(MoveSpeedPercent: 120);
+    (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(OrisaMoveSpeedID)).Value = 120;
     WaitUntil(!IsFiringPrimary(), 9999);
-    SetMoveSpeed(MoveSpeedPercent: 100);
+    (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(OrisaMoveSpeedID)).Value = 100;
 }
 
 void OrisaGallop() playervar "[orisa.del] Subroutine: Gallop" {
@@ -84,6 +89,7 @@ void OrisaGallop() playervar "[orisa.del] Subroutine: Gallop" {
     PlayEffect(AllPlayers(), PlayEffect.OrisaHaltImplosionSound, <Color>TeamOf(), EyePosition(), 500);
 
     # Casting
+    (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(OrisaMoveSpeedID)).Value = 0;
     SetMoveSpeed(MoveSpeedPercent: 0);
     StartFacing(EventPlayer(), Vector(0, 0, 1), 500, Relative.ToPlayer, FacingRev.DirectionAndTurnRate);
     WaitUntil(IsTrueForAny([HasStatus(Status: Status.Asleep), HasStatus(Status: Status.Hacked), HasStatus(Status: Status.KnockedDown), HasStatus(Status: Status.Stunned), HasStatus(Status: Status.Frozen)], ArrayElement() == true), 0.6);
@@ -92,6 +98,7 @@ void OrisaGallop() playervar "[orisa.del] Subroutine: Gallop" {
 
     # Gallop    
     ForceThrottle(MinForward: 1, MaxForward: 1);
+    (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(OrisaMoveSpeedID)).Value = 500;
     SetMoveSpeed(MoveSpeedPercent: 500);
     DisableMovementCollisionWithPlayers();
     PressButton(Button: Button.Melee);
@@ -119,6 +126,7 @@ void OrisaGallop() playervar "[orisa.del] Subroutine: Gallop" {
 
     # Stop movement
     StopForcingThrottle();
+    (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(OrisaMoveSpeedID)).Value = 0;
     SetMoveSpeed(MoveSpeedPercent: 0);
     EnableMovementCollisionWithPlayers();
     SetAbilityCooldown(Button: Button.Melee, Cooldown: 0);
@@ -131,16 +139,17 @@ void OrisaGallop() playervar "[orisa.del] Subroutine: Gallop" {
     Wait(0.25);
     StopCamera();
 
+    # Set cooldown / restore movement
+    SetAbilityCooldown(Button: Button.Ability2, Cooldown: 10);
+    (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(OrisaMoveSpeedID)).Value = 100;
+    SetMoveSpeed(MoveSpeedPercent: 100);
+    StopFacing();
+
     # Re-enable
     SetPrimaryFireEnabled(Enabled: true);
     SetSecondaryFireEnabled(Enabled: true);
     SetAbility2Enabled(Enabled: true);
     AllowButton(Button: Button.Ultimate);
-
-    # Set cooldown / restore movement
-    SetAbilityCooldown(Button: Button.Ability2, Cooldown: 10);
-    SetMoveSpeed(MoveSpeedPercent: 100);
-    StopFacing();
 }
 
 void OrisaGallopKnockback() playervar '[orisa.del] Subroutine: Galloping Knockback' {

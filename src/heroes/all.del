@@ -1,8 +1,5 @@
-import '../../../OSTWUtils/Miscellaneous.del';
-import '../../../OSTWUtils/OnScreenText.del';
-import '../../../OSTWUtils/EasingFunctions.del';
-
 playervar Number SupportHealingID;
+playervar Number DamageMoveSpeedID;
 playervar Number NextUltCharge = 5;
 playervar Hero[] HeroActive = [];
 playervar Number[] HeroEffects = [];
@@ -10,6 +7,7 @@ playervar Number[] HeroTexts = [];
 playervar Number[] HeroHealthPools = [];
 playervar Number[] HeroDamageModifications = [];
 playervar Number[] HeroHealingModifications = [];
+playervar Number[] HeroMoveSpeedModifications = [];
 
 /* ======================================================== */
 
@@ -76,6 +74,15 @@ void CleanupHealingMods() playervar '[all.del] Subroutine: Cleanup Healing Modif
     HeroHealingModifications = [];
 }
 
+void CleanupMoveSpeedMods() playervar '[all.del] Subroutine: Cleanup Move Speed Modifications' {
+    // Cleanup move speed
+    foreach (Number modificationID in HeroMoveSpeedModifications) {
+        CustomModifications.StopModifyingMoveSpeed(EventPlayer(), modificationID);
+    }
+
+    HeroMoveSpeedModifications = [];
+}
+
 /* ======================================================== */
 
 rule: "[all.del] Tank Passive: Reduce Ultimate Charge"
@@ -110,9 +117,17 @@ rule: "[all.del] Damage Passive"
 Event.OngoingPlayer
 if (ArrayContains(AllDamageHeroes(), HeroOf()) || ArrayContains(AllDamageHeroes(), HeroBeingDuplicated()))
 {
-    SetMoveSpeed(EventPlayer(), 115);
+    if (!DamageMoveSpeedID) {
+        CustomModifications.StartModifyingMoveSpeed(EventPlayer(), 115);
+        DamageMoveSpeedID = MoveSpeedModification.LastMoveSpeedModificationID;
+    }
+
+    (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(DamageMoveSpeedID)).Value = 115;
+
     WaitUntil((!ArrayContains(AllDamageHeroes(), HeroOf()) && !ArrayContains(AllDamageHeroes(), HeroBeingDuplicated())) || (HeroOf() == Hero.Echo && IsDuplicating() && !ArrayContains(AllDamageHeroes(), HeroBeingDuplicated())), 9999);
-    SetMoveSpeed(EventPlayer(), 100);
+
+    (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(DamageMoveSpeedID)).Value = 100;
+    
     WaitUntil((HeroOf() == Hero.Echo && !IsDuplicating()) || !ArrayContains(AllDamageHeroes(), HeroOf()), 9999);
     LoopIf(HeroOf() == Hero.Echo && !IsDuplicating());
 }

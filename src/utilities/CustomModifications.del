@@ -1,0 +1,62 @@
+/* ======================================================== */
+
+class CustomModification {
+    public Number ID;
+    public Number Player;
+    public Number Value;
+}
+
+class MoveSpeedModification : CustomModification {
+    static public MoveSpeedModification[] ActiveModifications = [];
+    static public Number LastMoveSpeedModificationID = 0;
+
+    static MoveSpeedModification GetMoveSpeedModification(in Number id): FilteredArray(MoveSpeedModification.ActiveModifications, (<MoveSpeedModification>ArrayElement()).ID == id)[0];
+
+    public MoveSpeedModification (in Player player, in Number id, in Number value) {
+        Player = player;
+        ID = id;
+        Value = value;
+    }
+}
+
+class CustomModifications {
+    static void StartModifyingMoveSpeed(in Player[] | Player players = EventPlayer(), in Number moveSpeed = 100) {
+        foreach (Player player in [].Append(players)) {
+            MoveSpeedModification.LastMoveSpeedModificationID += 1;
+            MoveSpeedModification.ActiveModifications += new MoveSpeedModification(player, MoveSpeedModification.LastMoveSpeedModificationID, moveSpeed);
+        }
+    }
+
+    static void StopModifyingMoveSpeed(in Player[] | Player players = EventPlayer(), in Number lastMoveSpeedID = MoveSpeedModification.LastMoveSpeedModificationID) {
+        foreach (Player player in [].Append(players)) {
+            ModifyVariable(MoveSpeedModification.ActiveModifications, Operation.RemoveFromArrayByValue, MoveSpeedModification.GetMoveSpeedModification(lastMoveSpeedID));
+        }
+    }
+
+    static void StopAllMoveSpeedModifications(in Player[] | Player players = EventPlayer()) {
+        foreach (Player player in [].Append(players)) {
+            foreach (MoveSpeedModification Modification in MoveSpeedModification.ActiveModifications) {
+                StopModifyingMoveSpeed(player, Modification.ID);
+            }
+        }
+    }
+}
+
+/* ======================================================== */
+
+rule: '[CustomModifications.del] Update Move Speed Modifications'
+{
+    
+    while (true) {
+        foreach (Player player in AllPlayers()) {
+            Number MoveSpeed = 100;
+            foreach (MoveSpeedModification Modification in FilteredArray(MoveSpeedModification.ActiveModifications, (<MoveSpeedModification>ArrayElement()).Player == player)) {
+                MoveSpeed *= Modification.Value / 100;
+            }
+            SetMoveSpeed(player, MoveSpeed);
+        }
+        Wait(ServerLoad() / 255);
+    }
+}
+
+/* ======================================================== */

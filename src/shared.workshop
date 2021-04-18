@@ -1,3 +1,13 @@
+import '../../OSTWUtils/Miscellaneous.del';
+import '../../OSTWUtils/OnScreenText.del';
+import '../../OSTWUtils/EasingFunctions.del';
+
+/* ======================================================== */
+
+import 'utilities/CustomModifications.del';
+
+/* ======================================================== */
+
 import "heroes/all.del";
 import "heroes/baptiste.del";
 import "heroes/echo.del";

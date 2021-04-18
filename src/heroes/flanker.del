@@ -1,7 +1,10 @@
+playervar Number FlankerMoveSpeedID;
+
 void FlankerSetup(Hero hero) playervar '[flanker.del] Subroutine: Setup' {
     InitialHeroSetup(hero);
 
-    SetMoveSpeed(MoveSpeedPercent: 91.6666667 + 13.75);
+    CustomModifications.StartModifyingMoveSpeed(EventPlayer(), 91.7090909);
+    ModifyVariable(HeroMoveSpeedModifications, Operation.AppendToArray, MoveSpeedModification.LastMoveSpeedModificationID);
 
     async! FlankerCleanup(hero);
 }
@@ -9,7 +12,7 @@ void FlankerSetup(Hero hero) playervar '[flanker.del] Subroutine: Setup' {
 void FlankerCleanup(Hero hero) playervar '[flanker.del] Subroutine: Cleanup' {
     StoppedBeingHero();
 
-    if (ArrayContains(AllDamageHeroes(), HeroOf()) || ArrayContains(AllDamageHeroes(), HeroBeingDuplicated())) { SetMoveSpeed(MoveSpeedPercent: 115); } else { SetMoveSpeed(MoveSpeedPercent: 100); }
+    CleanupMoveSpeedMods();
 
     Wait();
 
