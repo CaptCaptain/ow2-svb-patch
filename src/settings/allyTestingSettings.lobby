@@ -8,11 +8,12 @@
   "Modes": {
     "Skirmish": {
       "Enabled Maps": [
-        "Workshop Island (Night)"
-      ]
+        "Workshop Chamber"
+      ],
+      "Respawn Time Scalar": 0
     }
   },
-  "Description": "OW2 SVB Changes",
+  "Description": "OW2 SVB Changes | Reinhardt Charge Code by Lotto | Hero Select by Josbird",
   "Extensions": {
     "Buff Status Effects": true,
     "Buff and Debuff Sounds": true,

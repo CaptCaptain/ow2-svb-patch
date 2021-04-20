@@ -1,6 +1,9 @@
 import '../../OSTWUtils/Miscellaneous.del';
 import '../../OSTWUtils/OnScreenText.del';
+import '../../OSTWUtils/Colors.del';
 import '../../OSTWUtils/EasingFunctions.del';
+import '../../OSTWUtils/ServerLoad.del';
+
 
 /* ======================================================== */
 
@@ -19,3 +22,4 @@ import "heroes/mercy.del";
 import "heroes/symmetra.del";
 import "heroes/flanker.del";
 import "heroes/sombra.del";
+import "heroes/lucio.del";

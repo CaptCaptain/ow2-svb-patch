@@ -48,6 +48,7 @@ rule: '[CustomModifications.del] Update Move Speed Modifications'
 {
     
     while (true) {
+        WaitUntil(CountOf(MoveSpeedModification.ActiveModifications) > 0, 9999);
         foreach (Player player in AllPlayers()) {
             Number MoveSpeed = 100;
             foreach (MoveSpeedModification Modification in FilteredArray(MoveSpeedModification.ActiveModifications, (<MoveSpeedModification>ArrayElement()).Player == player)) {
@@ -55,7 +56,7 @@ rule: '[CustomModifications.del] Update Move Speed Modifications'
             }
             SetMoveSpeed(player, MoveSpeed);
         }
-        Wait(ServerLoad() / 255);
+        Wait(Max(ServerLoadAverage() / 255, 0.25));
     }
 }
 

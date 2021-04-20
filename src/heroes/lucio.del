@@ -1,0 +1,151 @@
+playervar Number MoveSpeedPercents = [];
+playervar Number LucioMoveSpeedID;
+playervar Number MusicMeter = 0;
+playervar Number WallrideTimer = 0;
+
+/* ======================================================== */
+
+void CleanupLucio() playervar '[lucio.del] Subroutine: Cleanup' {
+    StoppedBeingHero();
+
+    CleanupTexts();
+    CleanupHealingMods();
+    CleanupEffects();
+    CleanupHealthPools();
+    CleanupMoveSpeedMods();
+    StopChasingVariable(MusicMeter);
+    MusicMeter = 0;
+
+    Wait();
+
+    ModifyVariable(HeroActive, Operation.RemoveFromArrayByValue, Hero.Lucio);
+}
+
+void InitialLucio() playervar '[lucio.del] Subroutine: Initial' {
+    InitialHeroSetup(Hero.Lucio);
+
+    MoveSpeedPercents = [];
+
+    # Healing mod
+    StartHealingModification(AllPlayers(TeamOf()), EventPlayer(), 100 + (IsUsingAbility2() ? (LinearInterpolate(5, 20, MusicMeter / 100)) : 0), HealingModificationRev.ReceiversHealersAndHealingPercent);
+    ModifyVariable(HeroHealingModifications, Operation.AppendToArray, LastHealingModificationID());
+
+    # Create Hud
+    CreateProgressBarHudText(
+        VisibleTo: EventPlayer(),
+        Value: MusicMeter,
+        Text: <"<0> Music Meter <0>", AbilityIconString(Hero.Lucio, Button.Ability1)>,
+        Location: Location.Top,
+        SortOrder: 1,
+        ProgressBarColor: Colors.Gradient(new ComponentColor(255, 0, 0), IsInAlternateForm(EventPlayer()) ? new ComponentColor(0, 255, 0) : new ComponentColor(255, 255, 0), MusicMeter / 100),
+        Reevaluation: ProgressBarEvaluation.VisibleToValuesAndColor
+    );
+    ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
+
+    CustomModifications.StartModifyingMoveSpeed(EventPlayer(), 100);
+    LucioMoveSpeedID = MoveSpeedModification.LastMoveSpeedModificationID;
+    ModifyVariable(HeroMoveSpeedModifications, Operation.AppendToArray, MoveSpeedModification.LastMoveSpeedModificationID);
+
+    # Chase wallride timer
+    ChaseVariableAtRate(WallrideTimer, EventPlayer().IsOnWall() ? 1 : 0, EventPlayer().IsOnWall() ? 100 : 1, RateChaseReevaluation.DestinationAndRate);
+
+    # Chase music meter
+    ChaseVariableAtRate(MusicMeter, EventPlayer().IsOnWall() || (EventPlayer().IsOnWall() && (IsUsingUltimate(EventPlayer()) || IsUsingAbility2())) ? 100 : 0, WallrideTimer > 0 && !EventPlayer().IsOnWall() ? 0 : 25, RateChaseReevaluation.DestinationAndRate);
+    /*
+    for (define slot = 0; slot < 5; slot++) {
+        HealingPercents[slot] = 1;
+        DegenerationEnabled[slot] = false;
+    }
+    for (define slot = 0; slot < 5; slot++)
+    {
+        StartHealingModification(PlayersInSlot(EvaluateOnce(slot), TeamOf()), EventPlayer(), HealingPercents[EvaluateOnce(slot)] * 100, HealingModificationRev.ReceiversHealersAndHealingPercent);
+        ModifyVariable(HeroHealingModifications, Operation.AppendToArray, LastHealingModificationID());
+
+        CreateInWorldText(!UsingForbiddenAbility(PlayersInSlot(EvaluateOnce(slot), TeamOf())) ? EventPlayer() : null, <"[<0><1>%]\n", AbilityIconString(Hero.Baptiste, Button.Ability1), HealingPercents[EvaluateOnce(slot)] * 100>, PlayersInSlot(EvaluateOnce(slot), TeamOf()), 1, Clipping.ClipAgainstSurfaces, InworldTextRev.VisibleToPositionAndString);
+        ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
+    }
+    DisallowButton(Button: Button.Ability2);
+    */
+
+    async! CleanupLucio();
+}
+
+void LucioSoundbarrier() playervar '[lucio.del] Subroutine: Soundbarrier' {
+    Number SoundbarrierCalculation = RoundToInteger((750 * (100 + (Max(10, Min(LinearInterpolate(10, 20, MusicMeter / 100), 20)))) / 100) - 750, Rounding.Nearest);
+    
+    WaitUntil(HealthOfType(EventPlayer(), HealthType.Shields) > 0 || !IsUsingUltimate(), 9999);
+    AbortIfConditionIsFalse();
+
+    foreach (Player player in PlayersWithinRadius(EventPlayer().Position(), 30, TeamOf(), RadiusLOS.Surfaces)) {
+        # Apply additional shields to all nearby teammates
+        AddHealthPoolToPlayer(EvaluateOnce(player), HealthType.Shields, SoundbarrierCalculation, false, true);
+        ModifyVariable(HeroHealthPools, Operation.AppendToArray, LastCreatedHealthPool());
+
+        CreateEffect(HealthOfType(EvaluateOnce(player), HealthType.Shields) > 0 ? AllPlayers() : null, Effect.LucioSoundBarrierProtectedEffect, <Color>TeamOf(), EvaluateOnce(player), 1, EffectRev.VisibleToPositionAndRadius);
+        ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+    }
+
+    Wait(6 + (SoundbarrierCalculation / 125));
+    CleanupHealthPools();
+    CleanupEffects();
+}
+
+void LucioSpeedBoost() playervar '[lucio.del] Subroutine: Soundbarrier' {
+    (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(LucioMoveSpeedID)).Value = 100 + LinearInterpolate(5, 20, MusicMeter / 100);
+    WaitUntil(!IsUsingAbility2(), 9999);
+    (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(LucioMoveSpeedID)).Value = 100;
+}
+
+/* ======================================================== */
+
+rule: '[lucio.del] Initial'
+Event.OngoingPlayer
+Player.Lucio
+{
+    InitialLucio();
+}
+
+rule: '[lucio.del] Soundbarrier'
+Event.OngoingPlayer
+Player.Lucio
+if (IsUsingUltimate())
+{
+    LucioSoundbarrier();
+}
+
+rule: '[lucio.del] Speedboost'
+Event.OngoingPlayer
+Player.Lucio
+if (IsUsingAbility2())
+{
+    LucioSpeedBoost();
+}
+
+/* ======================================================== */
+
+rule: '[lucio.del] Initial (Duplication)'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Lucio)
+{
+    InitialLucio();
+}
+
+rule: '[lucio.del] Soundbarrier (Duplication)'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Lucio)
+if (IsUsingUltimate())
+{
+    LucioSoundbarrier();
+}
+
+rule: '[lucio.del] Speedboost (Duplication)'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Lucio)
+if (IsUsingAbility2())
+if (!IsInAlternateForm())
+{
+    LucioSpeedBoost();
+}

@@ -17,26 +17,23 @@ void CleanupSymmetra() playervar "[symmetra.del] Subroutine: Cleanup" {
 }
 
 void CreateSymmetraBotEffects() playervar "[symmetra.del] Subroutine: Create Clone Effects" {
+    CreateEffect(AllPlayers(), Effect.EchoCloningEffect, <Color>TeamOf(), SymmetraBotPlayer, 1, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+
+    Wait(0.1);
+
+    CreateEffect(AllPlayers(), Effect.WinstonTeslaCannonTargetSound, <Color>TeamOf(), SymmetraBotPlayer, 700, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+
+    Wait(0.1);
+    
     for (define repeat = 0; 3; 1)
     {
         CreateEffect(AllPlayers(), Effect.BadAura, <Color>TeamOf(), SymmetraBotPlayer, 0, EffectRev.VisibleToPositionAndRadius);
         ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
-        WaitUntil(EntityExists(LastOf(HeroEffects)), 9999);
+        Wait(0.0833333333);
     }
-    
-    CreateEffect(AllPlayers(), Effect.BadAura, <Color>TeamOf(), SymmetraBotPlayer, 0, EffectRev.VisibleToPositionAndRadius);
-    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
-
-    WaitUntil(EntityExists(LastOf(HeroEffects)), 9999);
-
-    CreateEffect(AllPlayers(), Effect.EchoCloningEffect, <Color>TeamOf(), SymmetraBotPlayer, 1, EffectRev.VisibleToPositionAndRadius);
-    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
-
-    WaitUntil(EntityExists(LastOf(HeroEffects)), 9999);
-
-    CreateEffect(AllPlayers(), Effect.WinstonTeslaCannonTargetSound, <Color>TeamOf(), SymmetraBotPlayer, 700, EffectRev.VisibleToPositionAndRadius);
-    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 }
 
 void InitialSymmetra() playervar "[symmetra.del] Subroutine: Initial" {
@@ -59,6 +56,8 @@ void SymmetraLightCloneUlt() playervar "[symmetra.del] Subroutine: Ult" {
     CreateDummyBot(Hero.Symmetra, TeamOf(), Min(5, NumberOfLivingPlayers()), PositionOf(), FacingDirectionOf());
     SymmetraBotPlayer = LastCreatedEntity();
 
+    SetInvisible(SymmetraBotPlayer, InvisibleTo.All);
+
     WaitUntil(IsAlive(SymmetraBotPlayer), 9999);
     WaitUntil(HasSpawned(SymmetraBotPlayer), 9999);
     Wait();
@@ -66,6 +65,9 @@ void SymmetraLightCloneUlt() playervar "[symmetra.del] Subroutine: Ult" {
     StartForcingDummyBotName(SymmetraBotPlayer, <"Light Clone">);
     SetAmmo(SymmetraBotPlayer, 0, Ammo(Clip: 0));
     SetDamageDealt(SymmetraBotPlayer, 50);
+    Teleport(SymmetraBotPlayer, PositionOf());
+
+    Wait(0.08);
 
     # Create effects
     async! CreateSymmetraBotEffects();
@@ -74,6 +76,8 @@ void SymmetraLightCloneUlt() playervar "[symmetra.del] Subroutine: Ult" {
     PlayEffect(AllPlayers(), PlayEffect.RingExplosion, <Color>TeamOf(), PositionOf(SymmetraBotPlayer), 10);
     PlayEffect(AllPlayers(), PlayEffect.SombraTranslocatorDisappearSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
     PlayEffect(AllPlayers(), PlayEffect.DoomfistRisingUppercutImpactSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
+
+    SetInvisible(SymmetraBotPlayer, InvisibleTo.None);
 
     Communicate(EventPlayer(), Communication.Attacking);
 

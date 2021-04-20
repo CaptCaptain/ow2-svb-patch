@@ -51,6 +51,7 @@ void CleanupTexts() playervar '[all.del] Subroutine: Cleanup Texts' {
     foreach (Number textID in HeroTexts) {
         DestroyHudText(textID);
         DestroyInWorldText(textID);
+        DestroyProgressBarHudText(textID);
     }
 
     HeroTexts = [];
