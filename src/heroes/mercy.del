@@ -178,7 +178,7 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     DisallowButton(Player: AngelicBlessingTarget, Button: Button.Interact);
 
     # Wait until target chooses to fly to a target, after 6 seconds have elapsed, or if the target is using an ability that restricts their movement
-    WaitUntil((AngelicBlessingTarget.IsButtonHeld(Button.Interact) && GetAngelicBlessingFlyTarget()) || UsingForbiddenAbility(AngelicBlessingTarget) || HeroBeingDuplicated(AngelicBlessingTarget) != EvaluateOnce(HeroBeingDuplicated(AngelicBlessingTarget)), 6);
+    WaitUntil((AngelicBlessingTarget.IsButtonHeld(Button.Interact) && GetAngelicBlessingFlyTarget() && !UsingForbiddenAbility(AngelicBlessingTarget)) || HeroBeingDuplicated(AngelicBlessingTarget) != EvaluateOnce(HeroBeingDuplicated(AngelicBlessingTarget)), 6);
 
     AngelicBlessingFlyTarget = GetAngelicBlessingFlyTarget();
     
@@ -193,12 +193,15 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
         PlayEffect(AllPlayers(), PlayEffect.BuffExplosionSound, Color.White, AngelicBlessingPosition, 100);
         SetGravity(AngelicBlessingTarget, 0);
         SetJumpVerticalSpeed(AngelicBlessingTarget, 0);
+        SetStatus(AngelicBlessingTarget, null, Status.Rooted, 9999);
 
-        while (DistanceBetween(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position()) > 2 && !UsingForbiddenAbility(AngelicBlessingTarget) && !AngelicBlessingTarget.IsButtonHeld(Button.Jump)) {
+        Vector Position = CenterPosition(AngelicBlessingFlyTarget);
+
+        while (DistanceBetween(AngelicBlessingTarget.Position(), Position) > 2 && !UsingForbiddenAbility(AngelicBlessingTarget) && !AngelicBlessingTarget.IsButtonHeld(Button.Jump) && IsInLineOfSight(AngelicBlessingTarget, EvaluateOnce(AngelicBlessingFlyTarget.Position()))) {
             # Impulse loop while the player isn't close to the fly target, isn't using any ability that restricts their movement, or hasn't jumped.
             ApplyImpulse(
                 Player: AngelicBlessingTarget,
-                Direction: DirectionTowards(CenterPosition(AngelicBlessingTarget), CenterPosition(AngelicBlessingFlyTarget)),
+                Direction: DirectionTowards(CenterPosition(AngelicBlessingTarget), Position),
                 Speed: 17 * EasingFunctions.EaseOutQuint(Min(15, DistanceBetween(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position())) / 15),
                 Motion: ContraryMotion.CancelXYZ
             );
@@ -217,10 +220,15 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
         SetGravity(AngelicBlessingTarget, 100);
         SetJumpVerticalSpeed(AngelicBlessingTarget, 100);
         AllowButton(Player: AngelicBlessingTarget, Button: Button.Interact);
+        ClearStatus(AngelicBlessingTarget, Status.Rooted);
         Wait(1);
     }
 
     # Cleanup
+    SetGravity(AngelicBlessingTarget, 100);
+    SetJumpVerticalSpeed(AngelicBlessingTarget, 100);
+    AllowButton(Player: AngelicBlessingTarget, Button: Button.Interact);
+    ClearStatus(AngelicBlessingTarget, Status.Rooted);
     AngelicBlessingTarget = null;
     AngelicBlessingFlyTarget = null;
     StopForcingPlayerOutlines(AllPlayers(), AngelicBlessingTarget);

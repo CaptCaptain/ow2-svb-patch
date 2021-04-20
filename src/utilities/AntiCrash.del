@@ -1,0 +1,19 @@
+globalvar Boolean antiCrashActivated = false;
+
+rule: "[AntiCrash.del] Enable"
+if (antiCrashActivated == false)
+if (ServerLoad() > 200)
+{
+    Wait(1, WaitBehavior.AbortWhenFalse);
+    SmallMessage(AllPlayers(), <"<0> SERVER IS EXPERIENCING HIGH LOAD <0>", IconString(Icon.Warning)>);
+    SetSlowMotion(10);
+    antiCrashActivated = true;
+}
+
+rule: "[AntiCrash.del] Disable"
+if (antiCrashActivated == true)
+if (ServerLoad() < 175)
+{
+    SetSlowMotion(100);
+    antiCrashActivated = false;
+}

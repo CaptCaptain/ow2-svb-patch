@@ -15,7 +15,14 @@ Vector CenterPosition(Player player = EventPlayer()): (player.EyePosition() + pl
 
 Boolean StoppedBeingHero(Player player = EventPlayer()): WaitUntil(HeroOf(player) != EvaluateOnce(HeroOf(player)) || HeroBeingDuplicated(player) != EvaluateOnce(HeroBeingDuplicated(player)), 9999);
 
-Boolean UsingForbiddenAbility(Player player = EventPlayer()): ((IsHero(Hero.Doomfist, player) || IsHero(Hero.Dva, player) || IsHero(Hero.Pharah)) && IsUsingUltimate(player));
+Hero ForbiddenUltimateHeroes: [Hero.Doomfist, Hero.Dva, Hero.Pharah, Hero.Pharah, Hero.Junkrat];
+Hero ForbiddenAbility1Heroes: [Hero.Reinhardt, Hero.Tracer, Hero.Sombra];
+Hero ForbiddenAbility2Heroes: [Hero.Tracer];
+Boolean UsingForbiddenAbility(Player player = EventPlayer()): (
+    ((ArrayContains(ForbiddenUltimateHeroes, HeroOf(player)) || ArrayContains(ForbiddenUltimateHeroes, HeroBeingDuplicated(player))) && IsUsingUltimate(player)) ||
+    ((ArrayContains(ForbiddenAbility1Heroes, HeroOf(player)) || ArrayContains(ForbiddenUltimateHeroes, HeroBeingDuplicated(player))) && IsUsingAbility1(player)) ||
+    ((ArrayContains(ForbiddenAbility2Heroes, HeroOf(player)) || ArrayContains(ForbiddenUltimateHeroes, HeroBeingDuplicated(player))) && IsUsingAbility2(player))
+);
 
 Boolean UsingExistingAbility(Player player = EventPlayer()): ((IsHero(Hero.Torbjorn, player) || IsHero(Hero.Sombra, player)) && IsUsingAbility2());
 

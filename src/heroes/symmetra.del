@@ -190,7 +190,7 @@ void UpdateSymmetraAI() playervar "[symmetra.del] Subroutine: Update Symmetra AI
                 StopHoldingButton(SymmetraBotPlayer, Button.Interact);
             break;
         }
-        Wait();
+        Wait(Max(Min(ServerLoad() / 255, 0.1), 0.08));
     }
 }
 
