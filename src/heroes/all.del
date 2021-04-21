@@ -16,7 +16,7 @@ Vector CenterPosition(Player player = EventPlayer()): (player.EyePosition() + pl
 Boolean StoppedBeingHero(Player player = EventPlayer()): WaitUntil(HeroOf(player) != EvaluateOnce(HeroOf(player)) || HeroBeingDuplicated(player) != EvaluateOnce(HeroBeingDuplicated(player)), 9999);
 
 Hero ForbiddenUltimateHeroes: [Hero.Doomfist, Hero.Dva, Hero.Pharah, Hero.Pharah, Hero.Junkrat];
-Hero ForbiddenAbility1Heroes: [Hero.Reinhardt, Hero.Tracer, Hero.Sombra];
+Hero ForbiddenAbility1Heroes: [Hero.Reinhardt, Hero.Tracer];
 Hero ForbiddenAbility2Heroes: [Hero.Tracer];
 Boolean UsingForbiddenAbility(Player player = EventPlayer()): (
     ((ArrayContains(ForbiddenUltimateHeroes, HeroOf(player)) || ArrayContains(ForbiddenUltimateHeroes, HeroBeingDuplicated(player))) && IsUsingUltimate(player)) ||
@@ -26,7 +26,7 @@ Boolean UsingForbiddenAbility(Player player = EventPlayer()): (
 
 Boolean UsingExistingAbility(Player player = EventPlayer()): ((IsHero(Hero.Torbjorn, player) || IsHero(Hero.Sombra, player)) && IsUsingAbility2());
 
-Player GetPlayerTarget(Player player = EventPlayer(), Team team = TeamOf(), RadiusLOS radiusLOS = RadiusLOS.Off, Number angle, Number radius): SortedArray(FilteredArray(PlayersWithinRadius(EyePosition(player), radius, team, radiusLOS).Remove(player).Remove(AllDeadPlayers()), IsInViewAngle(player, ArrayElement(), angle) && !UsingForbiddenAbility(ArrayElement())), AngleBetweenVectors(FacingDirectionOf(player), DirectionTowards(player.EyePosition(), (<Player>ArrayElement()).EyePosition())) + DistanceBetween(player.EyePosition(), (<Player>ArrayElement()).EyePosition())).First;
+Player GetPlayerTarget(Player player = EventPlayer(), Team team = TeamOf(), RadiusLOS radiusLOS = RadiusLOS.Off, Number angle, Number radius): SortedArray(FilteredArray(PlayersWithinRadius(EyePosition(player), radius, team, radiusLOS).Remove(player).Remove(AllDeadPlayers()), IsInViewAngle(player, ArrayElement(), angle) && !(HeroOf(player) == Hero.Sombra && IsUsingAbility1()) && !UsingForbiddenAbility(ArrayElement())), AngleBetweenVectors(FacingDirectionOf(player), DirectionTowards(player.EyePosition(), (<Player>ArrayElement()).EyePosition())) + DistanceBetween(player.EyePosition(), (<Player>ArrayElement()).EyePosition())).First;
 
 void InitialHeroSetup(in Hero hero) {
     WaitUntil(CountOf(HeroActive) == 0, 9999);

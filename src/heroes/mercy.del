@@ -128,7 +128,7 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     # Angelic Blessing Target
     CreateInWorldText(
         VisibleTo: AllPlayers(),
-        Header: <"<0><1>", AbilityIconString(Hero.Mercy, Button.Ability1), StringSlice("\n\n", 0, IsHero(Hero.Mercy, LocalPlayer()) && AngelicBlessingTarget.Team() == LocalPlayer().Team() ? 2 : 1)>,
+        Header: <"<0><1>", AbilityIconString(Hero.Mercy, Button.Ability1), StringSlice("\n\n", 0, IsHero(Hero.Mercy, LocalPlayer()) && AngelicBlessingTarget.Team() == LocalPlayer().Team() ? 2 : 0)>,
         Position: AngelicBlessingTarget,
         Scale: 1.5,
         Clipping: Clipping.ClipAgainstSurfaces,
@@ -153,14 +153,18 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
 
     AngelicBlessings.ModAppend(AngelicBlessingTarget);
 
+    # Universal Effects
+    CreateEffect(AngelicBlessingTarget, Effect.HealTargetEffect, <Color>TeamOf(AngelicBlessingTarget), AngelicBlessingTarget, 1, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+
     # Team Effects
-    CreateEffect(AllPlayers(), Effect.HealTargetEffect, <Color>TeamOf(), AngelicBlessingTarget, 1, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(TeamOf()), Effect.Sparkles, Color.Yellow, AngelicBlessingTarget, 1.5, EffectRev.VisibleToPositionAndRadius);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
     PlayEffect(AllPlayers(TeamOf()), PlayEffect.GoodExplosion, Color.Yellow, AngelicBlessingPosition, 1);
 
     # Enemy Effects
-    CreateEffect(AllPlayers(), Effect.HealTargetEffect, <Color>OppositeTeamOf(TeamOf()),AngelicBlessingTarget, 1, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(OppositeTeamOf(TeamOf())), Effect.Sparkles, Color.Orange, AngelicBlessingTarget, 1.5, EffectRev.VisibleToPositionAndRadius);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
     PlayEffect(AllPlayers(OppositeTeamOf(TeamOf())), PlayEffect.GoodExplosion, Color.Orange, AngelicBlessingPosition, 1);
@@ -180,6 +184,7 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     # Wait until target chooses to fly to a target, after 6 seconds have elapsed, or if the target is using an ability that restricts their movement
     WaitUntil((AngelicBlessingTarget.IsButtonHeld(Button.Interact) && GetAngelicBlessingFlyTarget() && !UsingForbiddenAbility(AngelicBlessingTarget)) || HeroBeingDuplicated(AngelicBlessingTarget) != EvaluateOnce(HeroBeingDuplicated(AngelicBlessingTarget)), 6);
 
+    Boolean Superjumping = IsCrouching(AngelicBlessingTarget) ? true : false;
     AngelicBlessingFlyTarget = GetAngelicBlessingFlyTarget();
     
     # Cleanup
@@ -189,39 +194,105 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     CleanupEffects();
 
     # If there is a valid fly target and the player isn't using an ability that restricts their movement, we GA
-    if (AngelicBlessingTarget.IsButtonHeld(Button.Interact) && AngelicBlessingFlyTarget && !UsingForbiddenAbility(AngelicBlessingTarget)) {
+    if (
+        AngelicBlessingTarget.IsButtonHeld(Button.Interact) &&
+        AngelicBlessingFlyTarget &&
+        !UsingForbiddenAbility(AngelicBlessingTarget)
+    )
+    {
         PlayEffect(AllPlayers(), PlayEffect.BuffExplosionSound, Color.White, AngelicBlessingPosition, 100);
         SetGravity(AngelicBlessingTarget, 0);
         SetJumpVerticalSpeed(AngelicBlessingTarget, 0);
         SetStatus(AngelicBlessingTarget, null, Status.Rooted, 9999);
 
-        Vector Position = CenterPosition(AngelicBlessingFlyTarget);
+        Vector Direction = DirectionTowards(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position());
 
-        while (DistanceBetween(AngelicBlessingTarget.Position(), Position) > 2 && !UsingForbiddenAbility(AngelicBlessingTarget) && !AngelicBlessingTarget.IsButtonHeld(Button.Jump) && IsInLineOfSight(AngelicBlessingTarget, EvaluateOnce(AngelicBlessingFlyTarget.Position()))) {
+        # Cancel any movement the player has
+        ApplyImpulse(
+            Player: AngelicBlessingTarget,
+            Direction: VelocityOf(AngelicBlessingTarget),
+            Speed: -HorizontalSpeedOf(AngelicBlessingTarget),
+            Motion: ContraryMotion.Incorporate
+        );
+
+        # If the player is not superjumping or on the ground, we lift them up slightly to simulate GA
+        SkipIf(IsInAir(AngelicBlessingTarget) || Superjumping, 1);
+        ApplyImpulse(
+            Player: AngelicBlessingTarget,
+            Direction: Up(),
+            Speed: 1,
+            Motion: ContraryMotion.Incorporate
+        );
+
+        # If the player is superjumping or in the air, we push them down slightly to simulate GA
+        SkipIf(IsInAir(AngelicBlessingTarget) || !Superjumping, 1);
+        ApplyImpulse(
+            Player: AngelicBlessingTarget,
+            Direction: Down(),
+            Speed: 1,
+            Motion: ContraryMotion.Incorporate
+        );
+
+        Wait();
+
+        while (
+            DistanceBetween(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position()) > 2 &&
+            !UsingForbiddenAbility(AngelicBlessingTarget)
+        ) 
+        {
             # Impulse loop while the player isn't close to the fly target, isn't using any ability that restricts their movement, or hasn't jumped.
             ApplyImpulse(
                 Player: AngelicBlessingTarget,
-                Direction: DirectionTowards(CenterPosition(AngelicBlessingTarget), Position),
-                Speed: 17 * EasingFunctions.EaseOutQuint(Min(15, DistanceBetween(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position())) / 15),
+                Direction: Direction,
+                Speed: LinearInterpolate(0, 17, Min(1, DistanceBetween(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position()) / 10)),
                 Motion: ContraryMotion.CancelXYZ
             );
-            Wait();
-        }
-        if (AngelicBlessingTarget.IsButtonHeld(Button.Jump)) {
-            # If the player jumps at any point during the GA, retain momentum and send them forward
+            # This impulse allows us to slow down the player as they approach their target to simulate GA
             ApplyImpulse(
                 Player: AngelicBlessingTarget,
-                Direction: DirectionTowards(CenterPosition(AngelicBlessingTarget), CenterPosition(AngelicBlessingFlyTarget)),
-                Speed: 8.5 * EasingFunctions.EaseOutQuint(Min(15, DistanceBetween(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position())) / 15),
+                Direction: Direction,
+                Speed: -1 * LinearInterpolate(17, 0, Min(1, DistanceBetween(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position()) / 10)),
                 Motion: ContraryMotion.Incorporate
             );
-        }
 
-        SetGravity(AngelicBlessingTarget, 100);
-        SetJumpVerticalSpeed(AngelicBlessingTarget, 100);
-        AllowButton(Player: AngelicBlessingTarget, Button: Button.Interact);
-        ClearStatus(AngelicBlessingTarget, Status.Rooted);
-        Wait(1);
+            # If the player is within range of superjumping and jumps, we launch them up
+            if (AngelicBlessingTarget.IsButtonHeld(Button.Jump) && DistanceBetween(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position()) < 4 && Superjumping) {
+                ApplyImpulse(
+                    Player: AngelicBlessingTarget,
+                    Direction: Up(),
+                    Speed: 8.5,
+                    Motion: ContraryMotion.Incorporate
+                );
+            }
+
+            # If the player jumps at any point during the GA, retain momentum and send them forward
+            if (AngelicBlessingTarget.IsButtonHeld(Button.Jump)) {
+                ApplyImpulse(
+                    Player: AngelicBlessingTarget,
+                    Direction: Direction + (Up() / 4),
+                    Speed: 17,
+                    Motion: ContraryMotion.Incorporate
+                );
+
+                break;
+            }
+
+            # If there is no line of sight or the player flies past the target, break the loop
+            if (TotalTimeElapsed() % 1 <= 0.08)
+            {
+                if (
+                    !IsInLineOfSight(
+                        AngelicBlessingTarget.EyePosition(), 
+                        AngelicBlessingTarget.EyePosition() + DirectionTowards(AngelicBlessingTarget.Position(), EvaluateOnce(AngelicBlessingFlyTarget.Position()))
+                    ) ||
+                    DotProduct(Direction, DirectionTowards(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position())) < 0
+                ) {
+                    break;
+                }
+            }
+
+            Wait(0.08);
+        }
     }
 
     # Cleanup

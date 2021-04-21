@@ -17,6 +17,8 @@ void CleanupSymmetra() playervar "[symmetra.del] Subroutine: Cleanup" {
 }
 
 void CreateSymmetraBotEffects() playervar "[symmetra.del] Subroutine: Create Clone Effects" {
+    Wait(0.1);
+    
     CreateEffect(AllPlayers(), Effect.EchoCloningEffect, <Color>TeamOf(), SymmetraBotPlayer, 1, EffectRev.VisibleToPositionAndRadius);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
