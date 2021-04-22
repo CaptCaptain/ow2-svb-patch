@@ -153,10 +153,6 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
 
     AngelicBlessings.ModAppend(AngelicBlessingTarget);
 
-    # Universal Effects
-    CreateEffect(AngelicBlessingTarget, Effect.HealTargetEffect, <Color>TeamOf(AngelicBlessingTarget), AngelicBlessingTarget, 1, EffectRev.VisibleToPositionAndRadius);
-    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
-
     # Team Effects
     CreateEffect(AllPlayers(TeamOf()), Effect.Sparkles, Color.Yellow, AngelicBlessingTarget, 1.5, EffectRev.VisibleToPositionAndRadius);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
@@ -170,7 +166,7 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     PlayEffect(AllPlayers(OppositeTeamOf(TeamOf())), PlayEffect.GoodExplosion, Color.Orange, AngelicBlessingPosition, 1);
 
     # Effects
-    CreateEffect(AllPlayers(), Effect.Soldier76SprintingEffect, Color.White, AngelicBlessingTarget, 1, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AngelicBlessingTarget, Effect.HealTargetEffect, <Color>TeamOf(AngelicBlessingTarget), AngelicBlessingTarget, 1, EffectRev.VisibleToPositionAndRadius);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
     PlayEffect(AllPlayers(), PlayEffect.BuffExplosionSound, Color.White, AngelicBlessingPosition, 100);
@@ -192,6 +188,10 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     DestroyInWorldText(AngelicBlessingTextID);
     StopForcingPlayerOutlines(AllPlayers(), AngelicBlessingTarget);
     CleanupEffects();
+
+    # Effects
+    CreateEffect(AllPlayers(), Effect.Soldier76SprintingEffect, Color.White, AngelicBlessingTarget, 1, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
     # If there is a valid fly target and the player isn't using an ability that restricts their movement, we GA
     if (
@@ -270,7 +270,7 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
                 ApplyImpulse(
                     Player: AngelicBlessingTarget,
                     Direction: Direction + (Up() / 4),
-                    Speed: 17,
+                    Speed: 24,
                     Motion: ContraryMotion.Incorporate
                 );
 
@@ -304,6 +304,7 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     AngelicBlessingFlyTarget = null;
     StopForcingPlayerOutlines(AllPlayers(), AngelicBlessingTarget);
     ModifyVariable(HeroTexts, Operation.RemoveFromArrayByValue, AngelicBlessingTextID);
+    CleanupEffects();
 }
 
 void MercyAngelicBlessingOutline() playervar '[mercy.del] Subroutine: Update Mercy Angelic Blessing Player Target Outline' {

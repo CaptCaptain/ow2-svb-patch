@@ -3,6 +3,7 @@ playervar Number FlankerMoveSpeedID;
 void FlankerSetup(Hero hero) playervar '[flanker.del] Subroutine: Setup' {
     InitialHeroSetup(hero);
 
+    # Setup move speed modification
     CustomModifications.StartModifyingMoveSpeed(EventPlayer(), 91.7090909);
     ModifyVariable(HeroMoveSpeedModifications, Operation.AppendToArray, MoveSpeedModification.LastMoveSpeedModificationID);
 

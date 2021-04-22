@@ -1,0 +1,44 @@
+void CleanupMccree() playervar "[mccree.del] Subroutine: Cleanup" {
+    StoppedBeingHero();
+
+    SetMaxHealth(HealthPercent: 100);
+
+    Wait();
+
+    ModifyVariable(HeroActive, Operation.RemoveFromArrayByValue, Hero.Mccree);
+}
+
+void InitialMccree() playervar "[mccree.del] Subroutine: Initial" {
+    InitialHeroSetup(Hero.Mccree);
+
+    # Character setup
+    SetMaxHealth(HealthPercent: 88.88888889);
+    
+    /*
+    for (define slot = 0; 5; 1)
+    {
+        StartDamageModification(PlayersInSlot(EvaluateOnce(slot), OppositeTeamOf(TeamOf())), EventPlayer(), 0.8 * LinearInterpolate(20, 40), DamageModificationRev.ReceiversDamagersAndDamagePercent);
+        ModifyVariable(HeroDamageModifications, Operation.AppendToArray, LastDamageModificationID());
+    }*/
+
+    async! CleanupMccree();
+}
+
+/* ================================================== */
+
+rule: '[mccree.del] Initial'
+Event.OngoingPlayer
+Player.Mccree
+{
+    InitialMccree();
+}
+
+/* ================================================== */
+
+rule: '[mccree.del] Initial (Duplication)'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Mccree)
+{
+    InitialMccree();
+}

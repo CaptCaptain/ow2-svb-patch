@@ -61,6 +61,7 @@ void BaptisteCastIF() playervar '[baptiste.del] Subroutine: Cast Immortality Fie
     CreateEffect(EventPlayer(), Effect.GoodAuraSound, <Color>TeamOf(), EventPlayer(), 700, EffectRev.VisibleToPositionAndRadius);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
+    # Casting
     async! SlowdownBaptiste();
 
     Communicate(EventPlayer(), Communication.WithYou);
@@ -74,6 +75,7 @@ void BaptisteCastIF() playervar '[baptiste.del] Subroutine: Cast Immortality Fie
         DisallowButton(Button: Button.Ability2);
     }
 
+    # CLeanup
     CleanupEffects();
 
     async! ReturnBaptisteToNormalSpeed();
@@ -85,12 +87,15 @@ void BaptisteCastIF() playervar '[baptiste.del] Subroutine: Cast Immortality Fie
 void InitialBaptiste() playervar "[baptiste.del] Subroutine: Initial" {
     InitialHeroSetup(Hero.Baptiste);
 
+    # Setup move speed modification
     CustomModifications.StartModifyingMoveSpeed(EventPlayer(), 100);
     BaptisteMoveSpeedID = MoveSpeedModification.LastMoveSpeedModificationID;
     ModifyVariable(HeroMoveSpeedModifications, Operation.AppendToArray, MoveSpeedModification.LastMoveSpeedModificationID);
 
+    # Healing modification to self
     StartHealingModification(EventPlayer(), EventPlayer(), 50, HealingModificationRev.ReceiversAndHealers);
     ModifyVariable(HeroHealingModifications, Operation.AppendToArray, LastHealingModificationID());
+    
     DisallowButton(Button: Button.Ability2);
 
     async! CleanupBaptiste();

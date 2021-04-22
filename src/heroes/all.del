@@ -26,13 +26,53 @@ Boolean UsingForbiddenAbility(Player player = EventPlayer()): (
 
 Boolean UsingExistingAbility(Player player = EventPlayer()): ((IsHero(Hero.Torbjorn, player) || IsHero(Hero.Sombra, player)) && IsUsingAbility2());
 
-Player GetPlayerTarget(Player player = EventPlayer(), Team team = TeamOf(), RadiusLOS radiusLOS = RadiusLOS.Off, Number angle, Number radius): SortedArray(FilteredArray(PlayersWithinRadius(EyePosition(player), radius, team, radiusLOS).Remove(player).Remove(AllDeadPlayers()), IsInViewAngle(player, ArrayElement(), angle) && !(HeroOf(player) == Hero.Sombra && IsUsingAbility1()) && !UsingForbiddenAbility(ArrayElement())), AngleBetweenVectors(FacingDirectionOf(player), DirectionTowards(player.EyePosition(), (<Player>ArrayElement()).EyePosition())) + DistanceBetween(player.EyePosition(), (<Player>ArrayElement()).EyePosition())).First;
+Player GetPlayerTarget(Player player = EventPlayer(), Team team = TeamOf(), RadiusLOS radiusLOS = RadiusLOS.Off, Number angle, Number radius):
+SortedArray(
+    FilteredArray(
+            PlayersWithinRadius(EyePosition(player), radius, team, radiusLOS).Remove(player).Remove(AllDeadPlayers()),
+            IsInViewAngle(player, ArrayElement(), angle) &&
+            !(HeroOf(player) == Hero.Sombra && IsUsingAbility1()) &&
+            !UsingForbiddenAbility(ArrayElement())
+        ),
+        AngleBetweenVectors(FacingDirectionOf(player), DirectionTowards(player.EyePosition(), (<Player>ArrayElement()).EyePosition())) + DistanceBetween(player.EyePosition(), (<Player>ArrayElement()).EyePosition())
+).First;
 
 void InitialHeroSetup(in Hero hero) {
     WaitUntil(CountOf(HeroActive) == 0, 9999);
     AbortIf(ArrayContains(HeroActive, hero));
     Wait();
     ModifyVariable(HeroActive, Operation.AppendToArray, hero);
+}
+
+void CleanupEverything() '[all.del] Subroutine: Cleanup Everything' {
+    StoppedBeingHero();
+
+    SetMaxHealth(HealthPercent: 100);
+
+    AllowButton(Button: Button.Ability1);
+    AllowButton(Button: Button.Ability2);
+    AllowButton(Button: Button.Crouch);
+    AllowButton(Button: Button.Interact);
+    AllowButton(Button: Button.Jump);
+    AllowButton(Button: Button.Melee);
+    AllowButton(Button: Button.PrimaryFire);
+    AllowButton(Button: Button.Reload);
+    AllowButton(Button: Button.SecondaryFire);
+    AllowButton(Button: Button.Ultimate);
+
+    SetAbility1Enabled(Enabled: true);
+    SetAbility2Enabled(Enabled: true);
+    
+    CleanupEffects();
+    CleanupHealthPools();
+    CleanupTexts();
+    CleanupDamageMods();
+    CleanupHealingMods();
+    CleanupMoveSpeedMods();
+
+    Wait();
+
+    ModifyVariable(HeroActive, Operation.RemoveFromArrayByValue, HeroActive[0]);
 }
 
 void CleanupEffects() playervar '[all.del] Subroutine: Cleanup Effects' {

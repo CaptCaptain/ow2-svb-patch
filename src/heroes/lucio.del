@@ -14,6 +14,8 @@ void CleanupLucio() playervar '[lucio.del] Subroutine: Cleanup' {
     CleanupHealthPools();
     CleanupMoveSpeedMods();
     StopChasingVariable(MusicMeter);
+    StopChasingVariable(WallrideTimer);
+    WallrideTimer = 0;
     MusicMeter = 0;
 
     Wait();
@@ -90,7 +92,8 @@ void LucioSoundbarrier() playervar '[lucio.del] Subroutine: Soundbarrier' {
     CleanupEffects();
 }
 
-void LucioSpeedBoost() playervar '[lucio.del] Subroutine: Soundbarrier' {
+void LucioSpeedBoost() playervar '[lucio.del] Subroutine: Speedboost' {
+    # Boost speed based on the music meter charge
     (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(LucioMoveSpeedID)).Value = 100 + LinearInterpolate(5, 20, MusicMeter / 100);
     WaitUntil(!IsUsingAbility2(), 9999);
     (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(LucioMoveSpeedID)).Value = 100;
