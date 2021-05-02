@@ -33,7 +33,7 @@ void InitialReinhardt() playervar '[reinhardt.del] Subroutine: Initial' {
     SetMaxHealth(EventPlayer(), 50);
     AddHealthPoolToPlayer(EventPlayer(), HealthType.Health, 150, true, true);
     ModifyVariable(HeroHealthPools, Operation.AppendToArray, LastCreatedHealthPool());
-    AddHealthPoolToPlayer(EventPlayer(), HealthType.Armor, 125, true, true);
+    AddHealthPoolToPlayer(EventPlayer(), HealthType.Armor, 150, true, true);
     ModifyVariable(HeroHealthPools, Operation.AppendToArray, LastCreatedHealthPool());
 
     // Create hud text

@@ -1,5 +1,3 @@
-playervar Number MoveSpeedPercents = [];
-playervar Number LucioMoveSpeedID;
 playervar Number MusicMeter = 0;
 playervar Number WallrideTimer = 0;
 
@@ -26,8 +24,6 @@ void CleanupLucio() playervar '[lucio.del] Subroutine: Cleanup' {
 void InitialLucio() playervar '[lucio.del] Subroutine: Initial' {
     InitialHeroSetup(Hero.Lucio);
 
-    MoveSpeedPercents = [];
-
     # Healing mod
     StartHealingModification(AllPlayers(TeamOf()), EventPlayer(), 100 + (IsUsingAbility2() ? (LinearInterpolate(5, 20, MusicMeter / 100)) : 0), HealingModificationRev.ReceiversHealersAndHealingPercent);
     ModifyVariable(HeroHealingModifications, Operation.AppendToArray, LastHealingModificationID());
@@ -44,30 +40,19 @@ void InitialLucio() playervar '[lucio.del] Subroutine: Initial' {
     );
     ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
 
-    CustomModifications.StartModifyingMoveSpeed(EventPlayer(), 100);
-    LucioMoveSpeedID = MoveSpeedModification.LastMoveSpeedModificationID;
-    ModifyVariable(HeroMoveSpeedModifications, Operation.AppendToArray, MoveSpeedModification.LastMoveSpeedModificationID);
-
     # Chase wallride timer
     ChaseVariableAtRate(WallrideTimer, EventPlayer().IsOnWall() ? 1 : 0, EventPlayer().IsOnWall() ? 100 : 1, RateChaseReevaluation.DestinationAndRate);
 
     # Chase music meter
     ChaseVariableAtRate(MusicMeter, EventPlayer().IsOnWall() || (EventPlayer().IsOnWall() && (IsUsingUltimate(EventPlayer()) || IsUsingAbility2())) ? 100 : 0, WallrideTimer > 0 && !EventPlayer().IsOnWall() ? 0 : 25, RateChaseReevaluation.DestinationAndRate);
-    /*
-    for (define slot = 0; slot < 5; slot++) {
-        HealingPercents[slot] = 1;
-        DegenerationEnabled[slot] = false;
-    }
+
     for (define slot = 0; slot < 5; slot++)
     {
-        StartHealingModification(PlayersInSlot(EvaluateOnce(slot), TeamOf()), EventPlayer(), HealingPercents[EvaluateOnce(slot)] * 100, HealingModificationRev.ReceiversHealersAndHealingPercent);
-        ModifyVariable(HeroHealingModifications, Operation.AppendToArray, LastHealingModificationID());
-
-        CreateInWorldText(!UsingForbiddenAbility(PlayersInSlot(EvaluateOnce(slot), TeamOf())) ? EventPlayer() : null, <"[<0><1>%]\n", AbilityIconString(Hero.Baptiste, Button.Ability1), HealingPercents[EvaluateOnce(slot)] * 100>, PlayersInSlot(EvaluateOnce(slot), TeamOf()), 1, Clipping.ClipAgainstSurfaces, InworldTextRev.VisibleToPositionAndString);
-        ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
+        # Setup speed modifications
+        CustomModifications.StartModifyingMoveSpeed(PlayersInSlot(EvaluateOnce(slot), TeamOf()), 100);
+        ModifyVariable(HeroMoveSpeedModifications, Operation.AppendToArray, MoveSpeedModification.LastMoveSpeedModificationID);
+        Wait();
     }
-    DisallowButton(Button: Button.Ability2);
-    */
 
     async! CleanupLucio();
 }
@@ -93,10 +78,21 @@ void LucioSoundbarrier() playervar '[lucio.del] Subroutine: Soundbarrier' {
 }
 
 void LucioSpeedBoost() playervar '[lucio.del] Subroutine: Speedboost' {
-    # Boost speed based on the music meter charge
-    (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(LucioMoveSpeedID)).Value = 100 + LinearInterpolate(5, 20, MusicMeter / 100);
-    WaitUntil(!IsUsingAbility2(), 9999);
-    (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(LucioMoveSpeedID)).Value = 100;
+    while (IsUsingAbility2()) {
+        foreach (Number MoveSpeedID in HeroMoveSpeedModifications) {
+            # Boost speed based on the music meter charge
+
+            if (DistanceBetween(<Player>(<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(MoveSpeedID).Player), EventPlayer().Position()) < 12) {
+                (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(MoveSpeedID)).Value = 100 + LinearInterpolate(5, 20, MusicMeter / 100);
+            } else {
+                (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(MoveSpeedID)).Value = 100;
+            }
+        }
+        Wait(1);
+    }
+    foreach (Number MoveSpeedID in HeroMoveSpeedModifications) {
+        (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(MoveSpeedID)).Value = 100;
+    }
 }
 
 /* ======================================================== */

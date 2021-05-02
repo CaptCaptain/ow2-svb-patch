@@ -1,7 +1,25 @@
-rule: '[echo.del] Not At Full Health Fix'
+playervar Number EchoLastHealth = 200;
+
+rule: '[echo.del] Save Last Health'
+Event.OngoingPlayer
+Player.Echo
+if (EventPlayer().IsButtonHeld(Button.PrimaryFire) || EventPlayer().IsButtonHeld(Button.Ultimate))
+{
+    AbortIf(IsDuplicating());
+    EchoLastHealth = EventPlayer().Health();
+}
+
+rule: '[echo.del] Max Health Fix'
 Event.OngoingPlayer
 Player.Echo
 {
-    # Because some heroes change their max health, Echo will start at a lower health once she stops duplicating, so we have to heal her back to full health.
-    StartHealOverTime(EventPlayer(), null, 1, 200);
+    # Some heroes change their max health and add health pools, there is currently a bug where normal health pools get affected, so this attempts to fix that.
+    AbortIf(IsDuplicating());
+    Resurrect(EventPlayer());
+    Wait(0.016);
+    EventPlayer().SetMaxHealth(0);
+    Wait(0.016);
+    EventPlayer().SetMaxHealth(100);
+    Wait(0.016);
+    Heal(EventPlayer(), null, Max(100, EchoLastHealth) - EventPlayer().Health());
 }

@@ -55,8 +55,9 @@ rule: '[CustomModifications.del] Update Move Speed Modifications'
                 MoveSpeed *= Modification.Value / 100;
             }
             SetMoveSpeed(player, MoveSpeed);
+            Wait();
         }
-        Wait(Max(ServerLoadAverage() / 255, 0.25));
+        Wait(Max(ServerLoadAverage() / 255, 0.125));
     }
 }
 

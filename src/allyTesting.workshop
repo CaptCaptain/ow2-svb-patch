@@ -1,8 +1,7 @@
 import "settings/allyTestingSettings.lobby";
-import "utilities/HeroSelectAny.del";
 import "shared.workshop";
 
-rule: '[practiceRange.workshop] Set Ultimate Charge'
+rule: '[allyTesting.workshop] Set Ultimate Charge'
 if (IsTrueForAny(AllLivingPlayers(), UltimateChargePercent(ArrayElement()) < 100))
 {
     SetUltimateCharge(AllLivingPlayers(), 100);
@@ -17,9 +16,16 @@ rule: '[allyTesting.workshop] Setup Bots'
         CreateDummyBot(Hero.Tracer, Team.Team1, slot);
     }
     CreateDummyBot(Hero.Mercy, Team.Team1, 4, Left() * 5);
+    Wait(1);
     CreateDummyBot(Hero.Lucio, Team.Team2, 0, Forward() * 5);
+    Wait(1);
     CreateDummyBot(Hero.Roadhog, Team.Team2, 1, Backward() * 5);
-    CreateDummyBot(Hero.Mercy, Team.Team2, 2, Right() * 10);
+    Wait(1);
+    CreateDummyBot(Hero.Echo, Team.Team2, 2, Backward() * 10);
+    Wait(1);
+    //CreateDummyBot(Hero.Symmetra, Team.Team2, 3, Forward() * 10);
+    Wait(1);
+    CreateDummyBot(Hero.Mercy, Team.Team2, 4, Right() * 10);
 }
 
 rule: '[allyTesting.workshop] Damage Bots'
@@ -40,4 +46,56 @@ if (AbilityCooldown(Button: Button.Ability2) == 0)
     PressButton(Button: Button.Ability2);
     Wait(1);
     LoopIfConditionIsTrue();
+}
+
+rule: '[allyTesting.workshop] Echo Duplication'
+Event.OngoingPlayer
+Team.Team2
+Player.Echo
+if (IsDummyBot())
+{
+    SetUltimateCharge(ChargePercent: 100);
+    PressButton(Button: Button.Ultimate);
+    Wait(2);
+    LoopIfConditionIsTrue();
+}
+
+rule: '[allyTesting.workshop] Symmetra Ultimate'
+Event.OngoingPlayer
+Team.Team2
+Player.Symmetra
+if (IsDummyBot())
+if (SlotOf() == 3)
+{
+    PressButton(Button: Button.Ultimate);
+    Wait(2);
+    LoopIfConditionIsTrue();
+}
+
+rule: '[allyTesting.workshop] Return to Hero Select'
+Event.OngoingPlayer
+if (!IsDummyBot())
+if (IsButtonHeld(Button: Button.Reload))
+{
+    Wait(0.5, WaitBehavior.AbortWhenFalse);
+    SetAllowedHeroes(EventPlayer(), AllowedHeroes().Remove(HeroOf()));
+    ResetHeroAvailability();
+}
+
+rule: '[allyTesting.workshop] Hud'
+{
+    CreateHudText(
+        VisibleTo: AllPlayers(),
+        Text: <"Hold [<0>] to return to hero select", InputBindingString(Button.Reload)>,
+        TextColor: Color.Yellow,
+        Location: Location.Right,
+        SortOrder: -8,
+    );
+    CreateHudText(
+        VisibleTo: AllPlayers(),
+        Text: <"Entities: <0> | Texts: <1> | Damage Mods: <2> | Healing Mods: <3>", EntityCount(), TextCount(), DamageModificationCount(), HealingModificationCount()>,
+        TextColor: Color.White,
+        Location: Location.Right,
+        SortOrder: -9,
+    );
 }

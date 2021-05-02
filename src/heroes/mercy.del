@@ -41,10 +41,14 @@ void InitialMercy() playervar '[mercy.del] Subroutine: Initial' {
         ModifyVariable(HeroHealingModifications, Operation.AppendToArray, LastHealingModificationID());
 
         #BUG: Mercy's degeneration visual showing when the player in slot does not exist
-        CreateInWorldText(!UsingForbiddenAbility(PlayersInSlot(EvaluateOnce(slot), TeamOf())) ? EventPlayer() : null, <"[<0><1>%]\n", AbilityIconString(Hero.Baptiste, Button.Ability1), HealingPercents[EvaluateOnce(slot)] * 100>, PlayersInSlot(EvaluateOnce(slot), TeamOf()), 1, Clipping.ClipAgainstSurfaces, InworldTextRev.VisibleToPositionAndString);
+        CreateInWorldText(EntityExists(PlayersInSlot(EvaluateOnce(slot), TeamOf())) ? EventPlayer() : null, <"[<0><1>%]\n", AbilityIconString(Hero.Baptiste, Button.Ability1), HealingPercents[EvaluateOnce(slot)] * 100>, PlayersInSlot(EvaluateOnce(slot), TeamOf()), 1, Clipping.ClipAgainstSurfaces, InworldTextRev.VisibleToPositionAndString);
         ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
     }
     DisallowButton(Button: Button.Ability2);
+
+    # Create Hud
+    CreateHudText(EventPlayer(), null, null, <"<0>(<1>)", <" \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n <0>", <"                                                                                                                            <0>", <"                                                                                                                            <0>", IsInAlternateForm() ?"                                                                                             " : "                                                                     ">>>, "Blessing">, Location.Left, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
 
     async! CleanupMercy();
 }
@@ -59,13 +63,11 @@ void MercyDegenerateBeam() playervar '[mercy.del] Subroutine: Degenerate Healing
 void MercyUpdateDegeneration() playervar '[mercy.del] Subroutine: Update Degeneration' {
     Healer().DegenerationEnabled[SlotOf(Healee())] = true;
     Wait(0.9);
-    switch (Healer().LastMercyTarget) {
-        case EventPlayer():
-            LoopIf(Healer().LastMercyTarget == EventPlayer() && IsFiringSecondary(Healer()));
-        break;
-        default:
-            LoopIf(GetPlayerTarget(Healer(), TeamOf(Healer()), RadiusLOS.Surfaces, 360, 15) == EventPlayer() && IsFiringSecondary(Healer()));
-        break;
+
+    if (Healer().LastMercyTarget == EventPlayer()) {
+        LoopIf(Healer().LastMercyTarget == EventPlayer() && IsFiringSecondary(Healer()));
+    } else {
+        LoopIf(GetPlayerTarget(Healer(), TeamOf(Healer()), RadiusLOS.Surfaces, 360, 15) == EventPlayer() && IsFiringSecondary(Healer()));
     }
     Healer().DegenerationEnabled[SlotOf(Healee())] = false;
 }
@@ -138,11 +140,12 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
 
     # Angelic Blessing Player Hud
-    CreateHudText(
-        VisibleTo: AngelicBlessingTarget,
-        Text: <"<1>Guardian Angel [<0>] |                                | [<0>] Guardian Angel", InputBindingString(Button.Interact), " \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n">,
-        Location: Location.Top,
-        SortOrder: 2
+    OnScreenText.CreateOnScreenText(
+        AngelicBlessingTarget,
+        <"Guardian Angel [<0>] |                                | [<0>] Guardian Angel", InputBindingString(Button.Interact)>,
+        0,
+        0.15,
+        1.32
     );
     Number AngelicBlessingConfirmID = LastTextID();
     ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
@@ -184,7 +187,7 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     AngelicBlessingFlyTarget = GetAngelicBlessingFlyTarget();
     
     # Cleanup
-    DestroyHudText(AngelicBlessingConfirmID);
+    DestroyInWorldText(AngelicBlessingConfirmID);
     DestroyInWorldText(AngelicBlessingTextID);
     StopForcingPlayerOutlines(AllPlayers(), AngelicBlessingTarget);
     CleanupEffects();

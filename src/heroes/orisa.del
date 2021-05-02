@@ -45,7 +45,7 @@ void InitialOrisa() playervar "[orisa.del] Subroutine: Initial" {
     Wait();
 
     # Create Hud
-    CreateHudText(EventPlayer(), null, null, <"<0>(<1>)", <" \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n <0>", <"                                                                                                                            <0>", <"                                                                                                                            <0>", "                                                                             ">>>, "Gallop">, Location.Left, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(EventPlayer(), null, null, <"<0>(<1>)", <" \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n <0>", <"                                                                                                                            <0>", <"                                                                                                                            <0>", "                                                                             ">>>, "Gallop">, Location.Left, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleTo, Spectators.DefaultVisibility);
     ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
 
     SetProjectileSpeed(ProjectileSpeedPercent: 125);

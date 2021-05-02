@@ -37,6 +37,7 @@ SortedArray(
         AngleBetweenVectors(FacingDirectionOf(player), DirectionTowards(player.EyePosition(), (<Player>ArrayElement()).EyePosition())) + DistanceBetween(player.EyePosition(), (<Player>ArrayElement()).EyePosition())
 ).First;
 
+/* ======================================================== */
 void InitialHeroSetup(in Hero hero) {
     WaitUntil(CountOf(HeroActive) == 0, 9999);
     AbortIf(ArrayContains(HeroActive, hero));
@@ -161,7 +162,7 @@ if (ArrayContains(AllSupportHeroes(), HeroOf()) || ArrayContains(AllSupportHeroe
 
 rule: "[all.del] Stop Support Passive"
 Event.OngoingPlayer
-if ((!ArrayContains(AllSupportHeroes(), HeroOf()) && !ArrayContains(AllSupportHeroes(), HeroBeingDuplicated())) || NormalizedHealth() == 1)
+if (!(ArrayContains(AllSupportHeroes(), HeroOf()) || ArrayContains(AllSupportHeroes(), HeroBeingDuplicated())) || NormalizedHealth() == 1)
 {
     StopHealOverTime(SupportHealingID);
 }

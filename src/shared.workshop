@@ -25,3 +25,10 @@ import "heroes/flanker.del";
 import "heroes/sombra.del";
 import "heroes/lucio.del";
 import "heroes/mccree.del";
+
+/* ======================================================== */
+
+rule: 'Disable Inspector Recording'
+{
+    DisableInspectorRecording();
+}

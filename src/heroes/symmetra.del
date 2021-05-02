@@ -44,7 +44,7 @@ void InitialSymmetra() playervar "[symmetra.del] Subroutine: Initial" {
     DisallowButton(Button: Button.Ultimate);
 
     # Create Hud
-    CreateHudText(EventPlayer(), null, null, <"<0>(<1>)", <" \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n <0>", <"                                                                                                                            <0>", <"                                                                   <0>", " ">>>, "Light Clone">, Location.Left, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(EventPlayer(), null, null, <"<0>(<1>)", <" \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n <0>", <"                                                                                                                            <0>", <"                                                                   <0>", " ">>>, "Light Clone">, Location.Left, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleTo, Spectators.DefaultVisibility);
     ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
 
     async! CleanupSymmetra();
@@ -55,7 +55,7 @@ void SymmetraLightCloneUlt() playervar "[symmetra.del] Subroutine: Ult" {
     SetUltimateAbilityEnabled(Enabled: false);
 
     # Create bot
-    CreateDummyBot(Hero.Symmetra, TeamOf(), Min(5, NumberOfLivingPlayers()), PositionOf(), FacingDirectionOf());
+    CreateDummyBot(Hero.Symmetra, TeamOf(), SlotOf() + 5, PositionOf(), FacingDirectionOf());
     SymmetraBotPlayer = LastCreatedEntity();
 
     SetInvisible(SymmetraBotPlayer, InvisibleTo.All);
@@ -85,7 +85,6 @@ void SymmetraLightCloneUlt() playervar "[symmetra.del] Subroutine: Ult" {
 
     # Wait until the bot is dead or after 12 seconds have elapsed
     WaitUntil(IsDead(SymmetraBotPlayer) || IsDead(), 12);
-    StartForcingDummyBotName(SymmetraBotPlayer, <"<0>'s Light Clone", EventPlayer()>);
     Wait();
 
     # Cleanup
@@ -108,91 +107,51 @@ void UpdateSymmetraAI() playervar "[symmetra.del] Subroutine: Update Symmetra AI
 
     DisableMovementCollisionWithPlayers(SymmetraBotPlayer);
     Teleport(SymmetraBotPlayer, PositionOf());
+    StartModifyingHeroVoiceLines(SymmetraBotPlayer, RandomReal(0, 2), false);
 
     while (EntityExists(SymmetraBotPlayer)) {
         # Mirror the player's actions
-        StartModifyingHeroVoiceLines(SymmetraBotPlayer, RandomReal(0, 2), false);
-        switch (IsFiringPrimary()) {
-            case true:
-                if (!IsFiringPrimary(SymmetraBotPlayer)) {
-                    StartHoldingButton(SymmetraBotPlayer, Button.PrimaryFire);
-                }
-            break;
-            case false:
-                StopHoldingButton(SymmetraBotPlayer, Button.PrimaryFire);
-            break;
+        Wait(0.016);
+        if (IsFiringPrimary()) {
+            if (!IsFiringPrimary(SymmetraBotPlayer)) {
+                StartHoldingButton(SymmetraBotPlayer, Button.PrimaryFire);
+            }
+        } else {
+            StopHoldingButton(SymmetraBotPlayer, Button.PrimaryFire);
         }
-        switch (IsFiringSecondary()) {
-            case true:
-                if (!IsFiringSecondary(SymmetraBotPlayer)) {
-                    StartHoldingButton(SymmetraBotPlayer, Button.SecondaryFire);
-                }
-            break;
-            case false:
-                StopHoldingButton(SymmetraBotPlayer, Button.SecondaryFire);
-            break;
+        Wait(0.016);
+        if (IsFiringSecondary()) {
+            if (!IsFiringSecondary(SymmetraBotPlayer)) {
+                StartHoldingButton(SymmetraBotPlayer, Button.SecondaryFire);
+            }
+        } else {
+            StopHoldingButton(SymmetraBotPlayer, Button.SecondaryFire);
         }
-        switch (IsUsingAbility1()) {
-            case true:
-                if (!IsUsingAbility1(SymmetraBotPlayer)) {
-                    StartHoldingButton(SymmetraBotPlayer, Button.Ability1);
-                }
-            break;
-            case false:
-                StopHoldingButton(SymmetraBotPlayer, Button.Ability1);
-            break;
+        Wait(0.016);
+        if (IsReloading()) {
+            if (!IsReloading(SymmetraBotPlayer)) {
+                StartHoldingButton(SymmetraBotPlayer, Button.Reload);
+            }
+        } else {
+            StopHoldingButton(SymmetraBotPlayer, Button.Reload);
         }
-        switch (IsMeleeing()) {
-            case true:
-                if (!IsMeleeing(SymmetraBotPlayer)) {
-                    StartHoldingButton(SymmetraBotPlayer, Button.Melee);
-                }
-            break;
-            case false:
-                StopHoldingButton(SymmetraBotPlayer, Button.Melee);
-            break;
+        Wait(0.016);
+        if (IsJumping()) {
+            if (!IsJumping(SymmetraBotPlayer)) {
+                StartHoldingButton(SymmetraBotPlayer, Button.Jump);
+            }
+        } else {
+            StopHoldingButton(SymmetraBotPlayer, Button.Jump);
         }
-        switch (IsReloading()) {
-            case true:
-                if (!IsReloading(SymmetraBotPlayer)) {
-                    StartHoldingButton(SymmetraBotPlayer, Button.Reload);
-                }
-            break;
-            case false:
-                StopHoldingButton(SymmetraBotPlayer, Button.Reload);
-            break;
+        Wait(0.016);
+        if (IsCrouching()) {
+            if (!IsCrouching(SymmetraBotPlayer)) {
+                StartHoldingButton(SymmetraBotPlayer, Button.Crouch);
+            }
+        } else {
+            StopHoldingButton(SymmetraBotPlayer, Button.Crouch);
         }
-        switch (IsJumping()) {
-            case true:
-                if (!IsJumping(SymmetraBotPlayer)) {
-                    StartHoldingButton(SymmetraBotPlayer, Button.Jump);
-                }
-            break;
-            case false:
-                StopHoldingButton(SymmetraBotPlayer, Button.Jump);
-            break;
-        }
-        switch (IsCrouching()) {
-            case true:
-                if (!IsCrouching(SymmetraBotPlayer)) {
-                    StartHoldingButton(SymmetraBotPlayer, Button.Crouch);
-                }
-            break;
-            case false:
-                StopHoldingButton(SymmetraBotPlayer, Button.Crouch);
-            break;
-        }
-        switch (IsButtonHeld(Button: Button.Interact)) {
-            case true:
-                if (!IsButtonHeld(Player: SymmetraBotPlayer, Button: Button.Interact)) {
-                    StartHoldingButton(SymmetraBotPlayer, Button.Interact);
-                }
-            break;
-            case false:
-                StopHoldingButton(SymmetraBotPlayer, Button.Interact);
-            break;
-        }
-        Wait(Max(Min(ServerLoad() / 255, 0.1), 0.08));
+        Wait(0.016);
     }
 }
 
