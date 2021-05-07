@@ -17,7 +17,7 @@ void CleanupSombra() playervar '[sombra.del] Subroutine: Cleanup' {
     
     Wait();
     
-    ModifyVariable(HeroActive, Operation.RemoveFromArrayByValue, Hero.Sombra);
+    HeroActive = null;
 }
 
 void InitialSombra() playervar '[sombra.del] Subroutine: Initial' {

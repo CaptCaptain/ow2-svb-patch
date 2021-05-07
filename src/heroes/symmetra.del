@@ -13,7 +13,7 @@ void CleanupSymmetra() playervar "[symmetra.del] Subroutine: Cleanup" {
 
     Wait();
 
-    ModifyVariable(HeroActive, Operation.RemoveFromArrayByValue, Hero.Symmetra);
+    HeroActive = null;
 }
 
 void CreateSymmetraBotEffects() playervar "[symmetra.del] Subroutine: Create Clone Effects" {
@@ -111,7 +111,6 @@ void UpdateSymmetraAI() playervar "[symmetra.del] Subroutine: Update Symmetra AI
 
     while (EntityExists(SymmetraBotPlayer)) {
         # Mirror the player's actions
-        Wait(0.016);
         if (IsFiringPrimary()) {
             if (!IsFiringPrimary(SymmetraBotPlayer)) {
                 StartHoldingButton(SymmetraBotPlayer, Button.PrimaryFire);
@@ -120,6 +119,7 @@ void UpdateSymmetraAI() playervar "[symmetra.del] Subroutine: Update Symmetra AI
             StopHoldingButton(SymmetraBotPlayer, Button.PrimaryFire);
         }
         Wait(0.016);
+
         if (IsFiringSecondary()) {
             if (!IsFiringSecondary(SymmetraBotPlayer)) {
                 StartHoldingButton(SymmetraBotPlayer, Button.SecondaryFire);
@@ -128,6 +128,7 @@ void UpdateSymmetraAI() playervar "[symmetra.del] Subroutine: Update Symmetra AI
             StopHoldingButton(SymmetraBotPlayer, Button.SecondaryFire);
         }
         Wait(0.016);
+
         if (IsReloading()) {
             if (!IsReloading(SymmetraBotPlayer)) {
                 StartHoldingButton(SymmetraBotPlayer, Button.Reload);
@@ -136,6 +137,7 @@ void UpdateSymmetraAI() playervar "[symmetra.del] Subroutine: Update Symmetra AI
             StopHoldingButton(SymmetraBotPlayer, Button.Reload);
         }
         Wait(0.016);
+
         if (IsJumping()) {
             if (!IsJumping(SymmetraBotPlayer)) {
                 StartHoldingButton(SymmetraBotPlayer, Button.Jump);
@@ -144,6 +146,7 @@ void UpdateSymmetraAI() playervar "[symmetra.del] Subroutine: Update Symmetra AI
             StopHoldingButton(SymmetraBotPlayer, Button.Jump);
         }
         Wait(0.016);
+        
         if (IsCrouching()) {
             if (!IsCrouching(SymmetraBotPlayer)) {
                 StartHoldingButton(SymmetraBotPlayer, Button.Crouch);

@@ -15,6 +15,7 @@ Player.Echo
 {
     # Some heroes change their max health and add health pools, there is currently a bug where normal health pools get affected, so this attempts to fix that.
     AbortIf(IsDuplicating());
+    SkipIf(IsDead(), 1);
     Resurrect(EventPlayer());
     Wait(0.016);
     EventPlayer().SetMaxHealth(0);

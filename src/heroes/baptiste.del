@@ -13,7 +13,7 @@ void CleanupBaptiste() playervar '[baptiste.del] Subroutine: Cleanup' {
 
     Wait();
 
-    ModifyVariable(HeroActive, Operation.RemoveFromArrayByValue, Hero.Baptiste);
+    HeroActive = null;
 }
 
 void SlowdownBaptiste() playervar '[baptiste.del] Subroutine: Slowdown' {

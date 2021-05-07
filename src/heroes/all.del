@@ -15,9 +15,9 @@ Vector CenterPosition(Player player = EventPlayer()): (player.EyePosition() + pl
 
 Boolean StoppedBeingHero(Player player = EventPlayer()): WaitUntil(HeroOf(player) != EvaluateOnce(HeroOf(player)) || HeroBeingDuplicated(player) != EvaluateOnce(HeroBeingDuplicated(player)), 9999);
 
-Hero ForbiddenUltimateHeroes: [Hero.Doomfist, Hero.Dva, Hero.Pharah, Hero.Pharah, Hero.Junkrat];
-Hero ForbiddenAbility1Heroes: [Hero.Reinhardt, Hero.Tracer];
-Hero ForbiddenAbility2Heroes: [Hero.Tracer];
+globalvar Hero ForbiddenUltimateHeroes = [Hero.Doomfist, Hero.Dva, Hero.Pharah, Hero.Junkrat];
+globalvar Hero ForbiddenAbility1Heroes = [Hero.Reinhardt, Hero.Tracer];
+globalvar Hero ForbiddenAbility2Heroes = [Hero.Tracer];
 Boolean UsingForbiddenAbility(Player player = EventPlayer()): (
     ((ArrayContains(ForbiddenUltimateHeroes, HeroOf(player)) || ArrayContains(ForbiddenUltimateHeroes, HeroBeingDuplicated(player))) && IsUsingUltimate(player)) ||
     ((ArrayContains(ForbiddenAbility1Heroes, HeroOf(player)) || ArrayContains(ForbiddenUltimateHeroes, HeroBeingDuplicated(player))) && IsUsingAbility1(player)) ||
@@ -39,10 +39,10 @@ SortedArray(
 
 /* ======================================================== */
 void InitialHeroSetup(in Hero hero) {
-    WaitUntil(CountOf(HeroActive) == 0, 9999);
-    AbortIf(ArrayContains(HeroActive, hero));
+    WaitUntil(HeroActive == null);
+    AbortIf(HeroActive == hero);
     Wait();
-    ModifyVariable(HeroActive, Operation.AppendToArray, hero);
+    HeroActive = hero;
 }
 
 void CleanupEffects() playervar '[all.del] Subroutine: Cleanup Effects' {

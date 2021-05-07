@@ -23,7 +23,7 @@ void CleanupMercy() playervar '[mercy.del] Subroutine: Cleanup' {
 
     Wait();
 
-    ModifyVariable(HeroActive, Operation.RemoveFromArrayByValue, Hero.Mercy);
+    HeroActive = null;
 }
 
 void InitialMercy() playervar '[mercy.del] Subroutine: Initial' {
@@ -137,7 +137,7 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
         Reevaluation: InworldTextRev.VisibleToPositionAndString
     );
     Number AngelicBlessingTextID = LastTextID();
-    ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
+    ModifyVariable(HeroTexts, Operation.AppendToArray, AngelicBlessingTextID);
 
     # Angelic Blessing Player Hud
     OnScreenText.CreateOnScreenText(
@@ -148,7 +148,7 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
         1.32
     );
     Number AngelicBlessingConfirmID = LastTextID();
-    ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
+    ModifyVariable(HeroTexts, Operation.AppendToArray, AngelicBlessingTextID);
 
     SmallMessage(AngelicBlessingTarget, <"Angelic Blessing Received by <0>", EventPlayer()>);
     StopChasingVariable(AngelicBlessingPosition);

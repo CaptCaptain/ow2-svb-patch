@@ -17,7 +17,7 @@ void FlankerCleanup(Hero hero) playervar '[flanker.del] Subroutine: Cleanup' {
 
     Wait();
 
-    ModifyVariable(HeroActive, Operation.RemoveFromArrayByValue, hero);
+    HeroActive = null;
 }
 
 /* ======================================================== */

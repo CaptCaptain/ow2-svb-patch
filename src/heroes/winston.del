@@ -6,7 +6,7 @@ void CleanupWinston() playervar "[winston.del] Subroutine: Cleanup" {
 
     Wait();
 
-    ModifyVariable(HeroActive, Operation.RemoveFromArrayByValue, Hero.Winston);
+    HeroActive = null;
 }
 
 void InitialWinston() playervar "[winston.del] Subroutine: Initial" {

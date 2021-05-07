@@ -28,7 +28,7 @@ import "heroes/mccree.del";
 
 /* ======================================================== */
 
-rule: 'Disable Inspector Recording'
+rule: '[shared.workshop] Disable Inspector Recording'
 {
     DisableInspectorRecording();
 }

@@ -5,7 +5,7 @@ void CleanupMccree() playervar "[mccree.del] Subroutine: Cleanup" {
 
     Wait();
 
-    ModifyVariable(HeroActive, Operation.RemoveFromArrayByValue, Hero.Mccree);
+    HeroActive = null;
 }
 
 void InitialMccree() playervar "[mccree.del] Subroutine: Initial" {
