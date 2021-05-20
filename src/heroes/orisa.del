@@ -65,7 +65,7 @@ void OrisaDecreaseMovementPenalty() playervar "[orisa.del] Subroutine: Decrease 
 }
 
 void OrisaGallop() playervar "[orisa.del] Subroutine: Gallop" {
-    AbortIf(IsTrueForAny([HasStatus(Status: Status.Asleep), HasStatus(Status: Status.Hacked), HasStatus(Status: Status.KnockedDown), HasStatus(Status: Status.Stunned), HasStatus(Status: Status.Frozen)], ArrayElement() == true));
+    AbortIfImmobile();
 
     # Communication
     SetDamageDealt(DamageDealtPercent: 0);

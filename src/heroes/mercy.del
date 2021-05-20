@@ -84,6 +84,8 @@ void MercyClearLastTarget() playervar '[mercy.del] Subroutine: Clear Last Target
 }
 
 void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Blessing' {
+    AbortIfImmobile();
+    
     # Get target
     AngelicBlessingTarget = GetPlayerTarget(radiusLOS: RadiusLOS.Surfaces, angle: 70, radius: 30);
     
@@ -130,7 +132,7 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     # Angelic Blessing Target
     CreateInWorldText(
         VisibleTo: AllPlayers(),
-        Header: <"<0><1>", AbilityIconString(Hero.Mercy, Button.Ability1), StringSlice("\n\n", 0, IsHero(Hero.Mercy, LocalPlayer()) && AngelicBlessingTarget.Team() == LocalPlayer().Team() ? 2 : 0)>,
+        Header: <"<0><1>", AbilityIconString(Hero.Mercy, Button.Ability1), StringSlice("\n\n", 0, (IsHero(Hero.Mercy, LocalPlayer()) && AngelicBlessingTarget.Team() == LocalPlayer().Team()) || HasStatus(AngelicBlessingTarget, Status.Hacked) ? 2 : 0)>,
         Position: AngelicBlessingTarget,
         Scale: 1.5,
         Clipping: Clipping.ClipAgainstSurfaces,

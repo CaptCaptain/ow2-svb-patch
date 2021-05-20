@@ -52,6 +52,8 @@ void ReturnBaptisteToNormalSpeed() playervar '[baptiste.del] Subroutine: Transit
 }
 
 void BaptisteCastIF() playervar '[baptiste.del] Subroutine: Cast Immortality Field' {  
+    AbortIfImmobile();
+    
     // Create effects
     for (define repeat = 0; 5; 1)
     {

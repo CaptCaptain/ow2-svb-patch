@@ -37,6 +37,8 @@ SortedArray(
         AngleBetweenVectors(FacingDirectionOf(player), DirectionTowards(player.EyePosition(), (<Player>ArrayElement()).EyePosition())) + DistanceBetween(player.EyePosition(), (<Player>ArrayElement()).EyePosition())
 ).First;
 
+Boolean AbortIfImmobile(Player player = EventPlayer()): AbortIf(HasStatus(Player: player, Status: Status.Asleep) || HasStatus(Player: player, Status: Status.Hacked) || HasStatus(Player: player, Status: Status.KnockedDown) || HasStatus(Player: player, Status: Status.Stunned) || HasStatus(Player: player, Status: Status.Frozen) || IsDead());
+
 /* ======================================================== */
 void InitialHeroSetup(in Hero hero) {
     WaitUntil(HeroActive == null, 9999);
