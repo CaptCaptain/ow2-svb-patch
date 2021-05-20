@@ -67,6 +67,7 @@ void SymmetraLightCloneUlt() playervar "[symmetra.del] Subroutine: Ult" {
     StartForcingDummyBotName(SymmetraBotPlayer, <"Light Clone">);
     SetAmmo(SymmetraBotPlayer, 0, Ammo(Clip: 0));
     SetDamageDealt(SymmetraBotPlayer, 50);
+    SetUltimateAbilityEnabled(SymmetraBotPlayer, false);
     Teleport(SymmetraBotPlayer, PositionOf());
 
     Wait(0.08);
@@ -111,6 +112,7 @@ void UpdateSymmetraAI() playervar "[symmetra.del] Subroutine: Update Symmetra AI
 
     while (EntityExists(SymmetraBotPlayer)) {
         # Mirror the player's actions
+        # BUG: Symmetra Light Clone causes other players to hold their buttons for some reason?
         if (IsFiringPrimary()) {
             if (!IsFiringPrimary(SymmetraBotPlayer)) {
                 StartHoldingButton(SymmetraBotPlayer, Button.PrimaryFire);

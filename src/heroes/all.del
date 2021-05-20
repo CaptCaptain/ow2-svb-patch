@@ -1,7 +1,7 @@
 playervar Number SupportHealingID;
 playervar Number DamageMoveSpeedID;
 playervar Number NextUltCharge = 5;
-playervar Hero[] HeroActive = [];
+playervar Hero HeroActive = null;
 playervar Number[] HeroEffects = [];
 playervar Number[] HeroTexts = [];
 playervar Number[] HeroHealthPools = [];
@@ -39,7 +39,7 @@ SortedArray(
 
 /* ======================================================== */
 void InitialHeroSetup(in Hero hero) {
-    WaitUntil(HeroActive == null);
+    WaitUntil(HeroActive == null, 9999);
     AbortIf(HeroActive == hero);
     Wait();
     HeroActive = hero;
