@@ -65,6 +65,8 @@ void OrisaDecreaseMovementPenalty() playervar "[orisa.del] Subroutine: Decrease 
 }
 
 void OrisaGallop() playervar "[orisa.del] Subroutine: Gallop" {
+    AbortIf(CastingUltimate);
+    AbortIf(AbilityCooldown(Button: Button.Ability2) > 0);
     AbortIfImmobile();
 
     # Communication
@@ -201,9 +203,7 @@ if (IsFiringPrimary()) {
 rule: '[orisa.del] Gallop'
 Event.OngoingPlayer
 Player.Orisa
-if (!CastingUltimate)
 if (IsButtonHeld(Button: Button.Ability2))
-if (AbilityCooldown(Button: Button.Ability2) == 0)
 {
     OrisaGallop();
 }
@@ -247,9 +247,7 @@ rule: '[orisa.del] Gallop (Duplicate)'
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Orisa)
-if (!CastingUltimate)
 if (IsButtonHeld(Button: Button.Ability2))
-if (AbilityCooldown(Button: Button.Ability2) == 0)
 {
     OrisaGallop();
 }

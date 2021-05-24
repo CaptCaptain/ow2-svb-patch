@@ -84,6 +84,7 @@ void MercyClearLastTarget() playervar '[mercy.del] Subroutine: Clear Last Target
 }
 
 void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Blessing' {
+    AbortIf(AbilityCooldown(Button: Button.Ability2) > 0);
     AbortIfImmobile();
     
     # Get target
@@ -368,7 +369,6 @@ rule: '[mercy.del] Angelic Blessing'
 Event.OngoingPlayer
 Player.Mercy
 if (IsButtonHeld(Button: Button.Ability2))
-if (AbilityCooldown(Button: Button.Ability2) == 0)
 {
     MercyAngelicBlessing();
 }
@@ -425,7 +425,6 @@ Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Mercy)
 if (IsButtonHeld(Button: Button.Ability2))
-if (AbilityCooldown(Button: Button.Ability2) == 0)
 {
     MercyAngelicBlessing();
 }

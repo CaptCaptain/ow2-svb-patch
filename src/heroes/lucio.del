@@ -78,17 +78,19 @@ void LucioSoundbarrier() playervar '[lucio.del] Subroutine: Soundbarrier' {
 }
 
 void LucioSpeedBoost() playervar '[lucio.del] Subroutine: Speedboost' {
+    AbortIf(IsInAlternateForm());
+    Number SpeedboostBonus = LinearInterpolate(5, 20, MusicMeter / 100);
     while (IsUsingAbility2()) {
         foreach (Number MoveSpeedID in HeroMoveSpeedModifications) {
             # Boost speed based on the music meter charge
 
-            if (DistanceBetween(<Player>(<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(MoveSpeedID).Player), EventPlayer().Position()) < 12) {
-                (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(MoveSpeedID)).Value = 100 + LinearInterpolate(5, 20, MusicMeter / 100);
+            if (DistanceBetween(<Player>(<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(MoveSpeedID).Player), EventPlayer().Position()) < 12 && !IsInAlternateForm()) {
+                (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(MoveSpeedID)).Value = 100 + SpeedboostBonus;
             } else {
                 (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(MoveSpeedID)).Value = 100;
             }
         }
-        Wait(1);
+        Wait(0.25);
     }
     foreach (Number MoveSpeedID in HeroMoveSpeedModifications) {
         (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(MoveSpeedID)).Value = 100;
@@ -144,7 +146,6 @@ Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Lucio)
 if (IsUsingAbility2())
-if (!IsInAlternateForm())
 {
     LucioSpeedBoost();
 }

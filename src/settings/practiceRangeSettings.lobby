@@ -13,12 +13,5 @@
     "Buff and Debuff Sounds": true,
     "Explosion Sounds": true,
     "Spawn More Dummy Bots": true
-  },
-  "Heroes": {
-    "General": {
-      "General": {
-        "Spawn With Ultimate Ready": true
-      }
-    }
   }
 }

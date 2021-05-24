@@ -52,6 +52,7 @@ void ReturnBaptisteToNormalSpeed() playervar '[baptiste.del] Subroutine: Transit
 }
 
 void BaptisteCastIF() playervar '[baptiste.del] Subroutine: Cast Immortality Field' {  
+    AbortIf(AbilityCooldown(Button: Button.Ability2) > 0);
     AbortIfImmobile();
     
     // Create effects
@@ -116,7 +117,6 @@ rule: '[baptiste.del] Cast IF'
 Event.OngoingPlayer
 Player.Baptiste
 if (IsButtonHeld(Button: Button.Ability2))
-if (AbilityCooldown(Button: Button.Ability2) == 0)
 {
     BaptisteCastIF();
 }
@@ -134,7 +134,6 @@ Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Baptiste)
 if (IsButtonHeld(Button: Button.Ability2))
-if (AbilityCooldown(Button: Button.Ability2) == 0)
 {
     BaptisteCastIF();
 }
