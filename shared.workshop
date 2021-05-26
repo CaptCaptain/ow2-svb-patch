@@ -1,7 +1,7 @@
-import '../../OSTWUtils/Miscellaneous.del';
-import '../../OSTWUtils/OnScreenText.del';
-import '../../OSTWUtils/Colors.del';
-import '../../OSTWUtils/EasingFunctions.del';
+import '../OSTWUtils/Miscellaneous.del';
+import '../OSTWUtils/OnScreenText.del';
+import '../OSTWUtils/Colors.del';
+import '../OSTWUtils/EasingFunctions.del';
 
 
 /* ======================================================== */

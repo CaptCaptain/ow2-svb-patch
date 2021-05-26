@@ -1,5 +1,5 @@
 import "settings/practiceRangeSettings.lobby";
-import '../../OSTWUtils/ServerLoad.del';
+import '../OSTWUtils/ServerLoad.del';
 import "shared.workshop";
 
 rule: '[practiceRange.workshop] Set Ultimate Charge'
