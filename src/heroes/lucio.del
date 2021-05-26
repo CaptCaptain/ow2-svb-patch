@@ -21,6 +21,9 @@ void CleanupLucio() playervar '[lucio.del] Subroutine: Cleanup' {
     HeroActive = null;
 }
 
+Boolean OnWall(Player player = EventPlayer()): player.IsOnWall() || (player.IsOnWall() && (IsUsingUltimate(player) || IsUsingAbility2()));
+Boolean NotOnWall(Player player = EventPlayer()): player.WallrideTimer > 0 && !player.IsOnWall();
+
 void InitialLucio() playervar '[lucio.del] Subroutine: Initial' {
     InitialHeroSetup(Hero.Lucio);
 
@@ -44,7 +47,7 @@ void InitialLucio() playervar '[lucio.del] Subroutine: Initial' {
     ChaseVariableAtRate(WallrideTimer, EventPlayer().IsOnWall() ? 1 : 0, EventPlayer().IsOnWall() ? 100 : 1, RateChaseReevaluation.DestinationAndRate);
 
     # Chase music meter
-    ChaseVariableAtRate(MusicMeter, EventPlayer().IsOnWall() || (EventPlayer().IsOnWall() && (IsUsingUltimate(EventPlayer()) || IsUsingAbility2())) ? 100 : 0, WallrideTimer > 0 && !EventPlayer().IsOnWall() ? 0 : 25, RateChaseReevaluation.DestinationAndRate);
+    ChaseVariableAtRate(MusicMeter, OnWall() ? 100 : 0, NotOnWall() ? 0 : (OnWall() ? 25 : 10), RateChaseReevaluation.DestinationAndRate);
 
     for (define slot = 0; slot < 5; slot++)
     {

@@ -49,9 +49,7 @@ void InitialHeroSetup(in Hero hero) {
 
 void CleanupEffects() playervar '[all.del] Subroutine: Cleanup Effects' {
     // Cleanup effects
-    foreach (Number effectID in HeroEffects) {
-        DestroyEffect(effectID);
-    }
+    DestroyEffect(HeroEffects);
 
     HeroEffects = [];
 }

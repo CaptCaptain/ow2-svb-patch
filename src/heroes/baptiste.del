@@ -28,9 +28,8 @@ void SlowdownBaptiste() playervar '[baptiste.del] Subroutine: Slowdown' {
         SetMoveSpeed(MoveSpeedPercent: EasingFunctions.EaseInOutCubic(frac) * 100);
         Wait();
     }
-
-    CustomModifications.StopModifyingMoveSpeed(EventPlayer(), BaptisteMoveSpeedID);
-    ModifyVariable(HeroMoveSpeedModifications, Operation.RemoveFromArrayByValue, BaptisteMoveSpeedID);
+    (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(BaptisteMoveSpeedID)).Value = 100;
+    
     StopChasingVariable(frac);
 }
 
@@ -45,9 +44,9 @@ void ReturnBaptisteToNormalSpeed() playervar '[baptiste.del] Subroutine: Transit
         SetMoveSpeed(MoveSpeedPercent: EasingFunctions.EaseInOutCubic(frac) * 100);
         Wait();
     }
+    (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(BaptisteMoveSpeedID)).Value = 100;
 
-    CustomModifications.StopModifyingMoveSpeed(EventPlayer(), BaptisteMoveSpeedID);
-    ModifyVariable(HeroMoveSpeedModifications, Operation.RemoveFromArrayByValue, BaptisteMoveSpeedID);
+    
     StopChasingVariable(frac);
 }
 

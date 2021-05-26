@@ -30,10 +30,10 @@ void InitialReinhardt() playervar '[reinhardt.del] Subroutine: Initial' {
     ChaseVariableAtRate(ReinhardtFirestrikeCooldown, 0, 1, RateChaseReevaluation.DestinationAndRate);
     
     # Character setup
-    SetMaxHealth(EventPlayer(), 50);
-    AddHealthPoolToPlayer(EventPlayer(), HealthType.Health, 150, true, true);
+    SetMaxHealth(EventPlayer(), 75);
+    AddHealthPoolToPlayer(EventPlayer(), HealthType.Health, 75, true, true);
     ModifyVariable(HeroHealthPools, Operation.AppendToArray, LastCreatedHealthPool());
-    AddHealthPoolToPlayer(EventPlayer(), HealthType.Armor, 150, true, true);
+    AddHealthPoolToPlayer(EventPlayer(), HealthType.Armor, 100, true, true);
     ModifyVariable(HeroHealthPools, Operation.AppendToArray, LastCreatedHealthPool());
 
     // Create hud text

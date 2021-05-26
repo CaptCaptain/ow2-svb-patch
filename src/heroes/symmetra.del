@@ -60,8 +60,16 @@ void SymmetraLightCloneUlt() playervar "[symmetra.del] Subroutine: Ult" {
 
     SetInvisible(SymmetraBotPlayer, InvisibleTo.All);
 
-    WaitUntil(IsAlive(SymmetraBotPlayer), 9999);
-    WaitUntil(HasSpawned(SymmetraBotPlayer), 9999);
+    # Wait for bot to spawn
+    WaitUntil(IsAlive(SymmetraBotPlayer), 1);
+    WaitUntil(HasSpawned(SymmetraBotPlayer), 1);
+
+    # If the bot doesn't spawn, return ult back to Symmetra and abort
+    SkipIf(EntityExists(SymmetraBotPlayer), 3);
+    SetUltimateCharge(ChargePercent: 100);
+    SetUltimateAbilityEnabled(Enabled: true);
+    Abort();
+
     Wait();
 
     StartForcingDummyBotName(SymmetraBotPlayer, <"Light Clone">);

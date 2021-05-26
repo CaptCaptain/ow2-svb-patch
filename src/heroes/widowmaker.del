@@ -13,7 +13,7 @@ void InitialWidowmaker() playervar "[widowmaker.del] Subroutine: Initial" {
 
     for (define slot = 0; 5; 1)
     {
-        StartDamageModification(PlayersInSlot(EvaluateOnce(slot), OppositeTeamOf(TeamOf())), EventPlayer(),!IsMeleeing() && IsFiringSecondary() ? Min(Max(25, DistanceBetween(EventPlayer(), PlayersInSlot(EvaluateOnce(slot), OppositeTeamOf(TeamOf()))) * 3.33333333333), 100) : 100, DamageModificationRev.ReceiversDamagersAndDamagePercent);
+        StartDamageModification(PlayersInSlot(EvaluateOnce(slot), OppositeTeamOf(TeamOf())), EventPlayer(),!IsMeleeing() && IsFiringSecondary() ? Min(Max(50, DistanceBetween(EventPlayer(), PlayersInSlot(EvaluateOnce(slot), OppositeTeamOf(TeamOf()))) * 3.33333333333), 100) : 100, DamageModificationRev.ReceiversDamagersAndDamagePercent);
         ModifyVariable(HeroDamageModifications, Operation.AppendToArray, LastDamageModificationID());
     }
 
