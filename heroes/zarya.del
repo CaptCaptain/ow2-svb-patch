@@ -1,0 +1,201 @@
+playervar define ZaryaBubbleCharges = 2;
+playervar define ZaryaBubbleCooldown = 5;
+
+/* ======================================================== */
+
+void CleanupZarya() playervar "[zarya.del] Subroutine: Cleanup" {
+    StoppedBeingHero();
+
+    CleanupTexts();
+    SetAbility1Enabled(Enabled: true);
+    SetAbility2Enabled(Enabled: true);
+    StopChasingVariable(ZaryaBubbleCooldown);
+
+    Wait();
+
+    HeroActive = null;
+}
+
+void InitialZarya() playervar '[zarya.del] Subroutine: Initial' {
+    InitialHeroSetup(Hero.Zarya);
+
+    Wait();
+    
+    # Variable setup
+    ZaryaBubbleCharges = 2;
+    ZaryaBubbleCooldown = 5;
+    ChaseVariableAtRate(ZaryaBubbleCooldown, 0, 1, RateChaseReevaluation.DestinationAndRate);
+
+    // Create hud text
+    OnScreenText.CreateOnScreenText(
+        IsCommunicatingAnyEmote(EventPlayer()) || IsDead() ? null : EventPlayer(),
+        <"(<0>) [<1>]", RoundToInteger(ZaryaBubbleCharges, Rounding.Down) > 0 ? RoundToInteger(ZaryaBubbleCharges, Rounding.Down) : IconString(Icon.X), RoundToInteger(ZaryaBubbleCharges, Rounding.Down) == 2 ? IconString(Icon.Checkmark) : RoundToInteger(ZaryaBubbleCooldown, Rounding.Up)>,
+        2.27,
+        -1.37,
+        1.3,
+        InworldTextRev.VisibleToPositionAndString,
+        Color.White,
+        Spectators.DefaultVisibility
+    );
+    ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
+
+    OnScreenText.CreateOnScreenText(
+        IsCommunicatingAnyEmote(EventPlayer()) || IsDead() ? null : EventPlayer(),
+        <"(<0>) [<1>]", RoundToInteger(ZaryaBubbleCharges, Rounding.Down) > 0 ? RoundToInteger(ZaryaBubbleCharges, Rounding.Down) : IconString(Icon.X), RoundToInteger(ZaryaBubbleCharges, Rounding.Down) == 2 ? IconString(Icon.Checkmark) : RoundToInteger(ZaryaBubbleCooldown, Rounding.Up)>,
+        2.57,
+        -1.37,
+        1.35,
+        InworldTextRev.VisibleToPositionAndString,
+        Color.White,
+        Spectators.DefaultVisibility
+    );
+    ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
+
+    # Start Rule
+    async! CleanupZarya();
+}
+
+void ZaryaRefreshBubble() playervar '[zarya.del] Subroutine: Refresh Bubble' {
+    SetAbilityCooldown(EventPlayer(), Button.Ability1, 0);
+    SetAbilityCooldown(EventPlayer(), Button.Ability2, 0);
+    Wait();
+    LoopIfConditionIsTrue();
+}
+
+void ZaryaBubbleRecharge() playervar '[zarya.del] Subroutine: Bubble Recharge' {
+    ZaryaBubbleCooldown = 5;
+    WaitUntil(ZaryaBubbleCooldown == 0, 9999);
+    ZaryaBubbleCharges = Min(ZaryaBubbleCharges + 1, 2);
+    LoopIfConditionIsTrue();
+}
+
+void ZaryaBubbleEnable() playervar '[zarya.del] Subroutine: Enable Zarya Bubble' {
+    SetAbility1Enabled(EventPlayer(), true);
+    SetAbility2Enabled(EventPlayer(), true);
+}
+
+void ZaryaBubbleDisable() playervar '[zarya.del] Subroutine: Disable Zarya Bubble' {
+    SetAbility1Enabled(EventPlayer(), false);
+    SetAbility2Enabled(EventPlayer(), false);
+}
+
+/* ======================================================== */
+
+rule: "[zarya.del] Initial"
+Event.OngoingPlayer
+Player.Zarya
+{
+    InitialZarya();
+}
+
+rule: "[zarya.del] Refresh Bubble"
+Event.OngoingPlayer
+Player.Zarya
+if (AbilityCooldown(Button: Button.Ability1) > 0 || AbilityCooldown(Button: Button.Ability2) > 0)
+{
+    ZaryaRefreshBubble();
+}
+
+rule: "[zarya.del] Bubble Recharge"
+Event.OngoingPlayer
+Player.Zarya
+if (RoundToInteger(ZaryaBubbleCharges, Rounding.Down) < 2)
+{
+    ZaryaBubbleRecharge();
+}
+
+rule: "[zarya.del] Bubble Expends Charge (Ability 1)"
+Event.OngoingPlayer
+Player.Zarya
+if (IsUsingAbility1(EventPlayer()) == true)
+{
+    ZaryaBubbleCharges -= 1;
+}
+
+rule: "[zarya.del] Bubble Expends Charge (Ability 2)"
+Event.OngoingPlayer
+Player.Zarya
+if (IsUsingAbility2(EventPlayer()) == true)
+{
+    ZaryaBubbleCharges -= 1;
+}
+
+rule: "[zarya.del] Enable Bubble when charges are available"
+Event.OngoingPlayer
+Player.Zarya
+if (RoundToInteger(ZaryaBubbleCharges, Rounding.Down) > 0)
+{
+    ZaryaBubbleEnable();
+}
+
+rule: "[zarya.del] Disable Bubble when charges are not available"
+Event.OngoingPlayer
+Player.Zarya
+if (RoundToInteger(ZaryaBubbleCharges, Rounding.Down) <= 0)
+{
+    ZaryaBubbleDisable();
+}
+
+/* ======================================================== */
+
+rule: "[zarya.del] Initial"
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Zarya)
+{
+    InitialZarya();
+}
+
+rule: "[zarya.del] Refresh Bubble"
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Zarya)
+if (AbilityCooldown(Button: Button.Ability1) > 0 || AbilityCooldown(Button: Button.Ability2) > 0)
+{
+    ZaryaRefreshBubble();
+}
+
+rule: "[zarya.del] Bubble Recharge"
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Zarya)
+if (RoundToInteger(ZaryaBubbleCharges, Rounding.Down) < 2)
+{
+    ZaryaBubbleRecharge();
+}
+
+rule: "[zarya.del] Bubble Expends Charge (Ability 1)"
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Zarya)
+if (IsUsingAbility1(EventPlayer()) == true)
+{
+    ZaryaBubbleCharges -= 1;
+}
+
+rule: "[zarya.del] Bubble Expends Charge (Ability 2)"
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Zarya)
+if (IsUsingAbility2(EventPlayer()) == true)
+{
+    ZaryaBubbleCharges -= 1;
+}
+
+rule: "[zarya.del] Enable Bubble when charges are available"
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Zarya)
+if (RoundToInteger(ZaryaBubbleCharges, Rounding.Down) > 0)
+{
+    ZaryaBubbleEnable();
+}
+
+rule: "[zarya.del] Disable Bubble when charges are not available"
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Zarya)
+if (RoundToInteger(ZaryaBubbleCharges, Rounding.Down) <= 0)
+{
+    ZaryaBubbleDisable();
+}
