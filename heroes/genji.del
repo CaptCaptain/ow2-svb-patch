@@ -1,0 +1,21 @@
+void GenjiResetDeflect() playervar '[genji.del] Subroutine: Deflect Cooldown Reset' {
+    AbortIf(!IsUsingUltimate());
+    SetAbilityCooldown(Button: Button.Ability2, Cooldown: 0);
+}
+
+/* ================================================== */
+
+rule: '[genji.del] Deflect Cooldown Reset'
+Event.OnFinalBlow
+Player.Genji
+{
+    GenjiResetDeflect();
+}
+
+rule: '[genji.del] Deflect Cooldown Reset (Duplication)'
+Event.OnFinalBlow
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Genji)
+{
+    GenjiResetDeflect();
+}
