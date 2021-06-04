@@ -24,7 +24,7 @@ rule: '[allyTesting.workshop] Setup Bots'
     Wait(1);
     CreateDummyBot(Hero.Echo, Team.Team2, 2, Backward() * 10);
     Wait(1);
-    CreateDummyBot(Hero.Symmetra, Team.Team2, 3, Forward() * 10);
+    //CreateDummyBot(Hero.Symmetra, Team.Team2, 3, Forward() * 10);
     Wait(1);
     CreateDummyBot(Hero.Mercy, Team.Team2, 4, Right() * 10);
 }
