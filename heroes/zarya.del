@@ -23,15 +23,16 @@ void InitialZarya() playervar '[zarya.del] Subroutine: Initial' {
     
     # Variable setup
     ZaryaBubbleCharges = 2;
-    ZaryaBubbleCooldown = 5;
-    ChaseVariableAtRate(ZaryaBubbleCooldown, 0, 1, RateChaseReevaluation.DestinationAndRate);
+    ZaryaBubbleCooldown = 0;
+    Wait();
+    ChaseVariableAtRate(ZaryaBubbleCooldown, 0, 1, RateChaseReevaluation.None);
 
     // Create hud text
     OnScreenText.CreateOnScreenText(
         IsCommunicatingAnyEmote(EventPlayer()) || IsDead() ? null : EventPlayer(),
         <"(<0>) [<1>]", RoundToInteger(ZaryaBubbleCharges, Rounding.Down) > 0 ? RoundToInteger(ZaryaBubbleCharges, Rounding.Down) : IconString(Icon.X), RoundToInteger(ZaryaBubbleCharges, Rounding.Down) == 2 ? IconString(Icon.Checkmark) : RoundToInteger(ZaryaBubbleCooldown, Rounding.Up)>,
         2.27,
-        -1.37,
+        IsReloading() ? -1.25 : -1.37,
         1.3,
         InworldTextRev.VisibleToPositionAndString,
         Color.White,
@@ -43,7 +44,7 @@ void InitialZarya() playervar '[zarya.del] Subroutine: Initial' {
         IsCommunicatingAnyEmote(EventPlayer()) || IsDead() ? null : EventPlayer(),
         <"(<0>) [<1>]", RoundToInteger(ZaryaBubbleCharges, Rounding.Down) > 0 ? RoundToInteger(ZaryaBubbleCharges, Rounding.Down) : IconString(Icon.X), RoundToInteger(ZaryaBubbleCharges, Rounding.Down) == 2 ? IconString(Icon.Checkmark) : RoundToInteger(ZaryaBubbleCooldown, Rounding.Up)>,
         2.57,
-        -1.37,
+        IsReloading() ? -1.25 : -1.37,
         1.35,
         InworldTextRev.VisibleToPositionAndString,
         Color.White,

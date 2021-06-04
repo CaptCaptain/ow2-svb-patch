@@ -26,8 +26,9 @@ void InitialReinhardt() playervar '[reinhardt.del] Subroutine: Initial' {
     
     # Variable setup
     ReinhardtFirestrikeCharges = 2;
-    ReinhardtFirestrikeCooldown = 6;
-    ChaseVariableAtRate(ReinhardtFirestrikeCooldown, 0, 1, RateChaseReevaluation.DestinationAndRate);
+    ReinhardtFirestrikeCooldown = 0;
+    Wait();
+    ChaseVariableAtRate(ReinhardtFirestrikeCooldown, 0, 1, RateChaseReevaluation.None);
     
     # Character setup
     SetMaxHealth(EventPlayer(), 75);
