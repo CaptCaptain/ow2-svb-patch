@@ -22,9 +22,9 @@ rule: '[allyTesting.workshop] Setup Bots'
     Wait(1);
     CreateDummyBot(Hero.Roadhog, Team.Team2, 1, Backward() * 5);
     Wait(1);
-    CreateDummyBot(Hero.Echo, Team.Team2, 2, Backward() * 10);
+    CreateDummyBot(Hero.Symmetra, Team.Team2, 2, Backward() * 10);
     Wait(1);
-    //CreateDummyBot(Hero.Symmetra, Team.Team2, 3, Forward() * 10);
+    CreateDummyBot(Hero.Zarya, Team.Team2, 3, Forward() * 10);
     Wait(1);
     CreateDummyBot(Hero.Mercy, Team.Team2, 4, Right() * 10);
 }
@@ -66,10 +66,11 @@ Event.OngoingPlayer
 Team.Team2
 Player.Symmetra
 if (IsDummyBot())
-if (SlotOf() == 3)
+if (SlotOf() == 2)
+if (UltimateChargePercent() == 100)
 {
+    Wait(1);
     PressButton(Button: Button.Ultimate);
-    Wait(2);
     LoopIfConditionIsTrue();
 }
 
