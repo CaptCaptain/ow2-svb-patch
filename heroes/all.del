@@ -15,14 +15,30 @@ Vector CenterPosition(Player player = EventPlayer()): (player.EyePosition() + pl
 
 Boolean StoppedBeingHero(Player player = EventPlayer()): WaitUntil(HeroOf(player) != EvaluateOnce(HeroOf(player)) || HeroBeingDuplicated(player) != EvaluateOnce(HeroBeingDuplicated(player)), 9999);
 
-globalvar Hero ForbiddenUltimateHeroes = [Hero.Doomfist, Hero.Dva, Hero.Pharah, Hero.Junkrat];
-globalvar Hero ForbiddenAbility1Heroes = [Hero.Reinhardt, Hero.Tracer];
-globalvar Hero ForbiddenAbility2Heroes = [Hero.Tracer];
+Hero AccurateHeroOf(Player player = EventPlayer()): HeroBeingDuplicated(player) != null ? HeroBeingDuplicated(player) : HeroOf(player);
+
+/* ======================================================== */
+
+enum Ability {
+    Ultimate,
+    Ability1,
+    Ability2
+}
+globalvar Hero ForbiddenAbilities = [
+    // Ultimate
+    [Hero.Doomfist, Hero.Dva, Hero.Pharah, Hero.Junkrat],
+    // Ability 1
+    [Hero.Reinhardt, Hero.Tracer],
+    // Ability 2
+    [Hero.Tracer]
+];
 Boolean UsingForbiddenAbility(Player player = EventPlayer()): (
-    ((ArrayContains(ForbiddenUltimateHeroes, HeroOf(player)) || ArrayContains(ForbiddenUltimateHeroes, HeroBeingDuplicated(player))) && IsUsingUltimate(player)) ||
-    ((ArrayContains(ForbiddenAbility1Heroes, HeroOf(player)) || ArrayContains(ForbiddenUltimateHeroes, HeroBeingDuplicated(player))) && IsUsingAbility1(player)) ||
-    ((ArrayContains(ForbiddenAbility2Heroes, HeroOf(player)) || ArrayContains(ForbiddenUltimateHeroes, HeroBeingDuplicated(player))) && IsUsingAbility2(player))
+    ArrayContains(ForbiddenAbilities[Ability.Ultimate], EvaluateOnce(AccurateHeroOf(player))) && IsUsingUltimate(player) ||
+    ArrayContains(ForbiddenAbilities[Ability.Ability1], EvaluateOnce(AccurateHeroOf(player))) && IsUsingAbility1(player) ||
+    ArrayContains(ForbiddenAbilities[Ability.Ability2], EvaluateOnce(AccurateHeroOf(player))) && IsUsingAbility2(player)
 );
+
+/* ======================================================== */
 
 Boolean UsingExistingAbility(Player player = EventPlayer()): ((IsHero(Hero.Torbjorn, player) || IsHero(Hero.Sombra, player)) && IsUsingAbility2());
 
