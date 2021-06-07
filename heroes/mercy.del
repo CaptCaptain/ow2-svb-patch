@@ -200,12 +200,11 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
     # If there is a valid fly target and the player isn't using an ability that restricts their movement, we GA
-    if (
-        AngelicBlessingTarget.IsButtonHeld(Button.Interact) &&
-        AngelicBlessingFlyTarget &&
-        !UsingForbiddenAbility(AngelicBlessingTarget)
-    )
+    if (AngelicBlessingTarget.IsButtonHeld(Button.Interact))
     {
+        if (!EntityExists(AngelicBlessingFlyTarget)) { Abort(); }
+        if (UsingForbiddenAbility(AngelicBlessingTarget)) { Abort(); }
+
         PlayEffect(AllPlayers(), PlayEffect.BuffExplosionSound, Color.White, AngelicBlessingPosition, 100);
         SetGravity(AngelicBlessingTarget, 0);
         SetJumpVerticalSpeed(AngelicBlessingTarget, 0);
@@ -241,11 +240,10 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
 
         Wait();
 
-        while (
-            DistanceBetween(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position()) > 2 &&
-            !UsingForbiddenAbility(AngelicBlessingTarget)
-        ) 
+        while (DistanceBetween(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position()) > 2) 
         {
+            if (UsingForbiddenAbility(AngelicBlessingTarget)) { Abort(); }
+
             # Impulse loop while the player isn't close to the fly target, isn't using any ability that restricts their movement, or hasn't jumped.
             ApplyImpulse(
                 Player: AngelicBlessingTarget,
