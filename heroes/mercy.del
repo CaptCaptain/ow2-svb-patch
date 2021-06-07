@@ -184,7 +184,7 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     DisallowButton(Player: AngelicBlessingTarget, Button: Button.Interact);
 
     # Wait until target chooses to fly to a target, after 6 seconds have elapsed, or if the target is using an ability that restricts their movement
-    WaitUntil((AngelicBlessingTarget.IsButtonHeld(Button.Interact) && GetAngelicBlessingFlyTarget() && !UsingForbiddenAbility(AngelicBlessingTarget)) || HeroBeingDuplicated(AngelicBlessingTarget) != EvaluateOnce(HeroBeingDuplicated(AngelicBlessingTarget)), 6);
+    WaitUntil((AngelicBlessingTarget.IsButtonHeld(Button.Interact) && GetAngelicBlessingFlyTarget() && !UsingForbiddenAbility(AngelicBlessingTarget)) || HeroBeingDuplicated(AngelicBlessingTarget) != EvaluateOnce(HeroBeingDuplicated(AngelicBlessingTarget)) || MaxHealth(AngelicBlessingTarget) != EvaluateOnce(MaxHealth(AngelicBlessingTarget)), 6);
 
     Boolean Superjumping = IsCrouching(AngelicBlessingTarget) ? true : false;
     AngelicBlessingFlyTarget = GetAngelicBlessingFlyTarget();
