@@ -71,7 +71,7 @@ void LucioSoundbarrier() playervar '[lucio.del] Subroutine: Soundbarrier' {
         AddHealthPoolToPlayer(EvaluateOnce(player), HealthType.Shields, SoundbarrierCalculation, false, true);
         ModifyVariable(HeroHealthPools, Operation.AppendToArray, LastCreatedHealthPool());
 
-        CreateEffect(HealthOfType(EvaluateOnce(player), HealthType.Shields) > 0 ? AllPlayers() : null, Effect.LucioSoundBarrierProtectedEffect, <Color>TeamOf(), EvaluateOnce(player), 1, EffectRev.VisibleToPositionAndRadius);
+        CreateEffect(HealthOfType(EvaluateOnce(player), HealthType.Shields) > 0 ? AllPlayers() : null, Effect.LucioSoundBarrierProtectedEffect, <Color>TeamOf(), EvaluateOnce(player), 1, EffectRev.VisibleTo);
         ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
     }
 

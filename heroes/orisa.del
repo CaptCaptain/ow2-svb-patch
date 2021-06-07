@@ -3,13 +3,13 @@ playervar Number OrisaMoveSpeedID;
 playervar Boolean Galloping;
 
 void CreateHeroEffects() playervar "[orisa.del] Subroutine: Create Effects" {
-    CreateEffect(AllPlayers(TeamOf()), Effect.GoodAura, Color.LimeGreen, UpdateEveryFrame(EyePosition()), 0.5, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(TeamOf()), Effect.GoodAura, Color.LimeGreen, UpdateEveryFrame(EyePosition()), 0.5, EffectRev.VisibleTo);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
-    CreateEffect(AllPlayers(OppositeTeamOf(TeamOf())), Effect.GoodAura, Color.Red, UpdateEveryFrame(EyePosition()), 0.5, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(OppositeTeamOf(TeamOf())), Effect.GoodAura, Color.Red, UpdateEveryFrame(EyePosition()), 0.5, EffectRev.VisibleTo);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
-    CreateEffect(AllPlayers(), Effect.WinstonPrimalRageEffect, <Color>TeamOf(), UpdateEveryFrame(EyePosition()), 1, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(), Effect.WinstonPrimalRageEffect, <Color>TeamOf(), UpdateEveryFrame(EyePosition()), 1, EffectRev.VisibleTo);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
-    CreateEffect(AllPlayers(), Effect.EnergySound, <Color>TeamOf(), UpdateEveryFrame(EyePosition()), 500, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(), Effect.EnergySound, <Color>TeamOf(), UpdateEveryFrame(EyePosition()), 500, EffectRev.VisibleTo);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 }
 

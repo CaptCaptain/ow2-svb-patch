@@ -160,19 +160,19 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     AngelicBlessings.ModAppend(AngelicBlessingTarget);
 
     # Team Effects
-    CreateEffect(AllPlayers(TeamOf()), Effect.Sparkles, Color.Yellow, AngelicBlessingTarget, 1.5, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(TeamOf()), Effect.Sparkles, Color.Yellow, AngelicBlessingTarget, 1.5, EffectRev.VisibleTo);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
     PlayEffect(AllPlayers(TeamOf()), PlayEffect.GoodExplosion, Color.Yellow, AngelicBlessingPosition, 1);
 
     # Enemy Effects
-    CreateEffect(AllPlayers(OppositeTeamOf(TeamOf())), Effect.Sparkles, Color.Orange, AngelicBlessingTarget, 1.5, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(OppositeTeamOf(TeamOf())), Effect.Sparkles, Color.Orange, AngelicBlessingTarget, 1.5, EffectRev.VisibleTo);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
     PlayEffect(AllPlayers(OppositeTeamOf(TeamOf())), PlayEffect.GoodExplosion, Color.Orange, AngelicBlessingPosition, 1);
 
     # Effects
-    CreateEffect(AngelicBlessingTarget, Effect.HealTargetEffect, <Color>TeamOf(AngelicBlessingTarget), AngelicBlessingTarget, 1, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AngelicBlessingTarget, Effect.HealTargetEffect, <Color>TeamOf(AngelicBlessingTarget), AngelicBlessingTarget, 1, EffectRev.VisibleTo);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
     PlayEffect(AllPlayers(), PlayEffect.BuffExplosionSound, Color.White, AngelicBlessingPosition, 100);
@@ -196,7 +196,7 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     CleanupEffects();
 
     # Effects
-    CreateEffect(AllPlayers(), Effect.Soldier76SprintingEffect, Color.White, AngelicBlessingTarget, 1, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(), Effect.Soldier76SprintingEffect, Color.White, AngelicBlessingTarget, 1, EffectRev.VisibleTo);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
     # If there is a valid fly target and the player isn't using an ability that restricts their movement, we GA

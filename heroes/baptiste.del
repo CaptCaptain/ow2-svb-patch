@@ -60,7 +60,7 @@ void BaptisteCastIF() playervar '[baptiste.del] Subroutine: Cast Immortality Fie
         CreateEffect(AllPlayers(), Effect.HealTargetEffect, <Color>TeamOf(), UpdateEveryFrame(EyePosition()), 1, EffectRev.VisibleToPositionAndRadius);
         ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
     }
-    CreateEffect(EventPlayer(), Effect.GoodAuraSound, <Color>TeamOf(), EventPlayer(), 700, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(EventPlayer(), Effect.GoodAuraSound, <Color>TeamOf(), EventPlayer(), 700, EffectRev.VisibleTo);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
     # Casting
