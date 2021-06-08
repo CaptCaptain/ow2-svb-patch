@@ -91,7 +91,7 @@ void SymmetraLightCloneUlt() playervar "[symmetra.del] Subroutine: Ult" {
 
     Wait();
 
-    StartForcingDummyBotName(SymmetraBotPlayer, <"Light Clone">);
+    StartForcingDummyBotName(SymmetraBotPlayer, <"<0>'s Light Clone", <String>EventPlayer()>);
     SetAmmo(SymmetraBotPlayer, 0, Ammo(Clip: 0));
     SetDamageDealt(SymmetraBotPlayer, 50);
     SetUltimateAbilityEnabled(SymmetraBotPlayer, false);
