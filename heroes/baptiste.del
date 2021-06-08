@@ -10,6 +10,7 @@ void CleanupBaptiste() playervar '[baptiste.del] Subroutine: Cleanup' {
     AllowButton(Button: Button.PrimaryFire);
     AllowButton(Button: Button.SecondaryFire);
     AllowButton(Button: Button.Ability2);
+    SetDamageDealt(DamageDealtPercent: 100);
     CleanupHealingMods();
     CleanupMoveSpeedMods();
 
