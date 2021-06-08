@@ -137,7 +137,7 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
         Position: AngelicBlessingTarget,
         Scale: 1.5,
         Clipping: Clipping.ClipAgainstSurfaces,
-        Reevaluation: InworldTextRev.VisibleToPositionAndString
+        Reevaluation: InworldTextRev.VisibleTo
     );
     Number AngelicBlessingTextID = LastTextID();
     ModifyVariable(HeroTexts, Operation.AppendToArray, AngelicBlessingTextID);
@@ -202,8 +202,9 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     # If there is a valid fly target and the player isn't using an ability that restricts their movement, we GA
     if (AngelicBlessingTarget.IsButtonHeld(Button.Interact))
     {
-        if (!EntityExists(AngelicBlessingFlyTarget)) { Abort(); }
-        if (UsingForbiddenAbility(AngelicBlessingTarget)) { Abort(); }
+        AbortIf(!EntityExists(AngelicBlessingFlyTarget));
+        AbortIfImmobile();
+        AbortIf(UsingForbiddenAbility(AngelicBlessingTarget));
 
         PlayEffect(AllPlayers(), PlayEffect.BuffExplosionSound, Color.White, AngelicBlessingPosition, 100);
         SetGravity(AngelicBlessingTarget, 0);
@@ -242,7 +243,7 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
 
         while (DistanceBetween(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position()) > 2) 
         {
-            if (UsingForbiddenAbility(AngelicBlessingTarget)) { Abort(); }
+            AbortIf(UsingForbiddenAbility(AngelicBlessingTarget));
 
             # Impulse loop while the player isn't close to the fly target, isn't using any ability that restricts their movement, or hasn't jumped.
             ApplyImpulse(
