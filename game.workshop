@@ -1,4 +1,5 @@
 import "settings/customGameSettings.lobby";
+import 'utilities/AntiCrash.del';
 import "shared.workshop";
 Player PlayersOnRole(in Team team, in Hero[] role): FilteredArray(AllPlayers(team), ArrayContains(role, HeroOf(ArrayElement())));
 Player PlayersNotOnRole(in Team team, in Hero[] role): FilteredArray(AllPlayers(team), !ArrayContains(role, HeroOf(ArrayElement())));

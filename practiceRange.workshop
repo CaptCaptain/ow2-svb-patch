@@ -1,4 +1,5 @@
 import "settings/practiceRangeSettings.lobby";
+import 'utilities/AntiCrash.del';
 import '../OSTWUtils/ServerLoad.del';
 import "shared.workshop";
 

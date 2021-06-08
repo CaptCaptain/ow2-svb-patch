@@ -7,7 +7,6 @@ import '../OSTWUtils/EasingFunctions.del';
 /* ======================================================== */
 
 import 'utilities/CustomModifications.del';
-import 'utilities/AntiCrash.del';
 
 /* ======================================================== */
 
