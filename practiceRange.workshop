@@ -10,3 +10,25 @@ if (IsTrueForAny(AllLivingPlayers(), UltimateChargePercent(ArrayElement()) < 100
     Wait(0.25);
     LoopIfConditionIsTrue();
 }
+
+rule: '[practiceRange.workshop] Testing Hud'
+{
+    CreateHudText(
+        VisibleTo: AllPlayers(),
+        Text: <"Entities: <0> | Texts: <1> | Damage Mods: <2> | Healing Mods: <3>", EntityCount(), TextCount(), DamageModificationCount(), HealingModificationCount()>,
+        TextColor: Color.White,
+        Location: Location.Right,
+        SortOrder: -9,
+    );
+}
+
+rule: 'My Rule'
+Event.OngoingPlayer
+Player.Mccree
+Team.Team2
+{
+    SetAbilityCooldown(Button: Button.Ability2, Cooldown: 0);
+    Wait(2.5);
+    PressButton(Button: Button.Ability2);
+    Loop();
+}
