@@ -16,27 +16,45 @@ void CleanupSymmetra() playervar "[symmetra.del] Subroutine: Cleanup" {
     HeroActive = null;
 }
 
-void CreateSymmetraBotEffects() playervar "[symmetra.del] Subroutine: Create Clone Effects" {
+void CreateSymmetraBotEffects() playervar "[symmetra.del] Subroutine: Create Bot Effects" {
     Wait(0.1);
     
-    CreateEffect(AllPlayers(), Effect.EchoCloningEffect, <Color>TeamOf(), SymmetraBotPlayer, 1, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(), Effect.EchoCloningEffect, <Color>TeamOf(), SymmetraBotPlayer, 1, EffectRev.VisibleTo);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
     Wait(0.1);
 
-    CreateEffect(AllPlayers(), Effect.WinstonTeslaCannonTargetSound, <Color>TeamOf(), SymmetraBotPlayer, 700, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(), Effect.WinstonTeslaCannonTargetSound, <Color>TeamOf(), SymmetraBotPlayer, 700, EffectRev.VisibleTo);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
     Wait(0.1);
     
     for (define repeat = 0; 3; 1)
     {
-        CreateEffect(AllPlayers(), Effect.BadAura, <Color>TeamOf(), SymmetraBotPlayer, 0, EffectRev.VisibleToPositionAndRadius);
+        CreateEffect(AllPlayers(), Effect.BadAura, <Color>TeamOf(), SymmetraBotPlayer, 0, EffectRev.VisibleTo);
         ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
         Wait(0.0833333333);
     }
 }
+
+void SymmetraButtonMacro(Button button) {
+    WaitUntil(!EntityExists(SymmetraBotPlayer) || EventPlayer().IsButtonHeld(button), 9999);
+   
+    AbortIf(!EntityExists(SymmetraBotPlayer));
+    StartHoldingButton(SymmetraBotPlayer, button);
+    
+    WaitUntil(!EntityExists(SymmetraBotPlayer) || !EventPlayer().IsButtonHeld(button), 9999);
+    StopHoldingButton(SymmetraBotPlayer, button);
+    
+    Wait();
+    LoopIf(EntityExists(SymmetraBotPlayer));
+}
+
+void SymmetraBotPrimaryFire() playervar "[symmetra.del] Subroutine: Bot Copy Primary Fire" { SymmetraButtonMacro(Button.PrimaryFire); }
+void SymmetraBotSecondaryFire() playervar "[symmetra.del] Subroutine: Bot Copy Secondary Fire" { SymmetraButtonMacro(Button.SecondaryFire); }
+void SymmetraBotCrouch() playervar "[symmetra.del] Subroutine: Bot Copy Crouch" { SymmetraButtonMacro(Button.Crouch); }
+void SymmetraBotJump() playervar "[symmetra.del] Subroutine: Bot Copy Jump" { SymmetraButtonMacro(Button.Jump); }
 
 void InitialSymmetra() playervar "[symmetra.del] Subroutine: Initial" {
     InitialHeroSetup(Hero.Symmetra);
@@ -118,54 +136,10 @@ void UpdateSymmetraAI() playervar "[symmetra.del] Subroutine: Update Symmetra AI
     Teleport(SymmetraBotPlayer, PositionOf());
     StartModifyingHeroVoiceLines(SymmetraBotPlayer, RandomReal(0, 2), false);
 
-    while (EntityExists(SymmetraBotPlayer)) {
-        # Mirror the player's actions
-        # BUG: Symmetra Light Clone causes other players to hold their buttons for some reason?
-        if (IsFiringPrimary()) {
-            if (!IsFiringPrimary(SymmetraBotPlayer)) {
-                StartHoldingButton(SymmetraBotPlayer, Button.PrimaryFire);
-            }
-        } else {
-            StopHoldingButton(SymmetraBotPlayer, Button.PrimaryFire);
-        }
-        Wait(0.016);
-
-        if (IsFiringSecondary()) {
-            if (!IsFiringSecondary(SymmetraBotPlayer)) {
-                StartHoldingButton(SymmetraBotPlayer, Button.SecondaryFire);
-            }
-        } else {
-            StopHoldingButton(SymmetraBotPlayer, Button.SecondaryFire);
-        }
-        Wait(0.016);
-
-        if (IsReloading()) {
-            if (!IsReloading(SymmetraBotPlayer)) {
-                StartHoldingButton(SymmetraBotPlayer, Button.Reload);
-            }
-        } else {
-            StopHoldingButton(SymmetraBotPlayer, Button.Reload);
-        }
-        Wait(0.016);
-
-        if (IsJumping()) {
-            if (!IsJumping(SymmetraBotPlayer)) {
-                StartHoldingButton(SymmetraBotPlayer, Button.Jump);
-            }
-        } else {
-            StopHoldingButton(SymmetraBotPlayer, Button.Jump);
-        }
-        Wait(0.016);
-        
-        if (IsCrouching()) {
-            if (!IsCrouching(SymmetraBotPlayer)) {
-                StartHoldingButton(SymmetraBotPlayer, Button.Crouch);
-            }
-        } else {
-            StopHoldingButton(SymmetraBotPlayer, Button.Crouch);
-        }
-        Wait(0.016);
-    }
+    async SymmetraBotPrimaryFire();
+    async SymmetraBotSecondaryFire();
+    async SymmetraBotJump();
+    async SymmetraBotCrouch();
 }
 
 /* ================================================== */
