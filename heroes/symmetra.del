@@ -55,6 +55,7 @@ void SymmetraBotPrimaryFire() playervar "[symmetra.del] Subroutine: Bot Copy Pri
 void SymmetraBotSecondaryFire() playervar "[symmetra.del] Subroutine: Bot Copy Secondary Fire" { SymmetraButtonMacro(Button.SecondaryFire); }
 void SymmetraBotCrouch() playervar "[symmetra.del] Subroutine: Bot Copy Crouch" { SymmetraButtonMacro(Button.Crouch); }
 void SymmetraBotJump() playervar "[symmetra.del] Subroutine: Bot Copy Jump" { SymmetraButtonMacro(Button.Jump); }
+void SymmetraBotReload() playervar "[symmetra.del] Subroutine: Bot Copy Jump" { SymmetraButtonMacro(Button.Reload); }
 
 void InitialSymmetra() playervar "[symmetra.del] Subroutine: Initial" {
     InitialHeroSetup(Hero.Symmetra);
@@ -99,7 +100,7 @@ void SymmetraLightCloneUlt() playervar "[symmetra.del] Subroutine: Ult" {
     Wait(0.08);
 
     # Create effects
-    async! CreateSymmetraBotEffects();
+    async CreateSymmetraBotEffects();
 
     # Casting
     PlayEffect(AllPlayers(), PlayEffect.RingExplosion, <Color>TeamOf(), PositionOf(SymmetraBotPlayer), 10);
@@ -109,6 +110,8 @@ void SymmetraLightCloneUlt() playervar "[symmetra.del] Subroutine: Ult" {
     SetInvisible(SymmetraBotPlayer, InvisibleTo.None);
 
     Communicate(EventPlayer(), Communication.Attacking);
+
+    async UpdateSymmetraAI();
 
     # Wait until the bot is dead or after 12 seconds have elapsed
     WaitUntil(IsDead(SymmetraBotPlayer) || IsDead(), 12);
@@ -140,6 +143,7 @@ void UpdateSymmetraAI() playervar "[symmetra.del] Subroutine: Update Symmetra AI
     async SymmetraBotSecondaryFire();
     async SymmetraBotJump();
     async SymmetraBotCrouch();
+    async SymmetraBotReload();
 }
 
 /* ================================================== */
@@ -161,14 +165,6 @@ if (UltimateChargePercent() == 100)
     SymmetraLightCloneUlt();
 }
 
-rule: '[symmetra.del] Light Clone AI'
-Event.OngoingPlayer
-Player.Symmetra
-if (EntityExists(SymmetraBotPlayer))
-{
-    UpdateSymmetraAI();
-}
-
 /* ================================================== */
 
 rule: '[symmetra.del] Initial (Duplication)'
@@ -187,13 +183,4 @@ if (IsButtonHeld(Button: Button.Ultimate))
 if (UltimateChargePercent() == 100)
 {
     SymmetraLightCloneUlt();
-}
-
-rule: '[symmetra.del] Light Clone AI (Duplication)'
-Event.OngoingPlayer
-Player.Echo
-if (HeroBeingDuplicated() == Hero.Symmetra)
-if (EntityExists(SymmetraBotPlayer))
-{
-    UpdateSymmetraAI();
 }
