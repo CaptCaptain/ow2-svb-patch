@@ -64,7 +64,7 @@ void BaptisteCastIF() playervar '[baptiste.del] Subroutine: Cast Immortality Fie
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
     # Casting
-    async! SlowdownBaptiste();
+    async SlowdownBaptiste();
 
     Communicate(EventPlayer(), Communication.WithYou);
 
@@ -80,7 +80,7 @@ void BaptisteCastIF() playervar '[baptiste.del] Subroutine: Cast Immortality Fie
     # CLeanup
     CleanupEffects();
 
-    async! ReturnBaptisteToNormalSpeed();
+    async ReturnBaptisteToNormalSpeed();
 
     WaitUntil(!IsUsingAbility2(), 0.5);
     SetAbilityCooldown(Button: Button.Ability2, Cooldown: 25);
