@@ -69,7 +69,7 @@ if (IsDummyBot())
 if (SlotOf() == 2)
 if (UltimateChargePercent() == 100)
 {
-    Wait(1);
+    Wait(2);
     PressButton(Button: Button.Ultimate);
     LoopIfConditionIsTrue();
 }
