@@ -28,7 +28,6 @@ void SlowdownBaptiste() playervar '[baptiste.del] Subroutine: Slowdown' {
         SetMoveSpeed(MoveSpeedPercent: EasingFunctions.EaseInOutCubic(frac) * 100);
         Wait();
     }
-    (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(BaptisteMoveSpeedID)).Value = 100;
     
     StopChasingVariable(frac);
 }
@@ -44,8 +43,6 @@ void ReturnBaptisteToNormalSpeed() playervar '[baptiste.del] Subroutine: Transit
         SetMoveSpeed(MoveSpeedPercent: EasingFunctions.EaseInOutCubic(frac) * 100);
         Wait();
     }
-    (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(BaptisteMoveSpeedID)).Value = 100;
-
     
     StopChasingVariable(frac);
 }
@@ -70,12 +67,23 @@ void BaptisteCastIF() playervar '[baptiste.del] Subroutine: Cast Immortality Fie
 
     WaitUntil(IsTrueForAny([HasStatus(Status: Status.Asleep), HasStatus(Status: Status.Hacked), HasStatus(Status: Status.KnockedDown), HasStatus(Status: Status.Stunned), HasStatus(Status: Status.Frozen)], ArrayElement() == true), 1);
 
+    SetAbilityCooldown(Button: Button.Melee, Cooldown: 0);
+    SetDamageDealt(DamageDealtPercent: 0);
+    PressButton(Button: Button.Melee);
+    DisallowButton(Button: Button.PrimaryFire);
+    DisallowButton(Button: Button.SecondaryFire);
+
     # Stun check
     if (IsTrueForAny([HasStatus(Status: Status.Asleep), HasStatus(Status: Status.Hacked), HasStatus(Status: Status.KnockedDown), HasStatus(Status: Status.Stunned), HasStatus(Status: Status.Frozen)], ArrayElement() == false)) {
         AllowButton(Button: Button.Ability2);
-        PressButton(Button: Button.Ability2);
+        while (!IsUsingAbility2()) {
+            PressButton(Button: Button.Ability2);
+            Wait();
+        }
         DisallowButton(Button: Button.Ability2);
     }
+
+    SetDamageDealt(DamageDealtPercent: 100);
 
     # CLeanup
     CleanupEffects();
