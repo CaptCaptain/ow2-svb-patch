@@ -1,7 +1,16 @@
+playervar Vector MccreeLassoPosition;
+
+/* ================================================== */
+
 void CleanupMccree() playervar "[mccree.del] Subroutine: Cleanup" {
     StoppedBeingHero();
 
     SetMaxHealth(HealthPercent: 100);
+    AllowButton(Button: Button.Ability2);
+    SetDamageDealt(DamageDealtPercent: 100);
+    CleanupEffects();
+    CleanupTexts();
+    MccreeLassoPosition = null;
 
     Wait();
 
@@ -13,6 +22,32 @@ void InitialMccree() playervar "[mccree.del] Subroutine: Initial" {
 
     # Character setup
     SetMaxHealth(HealthPercent: 88.88888889);
+
+    DisallowButton(Button: Button.Ability2);
+    StopChasingVariable(MccreeLassoPosition);
+
+    # Create Hud
+    CreateHudText(EventPlayer(), null, null, <"<0>(<1>)", <" \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n <0>", <"                                                                                                                            <0>", <"                                                                                                                            <0>",           "                                                                                                       ">>>, "Lasso">, Location.Left, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleTo, Spectators.DefaultVisibility);
+    ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
+
+    # Lasso Effects
+    # Beam
+    CreateBeamEffect(MccreeLassoPosition ? AllPlayers() : null, BeamType.GrappleBeam, UpdateEveryFrame(LocalPlayer() == EventPlayer() ? WorldVectorOf(Vector(0.8, 0.9, 0), EventPlayer(), LocalVector.RotationAndTranslation) : WorldVectorOf(Vector(0.25, 1.2, 0), EventPlayer(), LocalVector.RotationAndTranslation)), UpdateEveryFrame(MccreeLassoPosition), Color.White, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+
+    # Lasso
+
+    CreateBeamEffect(MccreeLassoPosition ? AllPlayers() : null, BeamType.GrappleBeam, UpdateEveryFrame(MccreeLassoPosition + (DirectionFromAngles(90, 0)  / 2)), UpdateEveryFrame(MccreeLassoPosition + (DirectionFromAngles(180, 0) / 2)), Color.White, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+
+    CreateBeamEffect(MccreeLassoPosition ? AllPlayers() : null, BeamType.GrappleBeam, UpdateEveryFrame(MccreeLassoPosition + (DirectionFromAngles(-90, 0)  / 2)), UpdateEveryFrame(MccreeLassoPosition + (DirectionFromAngles(-180, 0) / 2)), Color.White, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+
+    CreateBeamEffect(MccreeLassoPosition ? AllPlayers() : null, BeamType.GrappleBeam, UpdateEveryFrame(MccreeLassoPosition + (DirectionFromAngles(270, 0)  / 2)), UpdateEveryFrame(MccreeLassoPosition + (DirectionFromAngles(360, 0) / 2)), Color.White, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
+
+    CreateBeamEffect(MccreeLassoPosition ? AllPlayers() : null, BeamType.GrappleBeam, UpdateEveryFrame(MccreeLassoPosition + (DirectionFromAngles(-270, 0)  / 2)), UpdateEveryFrame(MccreeLassoPosition + (DirectionFromAngles(-360, 0) / 2)), Color.White, EffectRev.VisibleToPositionAndRadius);
+    ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
     
     /*
     for (define slot = 0; 5; 1)
@@ -24,6 +59,57 @@ void InitialMccree() playervar "[mccree.del] Subroutine: Initial" {
     async! CleanupMccree();
 }
 
+void MccreeLasso() playervar "[mccree.del] Subroutine: Mccree Lasso" {
+    AbortIf(AbilityCooldown(Button: Button.Ability2) > 0);
+    AbortIfImmobile();
+
+    // Projectile
+    Vector InitDirection = FacingDirectionOf();
+    MccreeLassoPosition = EventPlayer().EyePosition();
+
+    Wait(0.08);
+
+    # Casting
+    SetAbilityCooldown(Button: Button.Melee, Cooldown: 0);
+    SetDamageDealt(DamageDealtPercent: 0);
+    PressButton(Button: Button.Melee);
+
+    ChaseVariableAtRate(MccreeLassoPosition, MccreeLassoPosition + InitDirection + (Down() / 10), 25, RateChaseReevaluation.DestinationAndRate);
+
+    WaitUntil(!IsInLineOfSight(EyePosition(), MccreeLassoPosition, BarrierLOS.EnemyBarriersBlock) || CountOf(PlayersWithinRadius(MccreeLassoPosition, 1, OppositeTeamOf(TeamOf()), RadiusLOS.SurfacesAndEnemyBarriers)) > 0 || EntityExists(RayCastHitPlayer(EyePosition(), MccreeLassoPosition, AllPlayers(), AllPlayers(TeamOf()), true)), 0.25);
+
+    AbortIfImmobile();
+
+    StopChasingVariable(MccreeLassoPosition);
+
+    SetDamageDealt(DamageDealtPercent: 100);
+
+    Player[] HitPlayer = PlayersWithinRadius(MccreeLassoPosition, 1, OppositeTeamOf(TeamOf()), RadiusLOS.SurfacesAndEnemyBarriers);
+    
+    if (CountOf(HitPlayer) == 0) {
+        HitPlayer = RayCastHitPlayer(EyePosition(), MccreeLassoPosition, AllPlayers(), AllPlayers(TeamOf()), true);
+    } else {
+        HitPlayer = FirstOf(HitPlayer);
+    }
+
+    if (HitPlayer != null) {
+        Communicate(Type: Communication.Hello);
+        SetStatus(FirstOf(HitPlayer), EventPlayer(), Status.Rooted, 1);
+
+        ChaseVariableAtRate(MccreeLassoPosition, ((<Player>HitPlayer).EyePosition() + (<Player>HitPlayer).Position()) / 2, 10, RateChaseReevaluation.DestinationAndRate);
+
+        Wait(1);
+    } else {
+        ChaseVariableOverTime(MccreeLassoPosition, EventPlayer().EyePosition(), 0.25, TimeChaseReevaluation.DestinationAndDuration);
+
+        Wait(0.25);
+    }
+
+    SetAbilityCooldown(Button: Button.Ability2, Cooldown: 10);
+    StopChasingVariable(MccreeLassoPosition);
+    MccreeLassoPosition = null;
+}
+
 /* ================================================== */
 
 rule: '[mccree.del] Initial'
@@ -31,6 +117,14 @@ Event.OngoingPlayer
 Player.Mccree
 {
     InitialMccree();
+}
+
+rule: '[mccree.del] Lasso'
+Event.OngoingPlayer
+Player.Mccree
+if (IsButtonHeld(Button: Button.Ability2))
+{
+    MccreeLasso();
 }
 
 /* ================================================== */
@@ -41,4 +135,13 @@ Player.Echo
 if (HeroBeingDuplicated() == Hero.Mccree)
 {
     InitialMccree();
+}
+
+rule: '[mccree.del] Lasso (Duplication)'
+Event.OngoingPlayer
+Player.Echo
+if (HeroBeingDuplicated() == Hero.Mccree)
+if (IsButtonHeld(Button: Button.Ability2))
+{
+    MccreeLasso();
 }
