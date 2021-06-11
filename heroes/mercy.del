@@ -137,7 +137,7 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
         Position: AngelicBlessingTarget,
         Scale: 1.5,
         Clipping: Clipping.ClipAgainstSurfaces,
-        Reevaluation: InworldTextRev.VisibleTo
+        Reevaluation: InworldTextRev.VisibleToAndString
     );
     Number AngelicBlessingTextID = LastTextID();
     ModifyVariable(HeroTexts, Operation.AppendToArray, AngelicBlessingTextID);
