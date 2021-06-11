@@ -74,7 +74,7 @@ void MccreeLasso() playervar "[mccree.del] Subroutine: Mccree Lasso" {
     SetDamageDealt(DamageDealtPercent: 0);
     PressButton(Button: Button.Melee);
 
-    ChaseVariableAtRate(MccreeLassoPosition, MccreeLassoPosition + InitDirection + (Down() / 10), 25, RateChaseReevaluation.DestinationAndRate);
+    ChaseVariableAtRate(MccreeLassoPosition, MccreeLassoPosition + InitDirection + (Down() / 10), 50, RateChaseReevaluation.DestinationAndRate);
 
     WaitUntil(!IsInLineOfSight(EyePosition(), MccreeLassoPosition, BarrierLOS.EnemyBarriersBlock) || CountOf(PlayersWithinRadius(MccreeLassoPosition, 1, OppositeTeamOf(TeamOf()), RadiusLOS.SurfacesAndEnemyBarriers)) > 0 || EntityExists(RayCastHitPlayer(EyePosition(), MccreeLassoPosition, AllPlayers(), AllPlayers(TeamOf()), true)), 0.25);
 
