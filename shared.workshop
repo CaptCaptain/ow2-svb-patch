@@ -1,3 +1,10 @@
+rule: '[shared.workshop] Disable Inspector Recording'
+{
+    DisableInspectorRecording();
+}
+
+/* ======================================================== */
+
 import '../OSTWUtils/Miscellaneous.del';
 import '../OSTWUtils/OnScreenText.del';
 import '../OSTWUtils/Colors.del';
@@ -27,8 +34,3 @@ import "heroes/genji.del";
 import "heroes/zarya.del";
 
 /* ======================================================== */
-
-rule: '[shared.workshop] Disable Inspector Recording'
-{
-    DisableInspectorRecording();
-}

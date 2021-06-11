@@ -1,12 +1,18 @@
-playervar Number HealingPercents = [];
-playervar Boolean DegenerationEnabled = [];
-playervar Player LastMercyTarget = [];
-playervar Vector AngelicBlessingPosition;
-playervar Player AngelicBlessingTarget;
-playervar Player AngelicBlessingFlyTarget;
-playervar Player[] AngelicBlessings = [];
+enum MercyVars {
+    HealingPercents,
+    DegenerationEnabled,
+    LastMercyTarget,
+    AngelicBlessingTarget,
+    AngelicBlessingFlyTarget,
+    AngelicBlessings,
+    Superjumping,
+    AngelicBlessingTextID,
+    AngelicBlessingConfirmID
+}
 
-Player GetAngelicBlessingFlyTarget(): GetPlayerTarget(player: AngelicBlessingTarget, radiusLOS: RadiusLOS.Surfaces, angle: 70, radius: 30);
+playervar Vector AngelicBlessingPosition;
+
+Player GetAngelicBlessingFlyTarget(): GetPlayerTarget(player: (<Player>HeroVars[MercyVars.AngelicBlessingTarget]), radiusLOS: RadiusLOS.Surfaces, angle: 70, radius: 30);
 
 /* ======================================================== */
 
@@ -16,10 +22,11 @@ void CleanupMercy() playervar '[mercy.del] Subroutine: Cleanup' {
     CleanupTexts();
     CleanupHealingMods();
     CleanupEffects();
-    StopForcingPlayerOutlines(AllPlayers(), AngelicBlessingTarget);
+    CleanupVariables();
+    StopForcingPlayerOutlines(AllPlayers(), (<Player>HeroVars[MercyVars.AngelicBlessingTarget]));
     SetAbility2Enabled(Enabled: true);
     AllowButton(Button: Button.Ability2);
-    AllowButton(Player: AngelicBlessingTarget, Button: Button.Interact);
+    AllowButton(Player: (<Player>HeroVars[MercyVars.AngelicBlessingTarget]), Button: Button.Interact);
 
     Wait();
 
@@ -29,19 +36,19 @@ void CleanupMercy() playervar '[mercy.del] Subroutine: Cleanup' {
 void InitialMercy() playervar '[mercy.del] Subroutine: Initial' {
     InitialHeroSetup(Hero.Mercy);
 
-    HealingPercents = [];
-    DegenerationEnabled = [];
+    HeroVars[MercyVars.HealingPercents] = [];
+    HeroVars[MercyVars.DegenerationEnabled] = [];
     for (define slot = 0; slot < 5; slot++) {
-        HealingPercents[slot] = 1;
-        DegenerationEnabled[slot] = false;
+        HeroVars[MercyVars.HealingPercents][slot] = 1;
+        HeroVars[MercyVars.DegenerationEnabled][slot] = false;
     }
     for (define slot = 0; slot < 5; slot++)
     {
-        StartHealingModification(PlayersInSlot(EvaluateOnce(slot), TeamOf()), EventPlayer(), HealingPercents[EvaluateOnce(slot)] * 100, HealingModificationRev.ReceiversHealersAndHealingPercent);
+        StartHealingModification(PlayersInSlot(EvaluateOnce(slot), TeamOf()), EventPlayer(), HeroVars[MercyVars.HealingPercents][EvaluateOnce(slot)] * 100, HealingModificationRev.ReceiversHealersAndHealingPercent);
         ModifyVariable(HeroHealingModifications, Operation.AppendToArray, LastHealingModificationID());
 
         #BUG: Mercy's degeneration visual showing when the player in slot does not exist
-        CreateInWorldText(EntityExists(PlayersInSlot(EvaluateOnce(slot), TeamOf())) ? EventPlayer() : null, <"[<0><1>%]\n", AbilityIconString(Hero.Baptiste, Button.Ability1), HealingPercents[EvaluateOnce(slot)] * 100>, PlayersInSlot(EvaluateOnce(slot), TeamOf()), 1, Clipping.ClipAgainstSurfaces, InworldTextRev.VisibleToPositionAndString);
+        CreateInWorldText(EntityExists(PlayersInSlot(EvaluateOnce(slot), TeamOf())) ? EventPlayer() : null, <"[<0><1>%]\n", AbilityIconString(Hero.Baptiste, Button.Ability1), HeroVars[MercyVars.HealingPercents][EvaluateOnce(slot)] * 100>, PlayersInSlot(EvaluateOnce(slot), TeamOf()), 1, Clipping.ClipAgainstSurfaces, InworldTextRev.VisibleToPositionAndString);
         ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
     }
     DisallowButton(Button: Button.Ability2);
@@ -54,33 +61,33 @@ void InitialMercy() playervar '[mercy.del] Subroutine: Initial' {
 }
 
 void MercyDegenerateBeam() playervar '[mercy.del] Subroutine: Degenerate Healing Beam' {
-    HealingPercents[SlotOf(Healee())] = Max(HealingPercents[SlotOf(Healee())] - 0.07, 0.727272727);
-    LastMercyTarget = PlayersInSlot(SlotOf(Healee()), TeamOf());
+    HeroVars[MercyVars.HealingPercents][SlotOf(Healee())] = Max(HeroVars[MercyVars.HealingPercents][SlotOf(Healee())] - 0.07, 0.727272727);
+    HeroVars[MercyVars.LastMercyTarget] = PlayersInSlot(SlotOf(Healee()), TeamOf());
 
     Wait(1);
 }
 
 void MercyUpdateDegeneration() playervar '[mercy.del] Subroutine: Update Degeneration' {
-    Healer().DegenerationEnabled[SlotOf(Healee())] = true;
+    Healer().HeroVars[MercyVars.DegenerationEnabled][SlotOf(Healee())] = true;
     Wait(0.9);
 
-    if (Healer().LastMercyTarget == EventPlayer()) {
-        LoopIf(Healer().LastMercyTarget == EventPlayer() && IsFiringSecondary(Healer()));
+    if (Healer().HeroVars[MercyVars.LastMercyTarget] == EventPlayer()) {
+        LoopIf(Healer().HeroVars[MercyVars.LastMercyTarget] == EventPlayer() && IsFiringSecondary(Healer()));
     } else {
         LoopIf(GetPlayerTarget(Healer(), TeamOf(Healer()), RadiusLOS.Surfaces, 360, 15) == EventPlayer() && IsFiringSecondary(Healer()));
     }
-    Healer().DegenerationEnabled[SlotOf(Healee())] = false;
+    Healer().HeroVars[MercyVars.DegenerationEnabled][SlotOf(Healee())] = false;
 }
 
 void MercyRegenerateBeam() playervar '[mercy.del] Subroutine: Regenerate Healing Beam' {
-    HealingPercents = IsUsingUltimate() ? MappedArray(HealingPercents, 1) : MappedArray(HealingPercents, DegenerationEnabled[CurrentArrayIndex()] == false ? Min(ArrayElement() + 0.07, 1) : ArrayElement());
+    HeroVars[MercyVars.HealingPercents] = IsUsingUltimate() ? MappedArray(HeroVars[MercyVars.HealingPercents], 1) : MappedArray(HeroVars[MercyVars.HealingPercents], HeroVars[MercyVars.DegenerationEnabled][CurrentArrayIndex()] == false ? Min(ArrayElement() + 0.07, 1) : ArrayElement());
     Wait(1);
     LoopIfConditionIsTrue();
 }
 
 void MercyClearLastTarget() playervar '[mercy.del] Subroutine: Clear Last Target' {
     WaitUntil((!IsFiringPrimary() && !IsFiringSecondary()) || IsUsingUltimate(), 9999);
-    LastMercyTarget = null;
+    HeroVars[MercyVars.LastMercyTarget] = null;
 }
 
 void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Blessing' {
@@ -88,10 +95,10 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     AbortIfImmobile();
     
     # Get target
-    AngelicBlessingTarget = GetPlayerTarget(radiusLOS: RadiusLOS.Surfaces, angle: 70, radius: 30);
+    HeroVars[MercyVars.AngelicBlessingTarget] = GetPlayerTarget(radiusLOS: RadiusLOS.Surfaces, angle: 70, radius: 30);
     
     # Abort if Target is not valid
-    AbortIf(AngelicBlessingTarget == null);
+    AbortIf((<Player>HeroVars[MercyVars.AngelicBlessingTarget]) == null);
 
     # Casting
     SetDamageDealt(DamageDealtPercent: 0);
@@ -124,55 +131,55 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
     
     Communicate(Type: Communication.Go);
-    ChaseVariableAtRate(AngelicBlessingPosition, AngelicBlessingTarget
+    ChaseVariableAtRate(AngelicBlessingPosition, ((<Player>HeroVars[MercyVars.AngelicBlessingTarget]))
     .EyePosition(), 100, RateChaseReevaluation.DestinationAndRate);
 
-    WaitUntil(DistanceBetween(AngelicBlessingPosition, AngelicBlessingTarget.EyePosition()) < 1, 9999);
+    WaitUntil(DistanceBetween(AngelicBlessingPosition, (<Player>HeroVars[MercyVars.AngelicBlessingTarget]).EyePosition()) < 1, 9999);
     SetDamageDealt(DamageDealtPercent: 100);
 
     # Angelic Blessing Target
     CreateInWorldText(
         VisibleTo: AllPlayers(),
-        Header: <"<0><1>", AbilityIconString(Hero.Mercy, Button.Ability1), StringSlice("\n\n", 0, (IsHero(Hero.Mercy, LocalPlayer()) && AngelicBlessingTarget.Team() == LocalPlayer().Team()) || HasStatus(AngelicBlessingTarget, Status.Hacked) ? 2 : 0)>,
-        Position: AngelicBlessingTarget,
+        Header: <"<0><1>", AbilityIconString(Hero.Mercy, Button.Ability1), StringSlice("\n\n", 0, (IsHero(Hero.Mercy, LocalPlayer()) && (<Player>HeroVars[MercyVars.AngelicBlessingTarget]).Team() == LocalPlayer().Team()) || HasStatus((<Player>HeroVars[MercyVars.AngelicBlessingTarget]), Status.Hacked) ? 2 : 0)>,
+        Position: (<Player>HeroVars[MercyVars.AngelicBlessingTarget]),
         Scale: 1.5,
         Clipping: Clipping.ClipAgainstSurfaces,
         Reevaluation: InworldTextRev.VisibleToAndString
     );
-    Number AngelicBlessingTextID = LastTextID();
-    ModifyVariable(HeroTexts, Operation.AppendToArray, AngelicBlessingTextID);
+    HeroVars[MercyVars.AngelicBlessingTextID] = LastTextID();
+    ModifyVariable(HeroTexts, Operation.AppendToArray, HeroVars[MercyVars.AngelicBlessingTextID]);
 
     # Angelic Blessing Player Hud
     OnScreenText.CreateOnScreenText(
-        AngelicBlessingTarget,
+        (<Player>HeroVars[MercyVars.AngelicBlessingTarget]),
         <"Guardian Angel [<0>] |                                | [<0>] Guardian Angel", InputBindingString(Button.Interact)>,
         0,
         0.15,
         1.32
     );
-    Number AngelicBlessingConfirmID = LastTextID();
-    ModifyVariable(HeroTexts, Operation.AppendToArray, AngelicBlessingTextID);
+    HeroVars[MercyVars.AngelicBlessingConfirmID] = LastTextID();
+    ModifyVariable(HeroTexts, Operation.AppendToArray, HeroVars[MercyVars.AngelicBlessingTextID]);
 
-    SmallMessage(AngelicBlessingTarget, <"Angelic Blessing Received by <0>", EventPlayer()>);
+    SmallMessage((<Player>HeroVars[MercyVars.AngelicBlessingTarget]), <"Angelic Blessing Received by <0>", EventPlayer()>);
     StopChasingVariable(AngelicBlessingPosition);
     CleanupEffects();
 
-    AngelicBlessings.ModAppend(AngelicBlessingTarget);
+    ModifyVariable(HeroVars[MercyVars.AngelicBlessings], Operation.AppendToArray, (<Player>HeroVars[MercyVars.AngelicBlessingTarget]));
 
     # Team Effects
-    CreateEffect(AllPlayers(TeamOf()), Effect.Sparkles, Color.Yellow, AngelicBlessingTarget, 1.5, EffectRev.VisibleTo);
+    CreateEffect(AllPlayers(TeamOf()), Effect.Sparkles, Color.Yellow, (<Player>HeroVars[MercyVars.AngelicBlessingTarget]), 1.5, EffectRev.VisibleTo);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
     PlayEffect(AllPlayers(TeamOf()), PlayEffect.GoodExplosion, Color.Yellow, AngelicBlessingPosition, 1);
 
     # Enemy Effects
-    CreateEffect(AllPlayers(OppositeTeamOf(TeamOf())), Effect.Sparkles, Color.Orange, AngelicBlessingTarget, 1.5, EffectRev.VisibleTo);
+    CreateEffect(AllPlayers(OppositeTeamOf(TeamOf())), Effect.Sparkles, Color.Orange, (<Player>HeroVars[MercyVars.AngelicBlessingTarget]), 1.5, EffectRev.VisibleTo);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
     PlayEffect(AllPlayers(OppositeTeamOf(TeamOf())), PlayEffect.GoodExplosion, Color.Orange, AngelicBlessingPosition, 1);
 
     # Effects
-    CreateEffect(AngelicBlessingTarget, Effect.HealTargetEffect, <Color>TeamOf(AngelicBlessingTarget), AngelicBlessingTarget, 1, EffectRev.VisibleTo);
+    CreateEffect((<Player>HeroVars[MercyVars.AngelicBlessingTarget]), Effect.HealTargetEffect, <Color>TeamOf((<Player>HeroVars[MercyVars.AngelicBlessingTarget])), (<Player>HeroVars[MercyVars.AngelicBlessingTarget]), 1, EffectRev.VisibleTo);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
     PlayEffect(AllPlayers(), PlayEffect.BuffExplosionSound, Color.White, AngelicBlessingPosition, 100);
@@ -181,59 +188,59 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     AngelicBlessingPosition = null;
     SetAbilityCooldown(Button: Button.Ability2, Cooldown: 12);
     SetAbility2Enabled(Enabled: true);
-    DisallowButton(Player: AngelicBlessingTarget, Button: Button.Interact);
+    DisallowButton(Player: (<Player>HeroVars[MercyVars.AngelicBlessingTarget]), Button: Button.Interact);
 
     # Wait until target chooses to fly to a target, after 6 seconds have elapsed, or if the target is using an ability that restricts their movement
-    WaitUntil((AngelicBlessingTarget.IsButtonHeld(Button.Interact) && GetAngelicBlessingFlyTarget() && !UsingForbiddenAbility(AngelicBlessingTarget)) || HeroBeingDuplicated(AngelicBlessingTarget) != EvaluateOnce(HeroBeingDuplicated(AngelicBlessingTarget)) || MaxHealth(AngelicBlessingTarget) != EvaluateOnce(MaxHealth(AngelicBlessingTarget)), 6);
+    WaitUntil(((<Player>HeroVars[MercyVars.AngelicBlessingTarget]).IsButtonHeld(Button.Interact) && GetAngelicBlessingFlyTarget() && !UsingForbiddenAbility((<Player>HeroVars[MercyVars.AngelicBlessingTarget]))) || HeroBeingDuplicated((<Player>HeroVars[MercyVars.AngelicBlessingTarget])) != EvaluateOnce(HeroBeingDuplicated((<Player>HeroVars[MercyVars.AngelicBlessingTarget]))) || MaxHealth((<Player>HeroVars[MercyVars.AngelicBlessingTarget])) != EvaluateOnce(MaxHealth((<Player>HeroVars[MercyVars.AngelicBlessingTarget]))), 6);
 
-    Boolean Superjumping = IsCrouching(AngelicBlessingTarget) ? true : false;
-    AngelicBlessingFlyTarget = GetAngelicBlessingFlyTarget();
+    HeroVars[MercyVars.Superjumping] = IsCrouching((<Player>HeroVars[MercyVars.AngelicBlessingTarget])) ? true : false;
+    HeroVars[MercyVars.AngelicBlessingFlyTarget] = GetAngelicBlessingFlyTarget();
     
     # Cleanup
-    DestroyInWorldText(AngelicBlessingConfirmID);
-    DestroyInWorldText(AngelicBlessingTextID);
-    StopForcingPlayerOutlines(AllPlayers(), AngelicBlessingTarget);
+    DestroyInWorldText(HeroVars[MercyVars.AngelicBlessingConfirmID]);
+    DestroyInWorldText(HeroVars[MercyVars.AngelicBlessingTextID]);
+    StopForcingPlayerOutlines(AllPlayers(), (<Player>HeroVars[MercyVars.AngelicBlessingTarget]));
     CleanupEffects();
 
     # Effects
-    CreateEffect(AllPlayers(), Effect.Soldier76SprintingEffect, Color.White, AngelicBlessingTarget, 1, EffectRev.VisibleTo);
+    CreateEffect(AllPlayers(), Effect.Soldier76SprintingEffect, Color.White, (<Player>HeroVars[MercyVars.AngelicBlessingTarget]), 1, EffectRev.VisibleTo);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
     # If there is a valid fly target and the player isn't using an ability that restricts their movement, we GA
-    if (AngelicBlessingTarget.IsButtonHeld(Button.Interact))
+    if ((<Player>HeroVars[MercyVars.AngelicBlessingTarget]).IsButtonHeld(Button.Interact))
     {
-        AbortIf(!EntityExists(AngelicBlessingFlyTarget));
+        AbortIf(!EntityExists(HeroVars[MercyVars.AngelicBlessingFlyTarget]));
         AbortIfImmobile();
-        AbortIf(UsingForbiddenAbility(AngelicBlessingTarget));
+        AbortIf(UsingForbiddenAbility((<Player>HeroVars[MercyVars.AngelicBlessingTarget])));
 
         PlayEffect(AllPlayers(), PlayEffect.BuffExplosionSound, Color.White, AngelicBlessingPosition, 100);
-        SetGravity(AngelicBlessingTarget, 0);
-        SetJumpVerticalSpeed(AngelicBlessingTarget, 0);
-        SetStatus(AngelicBlessingTarget, null, Status.Rooted, 9999);
+        SetGravity((<Player>HeroVars[MercyVars.AngelicBlessingTarget]), 0);
+        SetJumpVerticalSpeed((<Player>HeroVars[MercyVars.AngelicBlessingTarget]), 0);
+        SetStatus((<Player>HeroVars[MercyVars.AngelicBlessingTarget]), null, Status.Rooted, 9999);
 
-        Vector Direction = DirectionTowards(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position());
+        Vector Direction = DirectionTowards((<Player>HeroVars[MercyVars.AngelicBlessingTarget]).Position(), PositionOf(HeroVars[MercyVars.AngelicBlessingFlyTarget]));
 
         # Cancel any movement the player has
         ApplyImpulse(
-            Player: AngelicBlessingTarget,
-            Direction: VelocityOf(AngelicBlessingTarget),
-            Speed: -HorizontalSpeedOf(AngelicBlessingTarget),
+            Player: (<Player>HeroVars[MercyVars.AngelicBlessingTarget]),
+            Direction: VelocityOf((<Player>HeroVars[MercyVars.AngelicBlessingTarget])),
+            Speed: -HorizontalSpeedOf((<Player>HeroVars[MercyVars.AngelicBlessingTarget])),
             Motion: ContraryMotion.Incorporate
         );
 
         # If the player is not superjumping or on the ground, we lift them up slightly to simulate GA
-        SkipIf(IsInAir(AngelicBlessingTarget) || Superjumping, 1);
+        SkipIf(IsInAir((<Player>HeroVars[MercyVars.AngelicBlessingTarget])) || HeroVars[MercyVars.Superjumping], 1);
         ApplyImpulse(
-            Player: AngelicBlessingTarget,
+            Player: (<Player>HeroVars[MercyVars.AngelicBlessingTarget]),
             Direction: Up(),
             Speed: 1,
             Motion: ContraryMotion.Incorporate
         );
 
         # If the player is superjumping or in the air, we push them down slightly to simulate GA
-        SkipIf(IsInAir(AngelicBlessingTarget) || !Superjumping, 1);
+        SkipIf(IsInAir((<Player>HeroVars[MercyVars.AngelicBlessingTarget])) || !HeroVars[MercyVars.Superjumping], 1);
         ApplyImpulse(
-            Player: AngelicBlessingTarget,
+            Player: (<Player>HeroVars[MercyVars.AngelicBlessingTarget]),
             Direction: Down(),
             Speed: 1,
             Motion: ContraryMotion.Incorporate
@@ -241,29 +248,29 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
 
         Wait();
 
-        while (DistanceBetween(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position()) > 2) 
+        while (DistanceBetween((<Player>HeroVars[MercyVars.AngelicBlessingTarget]).Position(), PositionOf(HeroVars[MercyVars.AngelicBlessingFlyTarget])) > 2) 
         {
-            AbortIf(UsingForbiddenAbility(AngelicBlessingTarget));
+            AbortIf(UsingForbiddenAbility((<Player>HeroVars[MercyVars.AngelicBlessingTarget])));
 
             # Impulse loop while the player isn't close to the fly target, isn't using any ability that restricts their movement, or hasn't jumped.
             ApplyImpulse(
-                Player: AngelicBlessingTarget,
+                Player: (<Player>HeroVars[MercyVars.AngelicBlessingTarget]),
                 Direction: Direction,
-                Speed: LinearInterpolate(0, 17, Min(1, DistanceBetween(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position()) / 10)),
+                Speed: LinearInterpolate(0, 17, Min(1, DistanceBetween((<Player>HeroVars[MercyVars.AngelicBlessingTarget]).Position(), PositionOf(HeroVars[MercyVars.AngelicBlessingFlyTarget])) / 10)),
                 Motion: ContraryMotion.CancelXYZ
             );
             # This impulse allows us to slow down the player as they approach their target to simulate GA
             ApplyImpulse(
-                Player: AngelicBlessingTarget,
+                Player: (<Player>HeroVars[MercyVars.AngelicBlessingTarget]),
                 Direction: Direction,
-                Speed: -1 * LinearInterpolate(17, 0, Min(1, DistanceBetween(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position()) / 10)),
+                Speed: -1 * LinearInterpolate(17, 0, Min(1, DistanceBetween((<Player>HeroVars[MercyVars.AngelicBlessingTarget]).Position(), PositionOf(HeroVars[MercyVars.AngelicBlessingFlyTarget])) / 10)),
                 Motion: ContraryMotion.Incorporate
             );
 
             # If the player is within range of superjumping and jumps, we launch them up
-            if (AngelicBlessingTarget.IsButtonHeld(Button.Jump) && DistanceBetween(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position()) < 4 && Superjumping) {
+            if ((<Player>HeroVars[MercyVars.AngelicBlessingTarget]).IsButtonHeld(Button.Jump) && DistanceBetween((<Player>HeroVars[MercyVars.AngelicBlessingTarget]).Position(), PositionOf(HeroVars[MercyVars.AngelicBlessingFlyTarget])) < 4 && HeroVars[MercyVars.Superjumping]) {
                 ApplyImpulse(
-                    Player: AngelicBlessingTarget,
+                    Player: (<Player>HeroVars[MercyVars.AngelicBlessingTarget]),
                     Direction: Up(),
                     Speed: 8.5,
                     Motion: ContraryMotion.Incorporate
@@ -271,9 +278,9 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
             }
 
             # If the player jumps at any point during the GA, retain momentum and send them forward
-            if (AngelicBlessingTarget.IsButtonHeld(Button.Jump)) {
+            if ((<Player>HeroVars[MercyVars.AngelicBlessingTarget]).IsButtonHeld(Button.Jump)) {
                 ApplyImpulse(
-                    Player: AngelicBlessingTarget,
+                    Player: (<Player>HeroVars[MercyVars.AngelicBlessingTarget]),
                     Direction: Direction + (Up() / 4),
                     Speed: 24,
                     Motion: ContraryMotion.Incorporate
@@ -287,10 +294,10 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
             {
                 if (
                     !IsInLineOfSight(
-                        AngelicBlessingTarget.EyePosition(), 
-                        AngelicBlessingTarget.EyePosition() + DirectionTowards(AngelicBlessingTarget.Position(), EvaluateOnce(AngelicBlessingFlyTarget.Position()))
+                        (<Player>HeroVars[MercyVars.AngelicBlessingTarget]).EyePosition(), 
+                        (<Player>HeroVars[MercyVars.AngelicBlessingTarget]).EyePosition() + DirectionTowards((<Player>HeroVars[MercyVars.AngelicBlessingTarget]).Position(), EvaluateOnce(PositionOf(HeroVars[MercyVars.AngelicBlessingFlyTarget])))
                     ) ||
-                    DotProduct(Direction, DirectionTowards(AngelicBlessingTarget.Position(), AngelicBlessingFlyTarget.Position())) < 0
+                    DotProduct(Direction, DirectionTowards((<Player>HeroVars[MercyVars.AngelicBlessingTarget]).Position(), PositionOf(HeroVars[MercyVars.AngelicBlessingFlyTarget]))) < 0
                 ) {
                     break;
                 }
@@ -301,23 +308,23 @@ void MercyAngelicBlessing() playervar '[mercy.del] Subroutine: Mercy Angelic Ble
     }
 
     # Cleanup
-    SetGravity(AngelicBlessingTarget, 100);
-    SetJumpVerticalSpeed(AngelicBlessingTarget, 100);
-    AllowButton(Player: AngelicBlessingTarget, Button: Button.Interact);
-    ClearStatus(AngelicBlessingTarget, Status.Rooted);
-    AngelicBlessingTarget = null;
-    AngelicBlessingFlyTarget = null;
-    StopForcingPlayerOutlines(AllPlayers(), AngelicBlessingTarget);
-    ModifyVariable(HeroTexts, Operation.RemoveFromArrayByValue, AngelicBlessingTextID);
+    SetGravity((<Player>HeroVars[MercyVars.AngelicBlessingTarget]), 100);
+    SetJumpVerticalSpeed((<Player>HeroVars[MercyVars.AngelicBlessingTarget]), 100);
+    AllowButton(Player: (<Player>HeroVars[MercyVars.AngelicBlessingTarget]), Button: Button.Interact);
+    ClearStatus((<Player>HeroVars[MercyVars.AngelicBlessingTarget]), Status.Rooted);
+    HeroVars[MercyVars.AngelicBlessingTarget] = null;
+    HeroVars[MercyVars.AngelicBlessingFlyTarget] = null;
+    StopForcingPlayerOutlines(AllPlayers(), (<Player>HeroVars[MercyVars.AngelicBlessingTarget]));
+    ModifyVariable(HeroTexts, Operation.RemoveFromArrayByValue, HeroVars[MercyVars.AngelicBlessingTextID]);
     CleanupEffects();
 }
 
 void MercyAngelicBlessingOutline() playervar '[mercy.del] Subroutine: Update Mercy Angelic Blessing Player Target Outline' {
     Wait(0.032, WaitBehavior.AbortWhenFalse);
-    StopForcingPlayerOutlines(AllPlayers().Remove(GetAngelicBlessingFlyTarget()), AngelicBlessingTarget);
-    StartForcingPlayerOutlines(GetAngelicBlessingFlyTarget(), AngelicBlessingTarget, true, Color.Yellow, OutlineType.Always);
+    StopForcingPlayerOutlines(AllPlayers().Remove(GetAngelicBlessingFlyTarget()), (<Player>HeroVars[MercyVars.AngelicBlessingTarget]));
+    StartForcingPlayerOutlines(GetAngelicBlessingFlyTarget(), (<Player>HeroVars[MercyVars.AngelicBlessingTarget]), true, Color.Yellow, OutlineType.Always);
     LoopIfConditionIsTrue();
-    StopForcingPlayerOutlines(AllPlayers(), AngelicBlessingTarget);
+    StopForcingPlayerOutlines(AllPlayers(), (<Player>HeroVars[MercyVars.AngelicBlessingTarget]));
 }
 
 /* ======================================================== */
@@ -375,7 +382,7 @@ if (IsButtonHeld(Button: Button.Ability2))
 rule: '[mercy.del] Update Angelic Blessing Player Target Outline'
 Event.OngoingPlayer
 Player.Mercy
-if (AngelicBlessingTarget && !AngelicBlessingFlyTarget)
+if ((<Player>HeroVars[MercyVars.AngelicBlessingTarget]) && !HeroVars[MercyVars.AngelicBlessingFlyTarget])
 {
     MercyAngelicBlessingOutline();
 }
@@ -432,7 +439,7 @@ rule: '[mercy.del] Update Angelic Blessing Player Target Outline (Duplication)'
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Mercy)
-if (AngelicBlessingTarget && !AngelicBlessingFlyTarget)
+if ((<Player>HeroVars[MercyVars.AngelicBlessingTarget]) && !HeroVars[MercyVars.AngelicBlessingFlyTarget])
 {
     MercyAngelicBlessingOutline();
 }

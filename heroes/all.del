@@ -8,6 +8,7 @@ playervar Number[] HeroHealthPools = [];
 playervar Number[] HeroDamageModifications = [];
 playervar Number[] HeroHealingModifications = [];
 playervar Number[] HeroMoveSpeedModifications = [];
+playervar Any[] HeroVars = [];
 
 /* ======================================================== */
 void InitialHeroSetup(in Hero hero) {
@@ -69,6 +70,11 @@ void CleanupMoveSpeedMods() playervar '[all.del] Subroutine: Cleanup Move Speed 
     }
 
     HeroMoveSpeedModifications = [];
+}
+
+void CleanupVariables() playervar '[all.del] Subroutine: Cleanup Variables' {
+    // Cleanup move speed
+    HeroVars = [];
 }
 
 /* ======================================================== */

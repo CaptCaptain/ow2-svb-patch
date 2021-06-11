@@ -1,4 +1,6 @@
-playervar Number BaptisteMoveSpeedID;
+enum BaptisteVars {
+    MoveSpeedID
+}
 
 /* ======================================================== */
 
@@ -13,6 +15,7 @@ void CleanupBaptiste() playervar '[baptiste.del] Subroutine: Cleanup' {
     SetDamageDealt(DamageDealtPercent: 100);
     CleanupHealingMods();
     CleanupMoveSpeedMods();
+    CleanupVariables();
 
     Wait();
 
@@ -20,14 +23,14 @@ void CleanupBaptiste() playervar '[baptiste.del] Subroutine: Cleanup' {
 }
 
 void SlowdownBaptiste() playervar '[baptiste.del] Subroutine: Slowdown' {
-    (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(BaptisteMoveSpeedID)).Value = 100;
+    (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(HeroVars[BaptisteVars.MoveSpeedID])).Value = 100;
 
     Number frac = 1;
     ChaseVariableOverTime(frac, 0.25, 1, TimeChaseReevaluation.DestinationAndDuration);
 
     while (frac > 0.25) {
         if (!IsHero(Hero.Baptiste)) {break;}
-        (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(BaptisteMoveSpeedID)).Value = EasingFunctions.EaseInOutCubic(frac) * 100;
+        (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(HeroVars[BaptisteVars.MoveSpeedID])).Value = EasingFunctions.EaseInOutCubic(frac) * 100;
         SetMoveSpeed(MoveSpeedPercent: EasingFunctions.EaseInOutCubic(frac) * 100);
         Wait();
     }
@@ -36,13 +39,13 @@ void SlowdownBaptiste() playervar '[baptiste.del] Subroutine: Slowdown' {
 }
 
 void ReturnBaptisteToNormalSpeed() playervar '[baptiste.del] Subroutine: Transition to Normal Speed' {
-    (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(BaptisteMoveSpeedID)).Value = 0;
+    (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(HeroVars[BaptisteVars.MoveSpeedID])).Value = 0;
 
     Number frac = 0.25;
     ChaseVariableOverTime(frac, 1, 1, TimeChaseReevaluation.DestinationAndDuration);
     while (frac < 1) {
         if (!IsHero(Hero.Baptiste)) {break;}
-        (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(BaptisteMoveSpeedID)).Value = EasingFunctions.EaseInOutCubic(frac) * 100;
+        (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(HeroVars[BaptisteVars.MoveSpeedID])).Value = EasingFunctions.EaseInOutCubic(frac) * 100;
         SetMoveSpeed(MoveSpeedPercent: EasingFunctions.EaseInOutCubic(frac) * 100);
         Wait();
     }
@@ -104,7 +107,7 @@ void InitialBaptiste() playervar "[baptiste.del] Subroutine: Initial" {
 
     # Setup move speed modification
     CustomModifications.StartModifyingMoveSpeed(EventPlayer(), 100);
-    BaptisteMoveSpeedID = MoveSpeedModification.LastMoveSpeedModificationID;
+    HeroVars[BaptisteVars.MoveSpeedID] = MoveSpeedModification.LastMoveSpeedModificationID;
     ModifyVariable(HeroMoveSpeedModifications, Operation.AppendToArray, MoveSpeedModification.LastMoveSpeedModificationID);
 
     # Healing modification to self

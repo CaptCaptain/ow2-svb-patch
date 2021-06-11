@@ -1,3 +1,8 @@
+enum LucioVars {
+    SoundbarrierCalculation,
+    SpeedboostBonus
+}
+
 playervar Number MusicMeter = 0;
 playervar Number WallrideTimer = 0;
 
@@ -11,6 +16,7 @@ void CleanupLucio() playervar '[lucio.del] Subroutine: Cleanup' {
     CleanupEffects();
     CleanupHealthPools();
     CleanupMoveSpeedMods();
+    CleanupVariables();
     StopChasingVariable(MusicMeter);
     StopChasingVariable(WallrideTimer);
     WallrideTimer = 0;
@@ -61,34 +67,34 @@ void InitialLucio() playervar '[lucio.del] Subroutine: Initial' {
 }
 
 void LucioSoundbarrier() playervar '[lucio.del] Subroutine: Soundbarrier' {
-    Number SoundbarrierCalculation = RoundToInteger((750 * (100 + (Max(10, Min(LinearInterpolate(10, 20, MusicMeter / 100), 20)))) / 100) - 750, Rounding.Nearest);
+    HeroVars[LucioVars.SoundbarrierCalculation] = RoundToInteger((750 * (100 + (Max(10, Min(LinearInterpolate(10, 20, MusicMeter / 100), 20)))) / 100) - 750, Rounding.Nearest);
     
     WaitUntil(HealthOfType(EventPlayer(), HealthType.Shields) > 0 || !IsUsingUltimate(), 9999);
     AbortIfConditionIsFalse();
 
     foreach (Player player in PlayersWithinRadius(EventPlayer().Position(), 30, TeamOf(), RadiusLOS.Surfaces)) {
         # Apply additional shields to all nearby teammates
-        AddHealthPoolToPlayer(EvaluateOnce(player), HealthType.Shields, SoundbarrierCalculation, false, true);
+        AddHealthPoolToPlayer(EvaluateOnce(player), HealthType.Shields, HeroVars[LucioVars.SoundbarrierCalculation], false, true);
         ModifyVariable(HeroHealthPools, Operation.AppendToArray, LastCreatedHealthPool());
 
         CreateEffect(HealthOfType(EvaluateOnce(player), HealthType.Shields) > 0 ? AllPlayers() : null, Effect.LucioSoundBarrierProtectedEffect, <Color>TeamOf(), EvaluateOnce(player), 1, EffectRev.VisibleTo);
         ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
     }
 
-    Wait(6 + (SoundbarrierCalculation / 125));
+    Wait(6 + (HeroVars[LucioVars.SoundbarrierCalculation] / 125));
     CleanupHealthPools();
     CleanupEffects();
 }
 
 void LucioSpeedBoost() playervar '[lucio.del] Subroutine: Speedboost' {
     AbortIf(IsInAlternateForm());
-    Number SpeedboostBonus = LinearInterpolate(5, 20, MusicMeter / 100);
+    HeroVars[LucioVars.SpeedboostBonus] = LinearInterpolate(5, 20, MusicMeter / 100);
     while (IsUsingAbility2()) {
         foreach (Number MoveSpeedID in HeroMoveSpeedModifications) {
             # Boost speed based on the music meter charge
 
             if (DistanceBetween(<Player>(<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(MoveSpeedID).Player), EventPlayer().Position()) < 12 && !IsInAlternateForm()) {
-                (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(MoveSpeedID)).Value = 100 + SpeedboostBonus;
+                (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(MoveSpeedID)).Value = 100 + HeroVars[LucioVars.SpeedboostBonus];
             } else {
                 (<MoveSpeedModification>MoveSpeedModification.GetMoveSpeedModification(MoveSpeedID)).Value = 100;
             }

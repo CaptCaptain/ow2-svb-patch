@@ -1,6 +1,9 @@
-playervar define ReinhardtFirestrikeCharges = 2;
+enum ReinVars {
+    FirestrikeCharges,
+    FacingAngle
+}
+
 playervar define ReinhardtFirestrikeCooldown = 6;
-playervar define facingAngle;
 
 /* ======================================================== */
 
@@ -9,6 +12,7 @@ void CleanupReinhardt() playervar "[reinhardt.del] Subroutine: Cleanup" {
 
     CleanupHealthPools();
     CleanupTexts();
+    CleanupVariables();
     SetMaxHealth(HealthPercent: 100);
     SetAbility2Enabled(Enabled: true);
     StopChasingVariable(ReinhardtFirestrikeCooldown);
@@ -25,7 +29,7 @@ void InitialReinhardt() playervar '[reinhardt.del] Subroutine: Initial' {
     Wait();
     
     # Variable setup
-    ReinhardtFirestrikeCharges = 2;
+    HeroVars[ReinVars.FirestrikeCharges] = 2;
     ReinhardtFirestrikeCooldown = 0;
     Wait();
     ChaseVariableAtRate(ReinhardtFirestrikeCooldown, 0, 1, RateChaseReevaluation.None);
@@ -38,7 +42,7 @@ void InitialReinhardt() playervar '[reinhardt.del] Subroutine: Initial' {
     ModifyVariable(HeroHealthPools, Operation.AppendToArray, LastCreatedHealthPool());
 
     // Create hud text
-    CreateHudText(EventPlayer(), null, null, <"<0>(<1>) [<2>]", <" \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n <0>", <"                                                                                                                            <0>", <"                                                                                                                            <0>", "                                                                         ">>>, RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) > 0 ? RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) : IconString(Icon.X), RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) == 2 ? IconString(Icon.Checkmark) : RoundToInteger(ReinhardtFirestrikeCooldown, Rounding.Up)>, Location.Left, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(EventPlayer(), null, null, <"<0>(<1>) [<2>]", <" \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n \r\n <0>", <"                                                                                                                            <0>", <"                                                                                                                            <0>", "                                                                         ">>>, RoundToInteger(HeroVars[ReinVars.FirestrikeCharges], Rounding.Down) > 0 ? RoundToInteger(HeroVars[ReinVars.FirestrikeCharges], Rounding.Down) : IconString(Icon.X), RoundToInteger(HeroVars[ReinVars.FirestrikeCharges], Rounding.Down) == 2 ? IconString(Icon.Checkmark) : RoundToInteger(ReinhardtFirestrikeCooldown, Rounding.Up)>, Location.Left, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
     ModifyVariable(HeroTexts, Operation.AppendToArray, LastTextID());
 
     # Start Rule
@@ -65,15 +69,15 @@ void ReinhardtRefreshFirestrike() playervar '[reinhardt.del] Subroutine: Refresh
 void ReinhardtFirestrikeRecharge() playervar '[reinhardt.del] Subroutine: Firestrike Recharge' {
     ReinhardtFirestrikeCooldown = 6;
     WaitUntil(ReinhardtFirestrikeCooldown == 0, 9999);
-    ReinhardtFirestrikeCharges = Min(ReinhardtFirestrikeCharges + 1, 2);
+    HeroVars[ReinVars.FirestrikeCharges] = Min(HeroVars[ReinVars.FirestrikeCharges] + 1, 2);
     LoopIfConditionIsTrue();
 }
 
 void ReinhardtDetectFacingAngle() playervar '[reinhardt.del] Subroutine: Detect Facing Angle' {
     # Code snippet provided by Lotto!
-    facingAngle = HorizontalFacingAngleOf(EventPlayer());
+    HeroVars[ReinVars.FacingAngle] = HorizontalFacingAngleOf(EventPlayer());
     MinWait();
-    if (AngleDifference(HorizontalFacingAngleOf(EventPlayer()), facingAngle) > 0)
+    if (AngleDifference(HorizontalFacingAngleOf(EventPlayer()), HeroVars[ReinVars.FacingAngle]) > 0)
     {
         if (IsInAir(EventPlayer()))
         {
@@ -84,7 +88,7 @@ void ReinhardtDetectFacingAngle() playervar '[reinhardt.del] Subroutine: Detect 
             StartAccelerating(EventPlayer(), Right(), 500, 11.5, Relative.ToPlayer, AccelerateRev.DirectionRateAndMaxSpeed);
         }
     }
-    else if (AngleDifference(HorizontalFacingAngleOf(EventPlayer()), facingAngle) < 0)
+    else if (AngleDifference(HorizontalFacingAngleOf(EventPlayer()), HeroVars[ReinVars.FacingAngle]) < 0)
     {
         if (IsInAir(EventPlayer()))
         {
@@ -139,7 +143,7 @@ if (IsUsingAbility2(EventPlayer()) == true)
 rule: "[reinhardt.del] Firestrike Recharge"
 Event.OngoingPlayer
 Player.Reinhardt
-if (RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) < 2)
+if (RoundToInteger(HeroVars[ReinVars.FirestrikeCharges], Rounding.Down) < 2)
 {
     ReinhardtFirestrikeRecharge();
 }
@@ -149,13 +153,13 @@ Event.OngoingPlayer
 Player.Reinhardt
 if (IsUsingAbility2(EventPlayer()) == true)
 {
-    ReinhardtFirestrikeCharges -= 1;
+    HeroVars[ReinVars.FirestrikeCharges] -= 1;
 }
 
 rule: "[reinhardt.del] Enable Firestrike when charges are available"
 Event.OngoingPlayer
 Player.Reinhardt
-if (RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) > 0)
+if (RoundToInteger(HeroVars[ReinVars.FirestrikeCharges], Rounding.Down) > 0)
 {
     SetAbility2Enabled(EventPlayer(), true);
 }
@@ -163,7 +167,7 @@ if (RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) > 0)
 rule: "[reinhardt.del] Disable Firestrike when charges are not available"
 Event.OngoingPlayer
 Player.Reinhardt
-if (RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) <= 0)
+if (RoundToInteger(HeroVars[ReinVars.FirestrikeCharges], Rounding.Down) <= 0)
 {
     SetAbility2Enabled(EventPlayer(), false);
 }
@@ -217,7 +221,7 @@ rule: "[reinhardt.del] Firestrike Recharge (Duplication)"
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Reinhardt)
-if (RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) < 2)
+if (RoundToInteger(HeroVars[ReinVars.FirestrikeCharges], Rounding.Down) < 2)
 {
     ReinhardtFirestrikeRecharge();
 }
@@ -228,14 +232,14 @@ Player.Echo
 if (HeroBeingDuplicated() == Hero.Reinhardt)
 if (IsUsingAbility2(EventPlayer()) == true)
 {
-    ReinhardtFirestrikeCharges -= 1;
+    HeroVars[ReinVars.FirestrikeCharges] -= 1;
 }
 
 rule: "[reinhardt.del] Enable Firestrike when charges are available (Duplication)"
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Reinhardt)
-if (RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) > 0)
+if (RoundToInteger(HeroVars[ReinVars.FirestrikeCharges], Rounding.Down) > 0)
 {
     SetAbility2Enabled(EventPlayer(), true);
 }
@@ -244,7 +248,7 @@ rule: "[reinhardt.del] Disable Firestrike when charges are not available (Duplic
 Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Reinhardt)
-if (RoundToInteger(ReinhardtFirestrikeCharges, Rounding.Down) <= 0)
+if (RoundToInteger(HeroVars[ReinVars.FirestrikeCharges], Rounding.Down) <= 0)
 {
     SetAbility2Enabled(EventPlayer(), false);
 }

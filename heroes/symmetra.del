@@ -1,9 +1,11 @@
-playervar Player SymmetraBotPlayer;
+enum SymmetraVars {
+    BotPlayer
+}
 
 void CleanupSymmetra() playervar "[symmetra.del] Subroutine: Cleanup" {
     StoppedBeingHero();
 
-    DestroyDummyBot(TeamOf(SymmetraBotPlayer), SlotOf(SymmetraBotPlayer));
+    DestroyDummyBot(TeamOf(HeroVars[SymmetraVars.BotPlayer]), SlotOf(HeroVars[SymmetraVars.BotPlayer]));
 
     CleanupEffects();
     CleanupTexts();
@@ -19,19 +21,19 @@ void CleanupSymmetra() playervar "[symmetra.del] Subroutine: Cleanup" {
 void CreateSymmetraBotEffects() playervar "[symmetra.del] Subroutine: Create Bot Effects" {
     Wait(0.1);
     
-    CreateEffect(AllPlayers(), Effect.EchoCloningEffect, <Color>TeamOf(), SymmetraBotPlayer, 1, EffectRev.VisibleTo);
+    CreateEffect(AllPlayers(), Effect.EchoCloningEffect, <Color>TeamOf(), HeroVars[SymmetraVars.BotPlayer], 1, EffectRev.VisibleTo);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
     Wait(0.1);
 
-    CreateEffect(AllPlayers(), Effect.WinstonTeslaCannonTargetSound, <Color>TeamOf(), SymmetraBotPlayer, 700, EffectRev.VisibleTo);
+    CreateEffect(AllPlayers(), Effect.WinstonTeslaCannonTargetSound, <Color>TeamOf(), HeroVars[SymmetraVars.BotPlayer], 700, EffectRev.VisibleTo);
     ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
     Wait(0.1);
     
     for (define repeat = 0; 3; 1)
     {
-        CreateEffect(AllPlayers(), Effect.BadAura, <Color>TeamOf(), SymmetraBotPlayer, 0, EffectRev.VisibleTo);
+        CreateEffect(AllPlayers(), Effect.BadAura, <Color>TeamOf(), HeroVars[SymmetraVars.BotPlayer], 0, EffectRev.VisibleTo);
         ModifyVariable(HeroEffects, Operation.AppendToArray, LastCreatedEntity());
 
         Wait(0.0833333333);
@@ -39,16 +41,16 @@ void CreateSymmetraBotEffects() playervar "[symmetra.del] Subroutine: Create Bot
 }
 
 void SymmetraButtonMacro(Button button) {
-    WaitUntil(!EntityExists(SymmetraBotPlayer) || EventPlayer().IsButtonHeld(button), 9999);
+    WaitUntil(!EntityExists(HeroVars[SymmetraVars.BotPlayer]) || EventPlayer().IsButtonHeld(button), 9999);
    
-    AbortIf(!EntityExists(SymmetraBotPlayer));
-    StartHoldingButton(SymmetraBotPlayer, button);
+    AbortIf(!EntityExists(HeroVars[SymmetraVars.BotPlayer]));
+    StartHoldingButton(HeroVars[SymmetraVars.BotPlayer], button);
     
-    WaitUntil(!EntityExists(SymmetraBotPlayer) || !EventPlayer().IsButtonHeld(button), 9999);
-    StopHoldingButton(SymmetraBotPlayer, button);
+    WaitUntil(!EntityExists(HeroVars[SymmetraVars.BotPlayer]) || !EventPlayer().IsButtonHeld(button), 9999);
+    StopHoldingButton(HeroVars[SymmetraVars.BotPlayer], button);
     
     Wait();
-    LoopIf(EntityExists(SymmetraBotPlayer));
+    LoopIf(EntityExists(HeroVars[SymmetraVars.BotPlayer]));
 }
 
 void SymmetraBotPrimaryFire() playervar "[symmetra.del] Subroutine: Bot Copy Primary Fire" { SymmetraButtonMacro(Button.PrimaryFire); }
@@ -75,27 +77,27 @@ void SymmetraLightCloneUlt() playervar "[symmetra.del] Subroutine: Ult" {
 
     # Create bot
     CreateDummyBot(Hero.Symmetra, TeamOf(), SlotOf() + 5, PositionOf(), FacingDirectionOf());
-    SymmetraBotPlayer = LastCreatedEntity();
+    HeroVars[SymmetraVars.BotPlayer] = LastCreatedEntity();
 
-    SetInvisible(SymmetraBotPlayer, InvisibleTo.All);
+    SetInvisible(HeroVars[SymmetraVars.BotPlayer], InvisibleTo.All);
 
     # Wait for bot to spawn
-    WaitUntil(IsAlive(SymmetraBotPlayer), 1);
-    WaitUntil(HasSpawned(SymmetraBotPlayer), 1);
+    WaitUntil(IsAlive(HeroVars[SymmetraVars.BotPlayer]), 1);
+    WaitUntil(HasSpawned(HeroVars[SymmetraVars.BotPlayer]), 1);
 
     # If the bot doesn't spawn, return ult back to Symmetra and abort
-    SkipIf(EntityExists(SymmetraBotPlayer), 3);
+    SkipIf(EntityExists(HeroVars[SymmetraVars.BotPlayer]), 3);
     SetUltimateCharge(ChargePercent: 100);
     SetUltimateAbilityEnabled(Enabled: true);
     Abort();
 
     Wait();
 
-    StartForcingDummyBotName(SymmetraBotPlayer, <"<0>'s Light Clone", <String>EventPlayer()>);
-    SetAmmo(SymmetraBotPlayer, 0, Ammo(Clip: 0));
-    SetDamageDealt(SymmetraBotPlayer, 50);
-    SetUltimateAbilityEnabled(SymmetraBotPlayer, false);
-    Teleport(SymmetraBotPlayer, PositionOf());
+    StartForcingDummyBotName(HeroVars[SymmetraVars.BotPlayer], <"<0>'s Light Clone", <String>EventPlayer()>);
+    SetAmmo(HeroVars[SymmetraVars.BotPlayer], 0, Ammo(Clip: 0));
+    SetDamageDealt(HeroVars[SymmetraVars.BotPlayer], 50);
+    SetUltimateAbilityEnabled(HeroVars[SymmetraVars.BotPlayer], false);
+    Teleport(HeroVars[SymmetraVars.BotPlayer], PositionOf());
 
     Wait(0.08);
 
@@ -103,41 +105,41 @@ void SymmetraLightCloneUlt() playervar "[symmetra.del] Subroutine: Ult" {
     async CreateSymmetraBotEffects();
 
     # Casting
-    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, <Color>TeamOf(), PositionOf(SymmetraBotPlayer), 10);
-    PlayEffect(AllPlayers(), PlayEffect.SombraTranslocatorDisappearSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
-    PlayEffect(AllPlayers(), PlayEffect.DoomfistRisingUppercutImpactSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
+    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, <Color>TeamOf(), PositionOf(HeroVars[SymmetraVars.BotPlayer]), 10);
+    PlayEffect(AllPlayers(), PlayEffect.SombraTranslocatorDisappearSound, <Color>TeamOf(), EyePosition(HeroVars[SymmetraVars.BotPlayer]), 500);
+    PlayEffect(AllPlayers(), PlayEffect.DoomfistRisingUppercutImpactSound, <Color>TeamOf(), EyePosition(HeroVars[SymmetraVars.BotPlayer]), 500);
 
-    SetInvisible(SymmetraBotPlayer, InvisibleTo.None);
+    SetInvisible(HeroVars[SymmetraVars.BotPlayer], InvisibleTo.None);
 
     Communicate(EventPlayer(), Communication.Attacking);
 
     async UpdateSymmetraAI();
 
     # Wait until the bot is dead or after 12 seconds have elapsed
-    WaitUntil(IsDead(SymmetraBotPlayer) || IsDead(), 12);
+    WaitUntil(IsDead(HeroVars[SymmetraVars.BotPlayer]) || IsDead(), 12);
     Wait();
 
     # Cleanup
-    PlayEffect(AllPlayers(), PlayEffect.BadExplosion, <Color>TeamOf(), PositionOf(SymmetraBotPlayer), 10);
-    PlayEffect(AllPlayers(), PlayEffect.SombraTranslocatorDisappearSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
-    PlayEffect(AllPlayers(), PlayEffect.DoomfistRisingUppercutImpactSound, <Color>TeamOf(), EyePosition(SymmetraBotPlayer), 500);
-    DestroyDummyBot(TeamOf(SymmetraBotPlayer), SlotOf(SymmetraBotPlayer));
+    PlayEffect(AllPlayers(), PlayEffect.BadExplosion, <Color>TeamOf(), PositionOf(HeroVars[SymmetraVars.BotPlayer]), 10);
+    PlayEffect(AllPlayers(), PlayEffect.SombraTranslocatorDisappearSound, <Color>TeamOf(), EyePosition(HeroVars[SymmetraVars.BotPlayer]), 500);
+    PlayEffect(AllPlayers(), PlayEffect.DoomfistRisingUppercutImpactSound, <Color>TeamOf(), EyePosition(HeroVars[SymmetraVars.BotPlayer]), 500);
+    DestroyDummyBot(TeamOf(HeroVars[SymmetraVars.BotPlayer]), SlotOf(HeroVars[SymmetraVars.BotPlayer]));
     
     SetUltimateAbilityEnabled(Enabled: true);
-    SymmetraBotPlayer = [];
+    HeroVars[SymmetraVars.BotPlayer] = [];
 
     CleanupEffects();
 }
 
 void UpdateSymmetraAI() playervar "[symmetra.del] Subroutine: Update Symmetra AI" {
     # Mirror the player's movement
-    StartThrottleInDirection(SymmetraBotPlayer, DirectionTowards(WorldVectorOf(Vector(), EventPlayer(), LocalVector.RotationAndTranslation), WorldVectorOf(Vector(-1 * ThrottleOf().X, 0, ThrottleOf().Z), EventPlayer(), LocalVector.RotationAndTranslation)), HorizontalSpeedOf(), Relative.ToWorld, ThrottleBehavior.ReplaceExistingThrottle);
+    StartThrottleInDirection(HeroVars[SymmetraVars.BotPlayer], DirectionTowards(WorldVectorOf(Vector(), EventPlayer(), LocalVector.RotationAndTranslation), WorldVectorOf(Vector(-1 * ThrottleOf().X, 0, ThrottleOf().Z), EventPlayer(), LocalVector.RotationAndTranslation)), HorizontalSpeedOf(), Relative.ToWorld, ThrottleBehavior.ReplaceExistingThrottle);
 
-    StartFacing(SymmetraBotPlayer, UpdateEveryFrame(DirectionTowards(EyePosition(SymmetraBotPlayer), RayCastHitPosition(EyePosition(), EyePosition() + (FacingDirectionOf() * 500), AllPlayers(OppositeTeamOf(TeamOf())), [SymmetraBotPlayer, EventPlayer()], false))), 1000, Relative.ToWorld, FacingRev.DirectionAndTurnRate);
+    StartFacing(HeroVars[SymmetraVars.BotPlayer], UpdateEveryFrame(DirectionTowards(EyePosition(HeroVars[SymmetraVars.BotPlayer]), RayCastHitPosition(EyePosition(), EyePosition() + (FacingDirectionOf() * 500), AllPlayers(OppositeTeamOf(TeamOf())), [HeroVars[SymmetraVars.BotPlayer], EventPlayer()], false))), 1000, Relative.ToWorld, FacingRev.DirectionAndTurnRate);
 
-    DisableMovementCollisionWithPlayers(SymmetraBotPlayer);
-    Teleport(SymmetraBotPlayer, PositionOf());
-    StartModifyingHeroVoiceLines(SymmetraBotPlayer, RandomReal(0, 2), false);
+    DisableMovementCollisionWithPlayers(HeroVars[SymmetraVars.BotPlayer]);
+    Teleport(HeroVars[SymmetraVars.BotPlayer], PositionOf());
+    StartModifyingHeroVoiceLines(HeroVars[SymmetraVars.BotPlayer], RandomReal(0, 2), false);
 
     async SymmetraBotPrimaryFire();
     async SymmetraBotSecondaryFire();

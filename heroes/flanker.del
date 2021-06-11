@@ -1,4 +1,6 @@
-playervar Number FlankerMoveSpeedID;
+enum FlankerVars {
+    MoveSpeedID
+}
 
 void FlankerSetup(Hero hero) playervar '[flanker.del] Subroutine: Setup' {
     InitialHeroSetup(hero);
@@ -14,6 +16,7 @@ void FlankerCleanup(Hero hero) playervar '[flanker.del] Subroutine: Cleanup' {
     StoppedBeingHero();
 
     CleanupMoveSpeedMods();
+    CleanupVariables();
 
     Wait();
 

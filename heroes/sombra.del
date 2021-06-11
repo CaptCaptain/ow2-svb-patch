@@ -1,5 +1,8 @@
+enum SombraVars {
+    SombraSelectedTarget
+}
+
 playervar Vector SombraProjectilePosition;
-playervar Player SombraSelectedTarget;
 
 Player SombraHackTarget: GetPlayerTarget(EventPlayer(), OppositeTeamOf(TeamOf(EventPlayer())), RadiusLOS.Off, 30, 30);
 Boolean IsBarrierBlocking(Vector PositionA, Vector PositionB, Vector Direction): IsInLineOfSight(PositionA, PositionA + Direction) && !IsInLineOfSight(PositionA, PositionA + Direction, BarrierLOS.EnemyBarriersBlock);
@@ -8,12 +11,12 @@ void CleanupSombra() playervar '[sombra.del] Subroutine: Cleanup' {
     StoppedBeingHero();
 
     CleanupEffects();
+    CleanupVariables();
     AllowButton(Button: Button.SecondaryFire);
     SetSecondaryFireEnabled(Enabled: true);
 
-    SombraProjectilePosition = null;
-    SombraSelectedTarget = null;
     StopChasingVariable(SombraProjectilePosition);
+    SombraProjectilePosition = null;
     
     Wait();
     
@@ -39,19 +42,19 @@ void InitialSombra() playervar '[sombra.del] Subroutine: Initial' {
 }
 
 void SombraLaunchProjectile() playervar '[sombra.del] Subroutine: Launch Projectile' {
-    SombraSelectedTarget = SombraHackTarget;
+    HeroVars[SombraVars.SombraSelectedTarget] = SombraHackTarget;
 
     # Check if we can target the enemy
     WaitUntil(
         !IsFiringSecondary() ||
-        (DistanceBetween(EventPlayer(), SombraSelectedTarget) <= 15.1 && IsInLineOfSight(EventPlayer(), SombraSelectedTarget, BarrierLOS.EnemyBarriersBlock)), 
+        (DistanceBetween(EventPlayer(), HeroVars[SombraVars.SombraSelectedTarget]) <= 15.1 && IsInLineOfSight(EventPlayer(), HeroVars[SombraVars.SombraSelectedTarget], BarrierLOS.EnemyBarriersBlock)), 
         9999
     );
     AbortIf(
         !IsFiringSecondary() ||
-        DistanceBetween(EventPlayer(), SombraSelectedTarget) > 15.1 ||
-        !EntityExists(SombraSelectedTarget) ||
-        !IsInLineOfSight(EventPlayer(), SombraSelectedTarget, BarrierLOS.EnemyBarriersBlock)
+        DistanceBetween(EventPlayer(), HeroVars[SombraVars.SombraSelectedTarget]) > 15.1 ||
+        !EntityExists(HeroVars[SombraVars.SombraSelectedTarget]) ||
+        !IsInLineOfSight(EventPlayer(), HeroVars[SombraVars.SombraSelectedTarget], BarrierLOS.EnemyBarriersBlock)
     );
 
     DisallowButton(Button: Button.SecondaryFire);
@@ -59,7 +62,7 @@ void SombraLaunchProjectile() playervar '[sombra.del] Subroutine: Launch Project
 
     SombraProjectilePosition = EyePosition();
 
-    ChaseVariableAtRate(SombraProjectilePosition, SombraSelectedTarget.EyePosition(), 50, RateChaseReevaluation.DestinationAndRate);
+    ChaseVariableAtRate(SombraProjectilePosition, EyePosition(HeroVars[SombraVars.SombraSelectedTarget]), 50, RateChaseReevaluation.DestinationAndRate);
 }
 
 void SombraProjectileHit() playervar '[sombra.del] Subroutine: Projectile Hit' {
@@ -70,11 +73,11 @@ void SombraProjectileHit() playervar '[sombra.del] Subroutine: Projectile Hit' {
 
     # If the projectile isn't blocked by a barrier or the target is not phased out, we can apply the hack status
     if (
-        !HasStatus(SombraSelectedTarget, Status.PhasedOut) &&
-        !HasStatus(SombraSelectedTarget, Status.Invincible) &&
-        !IsBarrierBlocking(SombraProjectilePosition, SombraSelectedTarget.EyePosition(), DirectionTowards(SombraProjectilePosition, SombraSelectedTarget.EyePosition()))
+        !HasStatus(HeroVars[SombraVars.SombraSelectedTarget], Status.PhasedOut) &&
+        !HasStatus(HeroVars[SombraVars.SombraSelectedTarget], Status.Invincible) &&
+        !IsBarrierBlocking(SombraProjectilePosition, EyePosition(HeroVars[SombraVars.SombraSelectedTarget]), DirectionTowards(SombraProjectilePosition, EyePosition(HeroVars[SombraVars.SombraSelectedTarget])))
     ) {
-        SetStatus(SombraSelectedTarget, EventPlayer(), Status.Hacked, 2);
+        SetStatus(HeroVars[SombraVars.SombraSelectedTarget], EventPlayer(), Status.Hacked, 2);
     }
 
     # Team Effects
@@ -87,7 +90,7 @@ void SombraProjectileHit() playervar '[sombra.del] Subroutine: Projectile Hit' {
     PlayEffect(AllPlayers(), PlayEffect.ExplosionSound, Color.White, SombraProjectilePosition, 100);
 
     SombraProjectilePosition = null;
-    SombraSelectedTarget = null;
+    HeroVars[SombraVars.SombraSelectedTarget] = null;
 }
 
 rule: '[sombra.del] Initial'
@@ -101,7 +104,7 @@ rule: '[sombra.del] Projectile Hit'
 Event.OngoingPlayer
 Player.Sombra
 if (SombraProjectilePosition != null)
-if (DistanceBetween(SombraSelectedTarget.EyePosition(), SombraProjectilePosition) < 1 || (IsBarrierBlocking(SombraProjectilePosition, SombraSelectedTarget.EyePosition(), DirectionTowards(SombraProjectilePosition, SombraSelectedTarget.EyePosition())) && DistanceBetween(SombraProjectilePosition, SombraSelectedTarget.EyePosition()) < 5)) 
+if (DistanceBetween(EyePosition(HeroVars[SombraVars.SombraSelectedTarget]), SombraProjectilePosition) < 1 || (IsBarrierBlocking(SombraProjectilePosition, EyePosition(HeroVars[SombraVars.SombraSelectedTarget]), DirectionTowards(SombraProjectilePosition, EyePosition(HeroVars[SombraVars.SombraSelectedTarget]))) && DistanceBetween(SombraProjectilePosition, EyePosition(HeroVars[SombraVars.SombraSelectedTarget])) < 5)) 
 {
     SombraProjectileHit();
 }
@@ -131,7 +134,7 @@ Event.OngoingPlayer
 Player.Echo
 if (HeroBeingDuplicated() == Hero.Sombra)
 if (SombraProjectilePosition != null)
-if (DistanceBetween(SombraSelectedTarget.EyePosition(), SombraProjectilePosition) < 1 || (IsBarrierBlocking(SombraProjectilePosition, SombraSelectedTarget.EyePosition(), DirectionTowards(SombraProjectilePosition, SombraSelectedTarget.EyePosition())) && DistanceBetween(SombraProjectilePosition, SombraSelectedTarget.EyePosition()) < 5)) 
+if (DistanceBetween(EyePosition(HeroVars[SombraVars.SombraSelectedTarget]), SombraProjectilePosition) < 1 || (IsBarrierBlocking(SombraProjectilePosition, EyePosition(HeroVars[SombraVars.SombraSelectedTarget]), DirectionTowards(SombraProjectilePosition, EyePosition(HeroVars[SombraVars.SombraSelectedTarget]))) && DistanceBetween(SombraProjectilePosition, EyePosition(HeroVars[SombraVars.SombraSelectedTarget])) < 5)) 
 {
     SombraProjectileHit();
 }
